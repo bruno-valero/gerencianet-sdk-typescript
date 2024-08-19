@@ -1,0 +1,64 @@
+{
+  "name": "@bruno-valero/gerencianet-sdk-typescript",
+  "version": "1.0.0",
+  "main": "./build/index.js",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/dev.ts",
+    "build": "tsup src/index.ts --format esm,cjs --dts --out-dir build",
+    "deploy": "npm version path && npm publish",
+    "test": "vitest ./tests"
+  },
+  "author": {
+    "name": "Bruno Fernandes Valero",
+    "email": "brunofvn6@gmail.com",
+    "url": "http://brunovalero.com.br"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bruno-valero/gerencianet-sdk-typescript"
+  },
+  "files": [
+    "build/",
+    "package.json",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "bruno-valero",
+    "typescript",
+    "efipay",
+    "pagamentos",
+    "payment",
+    "sdk",
+    "integração",
+    "integration",
+    "api",
+    "bank slip",
+    "boleto bancario",
+    "credit card",
+    "cartao de credito",
+    "pix"
+  ],
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.2.2",
+    "@types/node": "^22.2.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "tsup": "^8.2.4",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4",
+    "vite-tsconfig-paths": "^5.0.1",
+    "vitest": "^2.0.5"
+  },
+  "dependencies": {
+    "axios": "^1.7.3",
+    "dayjs": "^1.11.12",
+    "remask": "^1.2.2",
+    "zod": "^3.23.8"
+  }
+}

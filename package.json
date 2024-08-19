@@ -13,10 +13,17 @@
     "deploy:major": "npm version major && npm publish",
     "test": "vitest ./tests"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": {
     "name": "Bruno Fernandes Valero",
     "email": "brunofvn6@gmail.com",
     "url": "http://brunovalero.com.br"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bruno-valero/gerencianet-sdk-typescript"
   },
   "files": [
     "build/",

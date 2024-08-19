@@ -48,24 +48,34 @@ export class ApiRequest<
     this.#auth = new Auth<type, operation>(optionsComplete)
   }
 
-  get environment() {
+  protected get environment() {
     return this.#options.sandbox ? 'SANDBOX' : 'PRODUCTION'
   }
 
-  get endpoints() {
+  protected get endpoints() {
     return this.#endpoints
   }
 
-  get options() {
+  protected get options() {
     return this.#options
   }
 
-  get auth() {
+  protected get auth() {
     return this.#auth
   }
 
-  get baseUrl() {
+  protected get baseUrl() {
     return this.#baseUrl
+  }
+
+  get config() {
+    return {
+      environment: this.environment,
+      endpoints: this.endpoints,
+      options: this.options,
+      auth: this.auth,
+      baseUrl: this.baseUrl,
+    }
   }
 
   protected makeHeaders({ accessToken }: { accessToken: string }) {

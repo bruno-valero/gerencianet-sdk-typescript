@@ -1,22 +1,25 @@
 import {
-  CalendarioRequest,
   Chave,
   CnpjFilterSearch,
   CpfFilterSearch,
-  Devedor,
   FimFilterSearch,
   InfoAdicionais,
   InicioFilterSearch,
   ItensPorPaginaFilterSearch,
   Loc,
-  LocUpdate,
   PaginaAtualFilterSearch,
   Revisao,
   SolicitacaoPagador,
   StatusFilterSearch,
   TxId,
+} from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/@types-common'
+
+import {
+  CalendarioRequest,
+  Devedor,
+  LocUpdate,
   Valor,
-} from '@pixEnterprise/pix-modules/@types-common'
+} from './@types-pix-imediate-charge'
 
 export interface PixImediateChargeCreateProps {
   /**

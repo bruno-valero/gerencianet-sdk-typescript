@@ -18,7 +18,7 @@ export interface EfiConfig<
   pemKey?: PathLike | string
   sandbox: boolean
   partnerToken?: string
-  rawResponse?: any
+  rawResponse?: unknown
   baseUrl?: BaseUrl<type, operation>
   validateMtls?: boolean
   authRoute?: AuthRoute<operation>

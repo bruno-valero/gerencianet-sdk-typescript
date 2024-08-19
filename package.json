@@ -8,17 +8,15 @@
     "dev": "tsx watch src/dev.ts",
     "lint": "eslint src --fix",
     "build": "tsup src/index.ts --format esm,cjs --dts --out-dir build",
-    "deploy": "npm version path && npm publish",
+    "deploy:patch": "npm version path && npm publish",
+    "deploy:minor": "npm version minor && npm publish",
+    "deploy:major": "npm version major && npm publish",
     "test": "vitest ./tests"
   },
   "author": {
     "name": "Bruno Fernandes Valero",
     "email": "brunofvn6@gmail.com",
     "url": "http://brunovalero.com.br"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bruno-valero/gerencianet-sdk-typescript"
   },
   "files": [
     "build/",
@@ -30,6 +28,8 @@
     "bruno-valero",
     "typescript",
     "efipay",
+    "efibank",
+    "gerencianet",
     "pagamentos",
     "payment",
     "sdk",

@@ -14,7 +14,7 @@ import {
   Status,
   StatusFilterSearch,
   TxId,
-} from '@pixEnterprise/pix-modules/@types-common'
+} from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/@types-common'
 
 import {
   CalendarioRequest,

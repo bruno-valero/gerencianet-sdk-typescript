@@ -6,6 +6,7 @@
   "types": "./build/index.d.ts",
   "scripts": {
     "dev": "tsx watch src/dev.ts",
+    "lint": "eslint src --fix",
     "build": "tsup src/index.ts --format esm,cjs --dts --out-dir build",
     "deploy": "npm version path && npm publish",
     "test": "vitest ./tests"

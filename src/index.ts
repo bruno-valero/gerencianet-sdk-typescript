@@ -1,7 +1,83 @@
-import { PixRequest } from './domain-driven-design/domains/apis/enterprise/entities/pix/pix'
+import { PathLike } from 'node:fs'
 
-const EfiPay = {
-  pix: PixRequest,
-} as const
+import { EfiConfig } from './domain-driven-design/core/apis/config'
+import {
+  EnvironmentTypes,
+  OperationTypes,
+} from './domain-driven-design/core/apis/constants-callbacks'
+import { Optional } from './domain-driven-design/core/types/optional'
+import { PixRequest } from './domain-driven-design/domains/apis/enterprise/entities/pix/pix'
+import { env } from './env'
+
+type Options<
+  type extends EnvironmentTypes,
+  operation extends OperationTypes | undefined = undefined,
+> = Optional<EfiConfig<type, operation>, 'sandbox'>
+
+type OptionsCredentials = {
+  client_id?: string
+  client_secret?: string
+  certificate?: PathLike
+}
+
+interface MakeOptionsProps<
+  type extends EnvironmentTypes,
+  operation extends OperationTypes | undefined,
+> {
+  type: type
+  operation?: operation
+  data?: OptionsCredentials
+}
+
+function makeOptions<
+  type extends EnvironmentTypes,
+  operation extends OperationTypes | undefined,
+>({ type, operation, data }: MakeOptionsProps<type, operation>) {
+  if (!type) throw new Error('type is missing')
+  if (
+    ![
+      'PIX',
+      'DEFAULT',
+      'OPENFINANCE',
+      'PAGAMENTOS',
+      'CONTAS',
+      undefined,
+    ].includes(operation)
+  )
+    throw new Error(
+      'operation must be one of those: "PIX" | "DEFAULT" | "OPENFINANCE" | "PAGAMENTOS" | "CONTAS" | undefined = undefined',
+    )
+
+  const opt: Options<type, operation> = {
+    client_id: data?.client_id || env.CLIENT_ID_HOMOLOGACAO,
+    client_secret: data?.client_secret || env.CLIENT_SECRET_HOMOLOGACAO,
+    certificate: data?.certificate || env.CERTIFICADO_HOMOLOGACAO_PATH,
+  }
+
+  return opt
+}
+
+class EfiPay<type extends EnvironmentTypes> {
+  #pix: PixRequest<type>
+
+  constructor(type: type, options?: OptionsCredentials) {
+    this.#pix = new PixRequest({
+      type,
+      options: makeOptions({
+        type,
+        operation: 'PIX',
+        data: {
+          certificate: options?.certificate,
+          client_id: options?.client_id,
+          client_secret: options?.client_secret,
+        },
+      }),
+    })
+  }
+
+  get pix() {
+    return this.#pix
+  }
+}
 
 export default EfiPay

@@ -1,5 +1,5 @@
-import https from 'node:https';
 import { PathLike } from 'node:fs';
+import https from 'node:https';
 import dayjs from 'dayjs';
 import z from 'zod';
 
@@ -730,8 +730,8 @@ type ConstructorSingleParameters<T extends abstract new (arg: unknown) => unknow
 declare class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
     #private;
     constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox'>);
-    get environment(): "PRODUCTION" | "SANDBOX";
-    get endpoints(): {
+    protected get environment(): "PRODUCTION" | "SANDBOX";
+    protected get endpoints(): {
         readonly PIX: {
             readonly URL: {
                 readonly PRODUCTION: "https://pix.api.efipay.com.br";
@@ -1349,9 +1349,9 @@ declare class ApiRequest<type extends EnvironmentTypes, operation extends Operat
             };
         };
     }[operation];
-    get options(): EfiConfig<type, operation>;
-    get auth(): Auth<type, operation>;
-    get baseUrl(): {
+    protected get options(): EfiConfig<type, operation>;
+    protected get auth(): Auth<type, operation>;
+    protected get baseUrl(): {
         readonly PIX: {
             readonly URL: {
                 readonly PRODUCTION: "https://pix.api.efipay.com.br";
@@ -1969,6 +1969,1247 @@ declare class ApiRequest<type extends EnvironmentTypes, operation extends Operat
             };
         };
     }[operation]["URL"][type];
+    get config(): {
+        environment: string;
+        endpoints: {
+            readonly PIX: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://pix.api.efipay.com.br";
+                    readonly SANDBOX: "https://pix-h.api.efipay.com.br";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly pixCreateDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixDetailDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListDueCharges: () => {
+                        readonly route: "/v2/cobv/";
+                        readonly method: "get";
+                    };
+                    readonly createReport: () => {
+                        readonly route: "/v2/gn/relatorios/extrato-conciliacao";
+                        readonly method: "post";
+                    };
+                    readonly detailReport: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/relatorios/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixCreateCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixCreateImmediateCharge: () => {
+                        readonly route: "/v2/cob";
+                        readonly method: "post";
+                    };
+                    readonly pixDetailCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListCharges: () => {
+                        readonly route: "/v2/cob";
+                        readonly method: "get";
+                    };
+                    readonly pixDetailReceived: ({ e2eId }: {
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixReceivedList: () => {
+                        readonly route: "/v2/pix";
+                        readonly method: "get";
+                    };
+                    readonly pixSend: ({ idEnvio }: {
+                        idEnvio: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixSendDetail: ({ e2eId }: {
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/enviados/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSendList: () => {
+                        readonly route: "/v2/gn/pix/enviados";
+                        readonly method: "get";
+                    };
+                    readonly pixDevolution: ({ id, e2eId }: {
+                        id: string;
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}/devolucao/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixDetailDevolution: ({ id, e2eId }: {
+                        id: string;
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}/devolucao/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixConfigWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixDetailWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListWebhook: () => {
+                        readonly route: "/v2/webhook";
+                        readonly method: "get";
+                    };
+                    readonly pixDeleteWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly pixCreateLocation: () => {
+                        readonly route: "/v2/loc";
+                        readonly method: "post";
+                    };
+                    readonly pixLocationList: () => {
+                        readonly route: "/v2/loc";
+                        readonly method: "get";
+                    };
+                    readonly pixDetailLocation: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixGenerateQRCode: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}/qrcode`;
+                        readonly method: "get";
+                    };
+                    readonly pixUnlinkTxidLocation: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}/txid`;
+                        readonly method: "delete";
+                    };
+                    readonly pixCreateEvp: () => {
+                        readonly route: "/v2/gn/evp";
+                        readonly method: "post";
+                    };
+                    readonly pixListEvp: () => {
+                        readonly route: "/v2/gn/evp";
+                        readonly method: "get";
+                    };
+                    readonly pixDeleteEvp: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/gn/evp/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly getAccountBalance: () => {
+                        readonly route: "/v2/gn/saldo";
+                        readonly method: "get";
+                    };
+                    readonly updateAccountConfig: () => {
+                        readonly route: "/v2/gn/config";
+                        readonly method: "put";
+                    };
+                    readonly listAccountConfig: () => {
+                        readonly route: "/v2/gn/config";
+                        readonly method: "get";
+                    };
+                    readonly pixSplitDetailCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSplitLinkCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitUnlinkCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly method: "delete";
+                    };
+                    readonly pixSplitDetailDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSplitLinkDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitUnlinkDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly method: "delete";
+                    };
+                    readonly pixSplitConfig: () => {
+                        readonly route: "/v2/gn/split/config";
+                        readonly method: "post";
+                    };
+                    readonly pixSplitConfigId: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/config/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitDetailConfig: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/config/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSendDetailId: ({ idEnvio }: {
+                        idEnvio: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/enviados/id-envio/${string}`;
+                        readonly method: "get";
+                    };
+                };
+            };
+            readonly DEFAULT: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://api.gerencianet.com.br/v1";
+                    readonly SANDBOX: "https://sandbox.gerencianet.com.br/v1";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/authorize";
+                        readonly method: "post";
+                    };
+                    readonly sendSubscriptionLinkEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/subscription/resend`;
+                        readonly method: "post";
+                    };
+                    readonly oneStepSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription/one-step`;
+                        readonly method: "post";
+                    };
+                    readonly settleCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly oneStepSubscriptionLink: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription/one-step/link`;
+                        readonly method: "post";
+                    };
+                    readonly sendLinkEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createOneStepLink: () => {
+                        readonly route: "/charge/one-step/link";
+                        readonly method: "post";
+                    };
+                    readonly createCharge: () => {
+                        readonly route: "/charge";
+                        readonly method: "post";
+                    };
+                    readonly detailCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly updateChargeMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly updateBillet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/billet`;
+                        readonly method: "put";
+                    };
+                    readonly definePayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/pay`;
+                        readonly method: "post";
+                    };
+                    readonly cancelCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly createCarnet: () => {
+                        readonly route: "/carnet";
+                        readonly method: "post";
+                    };
+                    readonly detailCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly updateCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly updateCarnetMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly getNotification: ({ token }: {
+                        token: string;
+                    }) => {
+                        readonly route: `/notification/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly listPlans: () => {
+                        readonly route: "/plans";
+                        readonly method: "get";
+                    };
+                    readonly createPlan: () => {
+                        readonly route: "/plan";
+                        readonly method: "post";
+                    };
+                    readonly deletePlan: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly createSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription`;
+                        readonly method: "post";
+                    };
+                    readonly detailSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly defineSubscriptionPayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/pay`;
+                        readonly method: "post";
+                    };
+                    readonly cancelSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly updateSubscriptionMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly getInstallments: () => {
+                        readonly route: "/installments";
+                        readonly method: "get";
+                    };
+                    readonly sendBilletEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/billet/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createChargeHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly sendCarnetEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/resend`;
+                        readonly method: "post";
+                    };
+                    readonly sendCarnetParcelEmail: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createCarnetHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly cancelCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly cancelCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly linkCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "post";
+                    };
+                    readonly defineLinkPayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "post";
+                    };
+                    readonly updateChargeLink: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "put";
+                    };
+                    readonly updatePlan: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly createSubscriptionHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly defineBalanceSheetBillet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/balance-sheet`;
+                        readonly method: "post";
+                    };
+                    readonly settleCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly settleCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly createOneStepCharge: () => {
+                        readonly route: "/charge/one-step";
+                        readonly method: "post";
+                    };
+                };
+            };
+            readonly OPENFINANCE: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br/open-finance";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br/open-finance";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly ofListParticipants: () => {
+                        readonly route: "/participantes/";
+                        readonly method: "GET";
+                    };
+                    readonly ofStartPixPayment: () => {
+                        readonly route: "/pagamentos/pix";
+                        readonly method: "POST";
+                    };
+                    readonly ofListPixPayment: () => {
+                        readonly route: "/pagamentos/pix";
+                        readonly method: "GET";
+                    };
+                    readonly ofConfigUpdate: () => {
+                        readonly route: "/config";
+                        readonly method: "PUT";
+                    };
+                    readonly ofConfigDetail: () => {
+                        readonly route: "/config";
+                        readonly method: "GET";
+                    };
+                    readonly ofDevolutionPix: ({ identificadorPagamento, }: {
+                        identificadorPagamento: string;
+                    }) => {
+                        readonly route: `/pagamentos/pix/${string}/devolver`;
+                        readonly method: "post";
+                    };
+                };
+            };
+            readonly PAGAMENTOS: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br/pagamento";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br/pagamento";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly payDetailBarCode: ({ codBarras }: {
+                        codBarras: string;
+                    }) => {
+                        readonly route: `/codBarras/${string}`;
+                        readonly method: "GET";
+                    };
+                    readonly payRequestBarCode: ({ codBarras }: {
+                        codBarras: string;
+                    }) => {
+                        readonly route: `/codBarras/${string}`;
+                        readonly method: "POST";
+                    };
+                    readonly payDetailPayment: ({ idPagamento }: {
+                        idPagamento: string;
+                    }) => {
+                        readonly route: `/${string}`;
+                        readonly method: "GET";
+                    };
+                    readonly payListPayments: () => {
+                        readonly route: "/resumo";
+                        readonly method: "GET";
+                    };
+                };
+            };
+            readonly CONTAS: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly createAccount: () => {
+                        readonly route: "/cadastro/conta-simplificada";
+                        readonly method: "post";
+                    };
+                    readonly createAccountCertificate: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/conta-simplificada/${string}/certificado`;
+                        readonly method: "post";
+                    };
+                    readonly getAccountCredentials: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/conta-simplificada/${string}/credenciais`;
+                        readonly method: "get";
+                    };
+                    readonly accountConfigWebhook: () => {
+                        readonly route: "/cadastro/webhook";
+                        readonly method: "post";
+                    };
+                    readonly accountDeleteWebhook: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/webhook/${string}Webhook`;
+                        readonly method: "delete";
+                    };
+                    readonly accountDetailWebhook: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/webhook/${string}Webhook`;
+                        readonly method: "get";
+                    };
+                    readonly accountListWebhook: () => {
+                        readonly route: "/cadastro/webhooks";
+                        readonly method: "get";
+                    };
+                };
+            };
+        }[operation];
+        options: EfiConfig<type, operation>;
+        auth: Auth<type, operation>;
+        baseUrl: {
+            readonly PIX: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://pix.api.efipay.com.br";
+                    readonly SANDBOX: "https://pix-h.api.efipay.com.br";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly pixCreateDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixDetailDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cobv/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListDueCharges: () => {
+                        readonly route: "/v2/cobv/";
+                        readonly method: "get";
+                    };
+                    readonly createReport: () => {
+                        readonly route: "/v2/gn/relatorios/extrato-conciliacao";
+                        readonly method: "post";
+                    };
+                    readonly detailReport: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/relatorios/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixCreateCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixCreateImmediateCharge: () => {
+                        readonly route: "/v2/cob";
+                        readonly method: "post";
+                    };
+                    readonly pixDetailCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/cob/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListCharges: () => {
+                        readonly route: "/v2/cob";
+                        readonly method: "get";
+                    };
+                    readonly pixDetailReceived: ({ e2eId }: {
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixReceivedList: () => {
+                        readonly route: "/v2/pix";
+                        readonly method: "get";
+                    };
+                    readonly pixSend: ({ idEnvio }: {
+                        idEnvio: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixSendDetail: ({ e2eId }: {
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/enviados/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSendList: () => {
+                        readonly route: "/v2/gn/pix/enviados";
+                        readonly method: "get";
+                    };
+                    readonly pixDevolution: ({ id, e2eId }: {
+                        id: string;
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}/devolucao/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixDetailDevolution: ({ id, e2eId }: {
+                        id: string;
+                        e2eId: string;
+                    }) => {
+                        readonly route: `/v2/pix/${string}/devolucao/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixConfigWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixDetailWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListWebhook: () => {
+                        readonly route: "/v2/webhook";
+                        readonly method: "get";
+                    };
+                    readonly pixDeleteWebhook: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/webhook/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly pixCreateLocation: () => {
+                        readonly route: "/v2/loc";
+                        readonly method: "post";
+                    };
+                    readonly pixLocationList: () => {
+                        readonly route: "/v2/loc";
+                        readonly method: "get";
+                    };
+                    readonly pixDetailLocation: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixGenerateQRCode: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}/qrcode`;
+                        readonly method: "get";
+                    };
+                    readonly pixUnlinkTxidLocation: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/loc/${string}/txid`;
+                        readonly method: "delete";
+                    };
+                    readonly pixCreateEvp: () => {
+                        readonly route: "/v2/gn/evp";
+                        readonly method: "post";
+                    };
+                    readonly pixListEvp: () => {
+                        readonly route: "/v2/gn/evp";
+                        readonly method: "get";
+                    };
+                    readonly pixDeleteEvp: ({ chave }: {
+                        chave: string;
+                    }) => {
+                        readonly route: `/v2/gn/evp/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly getAccountBalance: () => {
+                        readonly route: "/v2/gn/saldo";
+                        readonly method: "get";
+                    };
+                    readonly updateAccountConfig: () => {
+                        readonly route: "/v2/gn/config";
+                        readonly method: "put";
+                    };
+                    readonly listAccountConfig: () => {
+                        readonly route: "/v2/gn/config";
+                        readonly method: "get";
+                    };
+                    readonly pixSplitDetailCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSplitLinkCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitUnlinkCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly method: "delete";
+                    };
+                    readonly pixSplitDetailDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSplitLinkDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitUnlinkDueCharge: ({ txid }: {
+                        txid: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly method: "delete";
+                    };
+                    readonly pixSplitConfig: () => {
+                        readonly route: "/v2/gn/split/config";
+                        readonly method: "post";
+                    };
+                    readonly pixSplitConfigId: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/config/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly pixSplitDetailConfig: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/v2/gn/split/config/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly pixSendDetailId: ({ idEnvio }: {
+                        idEnvio: string;
+                    }) => {
+                        readonly route: `/v2/gn/pix/enviados/id-envio/${string}`;
+                        readonly method: "get";
+                    };
+                };
+            };
+            readonly DEFAULT: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://api.gerencianet.com.br/v1";
+                    readonly SANDBOX: "https://sandbox.gerencianet.com.br/v1";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/authorize";
+                        readonly method: "post";
+                    };
+                    readonly sendSubscriptionLinkEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/subscription/resend`;
+                        readonly method: "post";
+                    };
+                    readonly oneStepSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription/one-step`;
+                        readonly method: "post";
+                    };
+                    readonly settleCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly oneStepSubscriptionLink: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription/one-step/link`;
+                        readonly method: "post";
+                    };
+                    readonly sendLinkEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createOneStepLink: () => {
+                        readonly route: "/charge/one-step/link";
+                        readonly method: "post";
+                    };
+                    readonly createCharge: () => {
+                        readonly route: "/charge";
+                        readonly method: "post";
+                    };
+                    readonly detailCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly updateChargeMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly updateBillet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/billet`;
+                        readonly method: "put";
+                    };
+                    readonly definePayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/pay`;
+                        readonly method: "post";
+                    };
+                    readonly cancelCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly createCarnet: () => {
+                        readonly route: "/carnet";
+                        readonly method: "post";
+                    };
+                    readonly detailCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly updateCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly updateCarnetMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly getNotification: ({ token }: {
+                        token: string;
+                    }) => {
+                        readonly route: `/notification/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly listPlans: () => {
+                        readonly route: "/plans";
+                        readonly method: "get";
+                    };
+                    readonly createPlan: () => {
+                        readonly route: "/plan";
+                        readonly method: "post";
+                    };
+                    readonly deletePlan: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}`;
+                        readonly method: "delete";
+                    };
+                    readonly createSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}/subscription`;
+                        readonly method: "post";
+                    };
+                    readonly detailSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}`;
+                        readonly method: "get";
+                    };
+                    readonly defineSubscriptionPayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/pay`;
+                        readonly method: "post";
+                    };
+                    readonly cancelSubscription: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly updateSubscriptionMetadata: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/metadata`;
+                        readonly method: "put";
+                    };
+                    readonly getInstallments: () => {
+                        readonly route: "/installments";
+                        readonly method: "get";
+                    };
+                    readonly sendBilletEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/billet/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createChargeHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly sendCarnetEmail: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/resend`;
+                        readonly method: "post";
+                    };
+                    readonly sendCarnetParcelEmail: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/resend`;
+                        readonly method: "post";
+                    };
+                    readonly createCarnetHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly cancelCarnet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly cancelCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/cancel`;
+                        readonly method: "put";
+                    };
+                    readonly linkCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "post";
+                    };
+                    readonly defineLinkPayMethod: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "post";
+                    };
+                    readonly updateChargeLink: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/link`;
+                        readonly method: "put";
+                    };
+                    readonly updatePlan: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/plan/${string}`;
+                        readonly method: "put";
+                    };
+                    readonly createSubscriptionHistory: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/subscription/${string}/history`;
+                        readonly method: "post";
+                    };
+                    readonly defineBalanceSheetBillet: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/balance-sheet`;
+                        readonly method: "post";
+                    };
+                    readonly settleCharge: ({ id }: {
+                        id: string;
+                    }) => {
+                        readonly route: `/charge/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly settleCarnetParcel: ({ id, parcel }: {
+                        id: string;
+                        parcel: string;
+                    }) => {
+                        readonly route: `/carnet/${string}/parcel/${string}/settle`;
+                        readonly method: "put";
+                    };
+                    readonly createOneStepCharge: () => {
+                        readonly route: "/charge/one-step";
+                        readonly method: "post";
+                    };
+                };
+            };
+            readonly OPENFINANCE: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br/open-finance";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br/open-finance";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly ofListParticipants: () => {
+                        readonly route: "/participantes/";
+                        readonly method: "GET";
+                    };
+                    readonly ofStartPixPayment: () => {
+                        readonly route: "/pagamentos/pix";
+                        readonly method: "POST";
+                    };
+                    readonly ofListPixPayment: () => {
+                        readonly route: "/pagamentos/pix";
+                        readonly method: "GET";
+                    };
+                    readonly ofConfigUpdate: () => {
+                        readonly route: "/config";
+                        readonly method: "PUT";
+                    };
+                    readonly ofConfigDetail: () => {
+                        readonly route: "/config";
+                        readonly method: "GET";
+                    };
+                    readonly ofDevolutionPix: ({ identificadorPagamento, }: {
+                        identificadorPagamento: string;
+                    }) => {
+                        readonly route: `/pagamentos/pix/${string}/devolver`;
+                        readonly method: "post";
+                    };
+                };
+            };
+            readonly PAGAMENTOS: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br/pagamento";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br/pagamento";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly payDetailBarCode: ({ codBarras }: {
+                        codBarras: string;
+                    }) => {
+                        readonly route: `/codBarras/${string}`;
+                        readonly method: "GET";
+                    };
+                    readonly payRequestBarCode: ({ codBarras }: {
+                        codBarras: string;
+                    }) => {
+                        readonly route: `/codBarras/${string}`;
+                        readonly method: "POST";
+                    };
+                    readonly payDetailPayment: ({ idPagamento }: {
+                        idPagamento: string;
+                    }) => {
+                        readonly route: `/${string}`;
+                        readonly method: "GET";
+                    };
+                    readonly payListPayments: () => {
+                        readonly route: "/resumo";
+                        readonly method: "GET";
+                    };
+                };
+            };
+            readonly CONTAS: {
+                readonly URL: {
+                    readonly PRODUCTION: "https://apis.gerencianet.com.br";
+                    readonly SANDBOX: "https://apis-h.gerencianet.com.br";
+                };
+                readonly ENDPOINTS: {
+                    readonly authorize: () => {
+                        readonly route: "/oauth/token";
+                        readonly method: "post";
+                    };
+                    readonly createAccount: () => {
+                        readonly route: "/cadastro/conta-simplificada";
+                        readonly method: "post";
+                    };
+                    readonly createAccountCertificate: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/conta-simplificada/${string}/certificado`;
+                        readonly method: "post";
+                    };
+                    readonly getAccountCredentials: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/conta-simplificada/${string}/credenciais`;
+                        readonly method: "get";
+                    };
+                    readonly accountConfigWebhook: () => {
+                        readonly route: "/cadastro/webhook";
+                        readonly method: "post";
+                    };
+                    readonly accountDeleteWebhook: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/webhook/${string}Webhook`;
+                        readonly method: "delete";
+                    };
+                    readonly accountDetailWebhook: ({ identificador }: {
+                        identificador: string;
+                    }) => {
+                        readonly route: `/cadastro/webhook/${string}Webhook`;
+                        readonly method: "get";
+                    };
+                    readonly accountListWebhook: () => {
+                        readonly route: "/cadastro/webhooks";
+                        readonly method: "get";
+                    };
+                };
+            };
+        }[operation]["URL"][type];
+    };
     protected makeHeaders({ accessToken }: {
         accessToken: string;
     }): {
@@ -3519,8 +4760,15 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
     get dueCharge(): PixDueCharge<type>;
 }
 
-declare const EfiPay: {
-    readonly pix: typeof PixRequest;
+type OptionsCredentials = {
+    client_id?: string;
+    client_secret?: string;
+    certificate?: PathLike;
 };
+declare class EfiPay<type extends EnvironmentTypes> {
+    #private;
+    constructor(type: type, options?: OptionsCredentials);
+    get pix(): PixRequest<type>;
+}
 
 export { EfiPay as default };

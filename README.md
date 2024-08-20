@@ -166,7 +166,7 @@ Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da
 
 Para entender mais sobre as **cobranças imediatas**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas)
 
-Para utilizas as **cobranças imediatas** através do SDK acesse a propriedade `imediateCharge` da api PIX, dessa forma:
+Para utilizar as **cobranças imediatas** através do SDK acesse a propriedade `imediateCharge` da api PIX, dessa forma:
 
 ```ts
 import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
@@ -192,7 +192,7 @@ Responsável pela gestão de cobranças com vencimento. As cobranças, no contex
 
 Para entender mais sobre as **cobranças com vencimento**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento)
 
-Para utilizas as **cobranças com vencimento** através do SDK acesse a propriedade `dueCharge` da api PIX, dessa forma:
+Para utilizar as **cobranças com vencimento** através do SDK acesse a propriedade `dueCharge` da api PIX, dessa forma:
 
 ```ts
 import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'

@@ -2269,9 +2269,15 @@ var PixRequest = class extends ApiRequest {
     this.#imediateCharge = new PixImediateCharge(type, "PIX", options);
     this.#dueCharge = new PixDueCharge(type, "PIX", options);
   }
+  /**
+   * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   */
   get imediateCharge() {
     return this.#imediateCharge;
   }
+  /**
+   * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   */
   get dueCharge() {
     return this.#dueCharge;
   }
@@ -2313,7 +2319,7 @@ if (!_env.success)
     ${JSON.stringify(_env.error.format(), null, 2)}
     `
   );
-var env = envSchema.parse(process.env);
+var env = _env.data;
 
 // src/index.ts
 function makeOptions({ type, operation, data }) {
@@ -2352,6 +2358,13 @@ var EfiPay = class {
       })
     });
   }
+  /**
+   * A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. Com nossa API é possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
+   *
+   * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
+   *
+   * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+   */
   get pix() {
     return this.#pix;
   }

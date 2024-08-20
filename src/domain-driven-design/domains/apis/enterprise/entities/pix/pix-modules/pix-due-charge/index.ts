@@ -10,6 +10,9 @@ import {
 import { PixDueChargeResponse } from './pix-due-charge-response'
 import { PixDueChargeResponseArray } from './pix-due-charge-response-array'
 
+/**
+ * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+ */
 export class PixDueCharge<type extends EnvironmentTypes> extends ApiRequest<
   type,
   'PIX'

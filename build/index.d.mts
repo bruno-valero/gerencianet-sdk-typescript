@@ -4227,6 +4227,9 @@ declare class PixDueChargeResponseArray extends ApiArrayResponse<typeof PixDueCh
     };
 }
 
+/**
+ * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+ */
 declare class PixDueCharge<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
     /**
      * Cadastrar uma cobrança com vencimento e um identificador de transação (`txid`).
@@ -4753,10 +4756,23 @@ interface PixRequestProps<type extends EnvironmentTypes> {
     type: type;
     options: Optional<EfiConfig<type, 'PIX'>, 'sandbox'>;
 }
+/**
+ * A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. Com nossa API é possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
+ *
+ * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
+ *
+ * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+ */
 declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
     #private;
     constructor({ type, options }: PixRequestProps<type>);
+    /**
+     * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+     */
     get imediateCharge(): PixImediateCharge<type>;
+    /**
+     * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+     */
     get dueCharge(): PixDueCharge<type>;
 }
 
@@ -4768,6 +4784,13 @@ type OptionsCredentials = {
 declare class EfiPay<type extends EnvironmentTypes> {
     #private;
     constructor(type: type, options?: OptionsCredentials);
+    /**
+     * A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. Com nossa API é possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
+     *
+     * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
+     *
+     * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+     */
     get pix(): PixRequest<type>;
 }
 

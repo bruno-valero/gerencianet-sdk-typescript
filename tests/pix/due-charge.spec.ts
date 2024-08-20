@@ -33,7 +33,7 @@ describe('Pix due change', () => {
             .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
           validadeAposVencimento: 20,
         },
-        chave: env.PIX_RAMDOM_KEY,
+        chave: env.PIX_KEY,
         devedor: {
           cpf: '45618677830',
           nome: 'bruno',

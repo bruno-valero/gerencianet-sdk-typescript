@@ -2305,7 +2305,7 @@ var envSchema = import_zod4.default.object({
   CLIENT_SECRET_HOMOLOGACAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing'),
   CLIENT_ID_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing'),
   CLIENT_SECRET_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_RAMDOM_KEY: import_zod4.default.string().min(1, 'environment variable "PIX_RAMDOM_KEY" is missing')
+  PIX_KEY: import_zod4.default.string().min(1, 'environment variable "PIX_KEY" is missing')
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)

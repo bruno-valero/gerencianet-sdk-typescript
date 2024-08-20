@@ -29,7 +29,7 @@ describe('Pix Imediate charge', () => {
         calendario: { expiracao: 3600 },
         devedor: { cpf: '45618642883', nome: 'teste' },
         valor: { original: '10.00' },
-        chave: env.PIX_RAMDOM_KEY,
+        chave: env.PIX_KEY,
         solicitacaoPagador: 'teste',
       },
     })
@@ -44,7 +44,7 @@ describe('Pix Imediate charge', () => {
         calendario: { expiracao: 3600 },
         devedor: { cpf: '45618642883', nome: 'teste' },
         valor: { original: '10.00' },
-        chave: env.PIX_RAMDOM_KEY,
+        chave: env.PIX_KEY,
         solicitacaoPagador: 'teste',
       },
       txid: new TxId().value,

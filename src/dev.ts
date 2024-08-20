@@ -17,7 +17,7 @@
 //       calendario: { expiracao: 3600 },
 //       devedor: { cpf: '45618642883', nome: 'teste' },
 //       valor: { original: '10.00' },
-//       chave: env.PIX_RAMDOM_KEY,
+//       chave: env.PIX_KEY,
 //       solicitacaoPagador: 'teste',
 //     },
 //   })
@@ -33,7 +33,7 @@
 //           .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
 //         validadeAposVencimento: 20,
 //       },
-//       chave: env.PIX_RAMDOM_KEY,
+//       chave: env.PIX_KEY,
 //       devedor: {
 //         cpf: '45618677830',
 //         nome: 'bruno',

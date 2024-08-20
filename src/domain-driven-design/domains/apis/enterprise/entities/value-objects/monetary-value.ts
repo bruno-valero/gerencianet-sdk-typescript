@@ -212,6 +212,15 @@ export type FormatCurrencies =
   | 'ZMW'
   | 'ZWL'
 
+export interface MonetaryValueFormatProps {
+  locale: FormatLocales
+  currency: FormatCurrencies
+}
+
+export interface MonetaryValueToObjectProps {
+  formatProps?: Partial<MonetaryValueFormatProps>
+}
+
 export class MonetaryValue {
   #valueInCents: number
 
@@ -288,18 +297,26 @@ export class MonetaryValue {
     return this.units.toFixed(2)
   }
 
-  format(locale: FormatLocales, currency: FormatCurrencies) {
+  protected getFormatParameters(props?: Partial<MonetaryValueFormatProps>) {
+    const locale: FormatLocales = props?.locale ?? 'pt-BR'
+    const currency: FormatCurrencies = props?.currency ?? 'BRL'
+
+    return { locale, currency }
+  }
+
+  format(props?: Partial<MonetaryValueFormatProps>) {
+    const { currency, locale } = this.getFormatParameters(props)
+
     return Intl.NumberFormat(locale, {
       style: 'currency',
       currency,
     }).format(this.units)
   }
 
-  toObject(formatProps?: Partial<Parameters<typeof this.format>>) {
-    const locale: FormatLocales = formatProps?.[0] ?? 'pt-BR'
-    const currency: FormatCurrencies = formatProps?.[1] ?? 'BRL'
+  toObject(props: MonetaryValueToObjectProps) {
+    const formatProps = props.formatProps
 
-    const format = this.format(locale, currency)
+    const format = this.format(formatProps)
 
     return {
       cents: this.cents,

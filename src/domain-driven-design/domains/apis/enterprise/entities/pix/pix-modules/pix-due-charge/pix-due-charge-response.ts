@@ -1,10 +1,11 @@
 import { UserAccount } from '../../../user-account'
-import { MonetaryValue } from '../../../value-objects/monetary-value'
+import { MonetaryValueToObjectProps } from '../../../value-objects/monetary-value'
 import { CalendarDueCharge } from '../../value-objects/calendar-due-charge-response'
 import { PixLocation } from '../../value-objects/pix-location'
 import { TxId } from '../../value-objects/tx-id'
 import { Status } from '../@types-common'
 import { PixDueChargeResponseType } from './@interfaces-pix-due-charge'
+import { PixDueChargeValue } from './value-objects/pix-due-charge-value'
 
 export class PixDueChargeResponse {
   #props: {
@@ -25,7 +26,7 @@ export class PixDueChargeResponse {
     status: Status
     devedor: UserAccount
     recebedor: UserAccount
-    valor: MonetaryValue
+    valor: PixDueChargeValue
     chave: string
     solicitacaoPagador: string
     pixCopiaECola: string
@@ -81,7 +82,7 @@ export class PixDueChargeResponse {
           },
         },
       }),
-      valor: new MonetaryValue(props.valor.original),
+      valor: new PixDueChargeValue(props.valor),
       chave: props.chave,
       solicitacaoPagador: props.solicitacaoPagador,
       pixCopiaECola: props.pixCopiaECola,
@@ -136,21 +137,9 @@ export class PixDueChargeResponse {
   }
 
   toObject(props?: {
-    valueFormat?: {
-      format?: Parameters<PixDueChargeResponse['valor']['format']>[0]
-      currency?: Parameters<PixDueChargeResponse['valor']['format']>[1]
-    }
+    valueFormat?: MonetaryValueToObjectProps['formatProps']
   }) {
-    type ToObjectParams = Parameters<
-      PixDueChargeResponse['valor']['toObject']
-    >[0]
-
-    const valueFormat = props?.valueFormat
-      ? ([
-          props.valueFormat.format,
-          props.valueFormat.currency,
-        ] satisfies ToObjectParams)
-      : undefined
+    const formatProps = props?.valueFormat
 
     return {
       calendario: this.calendario.toObject(),
@@ -169,7 +158,7 @@ export class PixDueChargeResponse {
       location: this.location,
       status: this.status,
       devedor: this.devedor.toObject(),
-      valor: this.valor.toObject(valueFormat),
+      valor: this.valor.toObject({ formatProps }),
       chave: this.chave,
       solicitacaoPagador: this.solicitacaoPagador,
       pixCopiaECola: this.pixCopiaECola,

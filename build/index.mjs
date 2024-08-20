@@ -998,10 +998,14 @@ var ApiRequest = class {
   #options;
   #auth;
   #baseUrl;
+  #type;
+  #operation;
   constructor(type, operation, options) {
     this.#constants = constantsCallbacks;
     this.#endpoints = this.#constants.APIS[operation];
     this.#baseUrl = this.#endpoints.URL[type];
+    this.#type = type;
+    this.#operation = operation;
     const optionsComplete = {
       ...options,
       sandbox: type === "SANDBOX",
@@ -1014,6 +1018,12 @@ var ApiRequest = class {
     };
     this.#options = optionsComplete;
     this.#auth = new auth_default(optionsComplete);
+  }
+  get type() {
+    return this.#type;
+  }
+  get operation() {
+    return this.#operation;
   }
   get environment() {
     return this.#options.sandbox ? "SANDBOX" : "PRODUCTION";
@@ -1509,84 +1519,6 @@ var UserAccount = class {
   }
 };
 
-// src/domain-driven-design/domains/apis/enterprise/entities/value-objects/monetary-value.ts
-var MonetaryValue = class {
-  #valueInCents;
-  constructor(value) {
-    const valueString = String(value);
-    const onlyNumberAttributes = valueString.replaceAll(/([^0-9.,]+)/gi, "");
-    const getNumberSymbols = (number) => {
-      const symbols2 = {
-        thousands: "",
-        decimal: ""
-      };
-      number.split("").forEach((char) => {
-        const isSymbol = [",", "."].includes(char);
-        if (!isSymbol) return;
-        if (!symbols2.thousands) {
-          symbols2.thousands = char;
-        } else if (symbols2.thousands !== char && !symbols2.decimal) {
-          symbols2.decimal = char;
-        }
-      });
-      let response;
-      if (!symbols2.decimal && symbols2.thousands) {
-        response = { decimal: symbols2.thousands, thousands: "" };
-      } else {
-        response = { ...symbols2 };
-      }
-      return response;
-    };
-    const getNumberInCents = (number, symbols2) => {
-      if (!symbols2.decimal && !symbols2.thousands) {
-        return Number(number);
-      } else {
-        const valueNumber = Number(
-          onlyNumberAttributes.replaceAll(symbols2.thousands, "").replace(symbols2.decimal, ".")
-        );
-        const valueRounded = Number(valueNumber.toFixed(2));
-        const valueInCents = valueRounded * 100;
-        return valueInCents;
-      }
-    };
-    const symbols = getNumberSymbols(onlyNumberAttributes);
-    const numberInCents = getNumberInCents(onlyNumberAttributes, symbols);
-    this.#valueInCents = numberInCents;
-  }
-  get cents() {
-    return this.#valueInCents;
-  }
-  get units() {
-    return this.cents / 100;
-  }
-  /**
-   * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
-   */
-  get originalValue() {
-    return this.units.toFixed(2);
-  }
-  format(locale, currency) {
-    return Intl.NumberFormat(locale, {
-      style: "currency",
-      currency
-    }).format(this.units);
-  }
-  toObject(formatProps) {
-    const locale = formatProps?.[0] ?? "pt-BR";
-    const currency = formatProps?.[1] ?? "BRL";
-    const format = this.format(locale, currency);
-    return {
-      cents: this.cents,
-      units: this.units,
-      /**
-       * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
-       */
-      originalValue: this.originalValue,
-      format
-    };
-  }
-};
-
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/calendar-due-charge-response.ts
 import dayjs2 from "dayjs";
 var CalendarDueCharge = class {
@@ -1706,6 +1638,343 @@ var TxId = class {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/value-objects/monetary-value.ts
+var MonetaryValue = class {
+  #valueInCents;
+  constructor(value) {
+    const valueString = String(value);
+    const onlyNumberAttributes = valueString.replaceAll(/([^0-9.,]+)/gi, "");
+    const getNumberSymbols = (number) => {
+      const symbols2 = {
+        thousands: "",
+        decimal: ""
+      };
+      number.split("").forEach((char) => {
+        const isSymbol = [",", "."].includes(char);
+        if (!isSymbol) return;
+        if (!symbols2.thousands) {
+          symbols2.thousands = char;
+        } else if (symbols2.thousands !== char && !symbols2.decimal) {
+          symbols2.decimal = char;
+        }
+      });
+      let response;
+      if (!symbols2.decimal && symbols2.thousands) {
+        response = { decimal: symbols2.thousands, thousands: "" };
+      } else {
+        response = { ...symbols2 };
+      }
+      return response;
+    };
+    const getNumberInCents = (number, symbols2) => {
+      if (!symbols2.decimal && !symbols2.thousands) {
+        return Number(number);
+      } else {
+        const valueNumber = Number(
+          onlyNumberAttributes.replaceAll(symbols2.thousands, "").replace(symbols2.decimal, ".")
+        );
+        const valueRounded = Number(valueNumber.toFixed(2));
+        const valueInCents = valueRounded * 100;
+        return valueInCents;
+      }
+    };
+    const symbols = getNumberSymbols(onlyNumberAttributes);
+    const numberInCents = getNumberInCents(onlyNumberAttributes, symbols);
+    this.#valueInCents = numberInCents;
+  }
+  get cents() {
+    return this.#valueInCents;
+  }
+  get units() {
+    return this.cents / 100;
+  }
+  /**
+   * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
+   */
+  get originalValue() {
+    return this.units.toFixed(2);
+  }
+  getFormatParameters(props) {
+    const locale = props?.locale ?? "pt-BR";
+    const currency = props?.currency ?? "BRL";
+    return { locale, currency };
+  }
+  format(props) {
+    const { currency, locale } = this.getFormatParameters(props);
+    return Intl.NumberFormat(locale, {
+      style: "currency",
+      currency
+    }).format(this.units);
+  }
+  toObject(props) {
+    const formatProps = props.formatProps;
+    const format = this.format(formatProps);
+    return {
+      cents: this.cents,
+      units: this.units,
+      /**
+       * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
+       */
+      originalValue: this.originalValue,
+      format
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/@abstract-pix-due-charge-value-contract.ts
+var PixDueChargeValueContract = class {
+  #props;
+  constructor(props) {
+    this.#props = {
+      original: new MonetaryValue(props.original),
+      multa: props.multa,
+      juros: props.juros,
+      abatimento: props.abatimento,
+      desconto: props.desconto
+    };
+  }
+  /**
+   * Detalhes sobre a transação
+   */
+  get props() {
+    return {
+      /**
+       * Valor original da cobrança.string `\d{1,10}\ .\d{2}`
+       */
+      original: this.#props.original,
+      /**
+       * Multa aplicada à cobrança. `object`
+       */
+      multa: this.#props.multa,
+      /**
+       * Juros aplicado à cobrança. `object`
+       */
+      juros: this.#props.juros,
+      /**
+       * Abatimento aplicado à cobrança. `object`
+       */
+      abatimento: this.#props.abatimento,
+      /**
+       * Descontos aplicados à cobrança. `object`
+       */
+      desconto: this.#props.desconto
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/pix-due-charge-details/pix-due-charge-value-details-abatimento.ts
+var PixDueChargeValueDetailsAbatimento = class extends PixDueChargeValueContract {
+  get data() {
+    return this.props.abatimento;
+  }
+  get details() {
+    if (!this.props.abatimento) return void 0;
+    let value;
+    if (!this.props.abatimento.modalidade || ![1, 2].includes(this.props.abatimento.modalidade)) {
+      value = 0;
+    }
+    if (this.props.abatimento.modalidade === 1) {
+      value = Number(this.props.abatimento.valorPerc);
+    } else {
+      value = Number(this.props.abatimento.valorPerc) / 100 * this.props.original.units;
+    }
+    const modalidadeType = this.props.abatimento.modalidade === 1 ? "Valor Fixo" : "Valor Percentual";
+    return {
+      value: new MonetaryValue(value),
+      modalidade: {
+        type: modalidadeType
+      }
+    };
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      data: this.data,
+      details: {
+        modalidade: this.details?.modalidade,
+        value: this.details?.value.format(formatProps)
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/pix-due-charge-details/pix-due-charge-value-details-desconto.ts
+var PixDueChargeValueDetailsDesconto = class extends PixDueChargeValueContract {
+  get data() {
+    return this.props.abatimento;
+  }
+  get details() {
+    const modalidadeType = [1, 2].includes(
+      this.props.desconto.modalidade
+    ) ? "fixo" : [3, 5].includes(this.props.desconto.modalidade) ? "por antecipa\xE7\xE3o dias corridos" : "por antecipa\xE7\xE3o dias \xFAteis";
+    const modalidadeInterest = [1, 3, 4].includes(
+      this.props.desconto.modalidade
+    ) ? "Valor" : "Percentual";
+    const details = {
+      modalidade: {
+        type: modalidadeType,
+        interest: modalidadeInterest
+      },
+      descontoDataFixa: this.props.desconto.descontoDataFixa.map((item) => {
+        return {
+          data: item.data,
+          value: new MonetaryValue(
+            modalidadeInterest === "Valor" ? Number(item.valorPerc) : this.props.original.units * (Number(item.valorPerc) / 100)
+          )
+        };
+      })
+    };
+    return details;
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      data: this.data,
+      details: {
+        modalidade: this.details.modalidade,
+        value: this.details.descontoDataFixa.map(({ data, value }) => {
+          return { data, value: value.format(formatProps) };
+        })
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/pix-due-charge-details/pix-due-charge-value-details-juros.ts
+var PixDueChargeValueDetailsJuros = class extends PixDueChargeValueContract {
+  get data() {
+    return this.props.juros;
+  }
+  get details() {
+    let value;
+    if (!this.props.juros.modalidade || ![1, 2, 3, 4, 5, 6, 7, 8].includes(this.props.juros.modalidade)) {
+      value = 0;
+    }
+    const type = [1, 2, 3, 4].includes(
+      this.props.juros.modalidade
+    ) ? "dias corridos" : "dias \xFAteis";
+    const interest = [1, 5].includes(
+      this.props.juros.modalidade
+    ) ? "Valor" : "Percentual";
+    const periodicity = [1, 2, 5, 6].includes(
+      this.props.juros.modalidade
+    ) ? "dia" : [3, 7].includes(this.props.juros.modalidade) ? "m\xEAs" : "ano";
+    const valuePerc = interest === "Percentual" ? `${this.props.juros.valorPerc}%` : new MonetaryValue(this.props.juros.valorPerc).format({
+      locale: "pt-BR",
+      currency: "BRL"
+    });
+    const format = `${valuePerc} ao ${periodicity} (${type})`;
+    if (interest === "Percentual") {
+      value = this.props.original.units * (Number(this.props.juros.valorPerc) / 100);
+    } else {
+      value = Number(this.props.juros.valorPerc);
+    }
+    return {
+      value: new MonetaryValue(value),
+      modalidade: {
+        type,
+        interest,
+        periodicity,
+        format
+      }
+    };
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      data: this.data,
+      details: {
+        modalidade: this.details.modalidade,
+        value: this.details.value.format(formatProps)
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/pix-due-charge-details/pix-due-charge-value-details-multa.ts
+var PixDueChargeValueDetailsMulta = class extends PixDueChargeValueContract {
+  get data() {
+    return this.props.multa;
+  }
+  get details() {
+    let value;
+    if (!this.props.multa.modalidade || ![1, 2].includes(this.props.multa.modalidade)) {
+      value = 0;
+    }
+    if (this.props.multa.modalidade === 1) {
+      value = Number(this.props.multa.valorPerc);
+    } else {
+      value = Number(this.props.multa.valorPerc) / 100 * this.props.original.units;
+    }
+    return new MonetaryValue(value);
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      data: this.data,
+      details: this.details.toObject({ formatProps })
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/pix-due-charge-details/index.ts
+var PixDueChargeValueDetails = class extends PixDueChargeValueContract {
+  #multa;
+  #juros;
+  #abatimento;
+  #desconto;
+  constructor(props) {
+    super(props);
+    this.#multa = new PixDueChargeValueDetailsMulta(props);
+    this.#juros = new PixDueChargeValueDetailsJuros(props);
+    this.#abatimento = new PixDueChargeValueDetailsAbatimento(props);
+    this.#desconto = new PixDueChargeValueDetailsDesconto(props);
+  }
+  get multa() {
+    return this.#multa;
+  }
+  get juros() {
+    return this.#juros;
+  }
+  get abatimento() {
+    return this.#abatimento;
+  }
+  get desconto() {
+    return this.#desconto;
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      multa: this.multa.toObject({ formatProps }),
+      juros: this.juros.toObject({ formatProps }),
+      abatimento: this.abatimento.toObject({ formatProps }),
+      desconto: this.desconto.toObject({ formatProps })
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/value-objects/pix-due-charge-value/index.ts
+var PixDueChargeValue = class extends PixDueChargeValueContract {
+  #details;
+  constructor(props) {
+    super(props);
+    this.#details = new PixDueChargeValueDetails(props);
+  }
+  get details() {
+    return this.#details;
+  }
+  get value() {
+    return this.props.original;
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      details: this.details.toObject({ formatProps }),
+      value: this.value.format(formatProps)
+    };
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/pix-due-charge-response.ts
 var PixDueChargeResponse = class {
   #props;
@@ -1759,7 +2028,7 @@ var PixDueChargeResponse = class {
           }
         }
       }),
-      valor: new MonetaryValue(props.valor.original),
+      valor: new PixDueChargeValue(props.valor),
       chave: props.chave,
       solicitacaoPagador: props.solicitacaoPagador,
       pixCopiaECola: props.pixCopiaECola
@@ -1802,10 +2071,7 @@ var PixDueChargeResponse = class {
     return this.#props.pixCopiaECola;
   }
   toObject(props) {
-    const valueFormat = props?.valueFormat ? [
-      props.valueFormat.format,
-      props.valueFormat.currency
-    ] : void 0;
+    const formatProps = props?.valueFormat;
     return {
       calendario: this.calendario.toObject(),
       /**
@@ -1823,7 +2089,7 @@ var PixDueChargeResponse = class {
       location: this.location,
       status: this.status,
       devedor: this.devedor.toObject(),
-      valor: this.valor.toObject(valueFormat),
+      valor: this.valor.toObject({ formatProps }),
       chave: this.chave,
       solicitacaoPagador: this.solicitacaoPagador,
       pixCopiaECola: this.pixCopiaECola
@@ -1922,7 +2188,7 @@ var PixDueChargeResponseArray = class extends ApiArrayResponse {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/index.ts
-var PixDueCharge = class extends ApiRequest {
+var PixDueCharge = class _PixDueCharge extends ApiRequest {
   /**
    * Cadastrar uma cobrança com vencimento e um identificador de transação (`txid`).
    *
@@ -1992,6 +2258,21 @@ var PixDueCharge = class extends ApiRequest {
       ResponseClass: PixDueChargeResponseArray
     });
     return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixDueCharge(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
   }
 };
 
@@ -2104,10 +2385,7 @@ var PixImediateChargeResponse = class extends ApiResponse {
     return this.props.pixCopiaECola;
   }
   toObject(props) {
-    const valueFormat = props?.valueFormat ? [
-      props.valueFormat.format,
-      props.valueFormat.currency
-    ] : void 0;
+    const formatProps = props?.valueFormat;
     return {
       calendario: this.calendario.toObject(),
       /**
@@ -2125,7 +2403,7 @@ var PixImediateChargeResponse = class extends ApiResponse {
       location: this.location,
       status: this.status,
       devedor: this.devedor.toObject(),
-      valor: this.valor.toObject(valueFormat),
+      valor: this.valor.toObject({ formatProps }),
       chave: this.chave,
       solicitacaoPagador: this.solicitacaoPagador,
       pixCopiaECola: this.pixCopiaECola
@@ -2154,7 +2432,7 @@ var PixImediateChargeResponseArray = class extends ApiArrayResponse {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-imediate-charge/index.ts
-var PixImediateCharge = class extends ApiRequest {
+var PixImediateCharge = class _PixImediateCharge extends ApiRequest {
   /**
    * O txid é criado pelo usuário recebedor e está sob sua responsabilidade. No entanto, caso deseje que o txid será definido pela Efí, basta omitir est informação.
    *
@@ -2229,10 +2507,25 @@ var PixImediateCharge = class extends ApiRequest {
     });
     return resp;
   }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixImediateCharge(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix.ts
-var PixRequest = class extends ApiRequest {
+var PixRequest = class _PixRequest extends ApiRequest {
   #imediateCharge;
   #dueCharge;
   constructor({ type, options }) {
@@ -2252,6 +2545,24 @@ var PixRequest = class extends ApiRequest {
    */
   get dueCharge() {
     return this.#dueCharge;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixRequest({
+      type,
+      options: {
+        ...options,
+        client_id: clientId,
+        client_secret: clientSecret
+      }
+    });
+    return pix;
   }
 };
 

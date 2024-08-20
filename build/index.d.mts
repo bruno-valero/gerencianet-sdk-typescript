@@ -727,9 +727,11 @@ declare class Auth<type extends EnvironmentTypes, operation extends OperationTyp
 }
 
 type ConstructorSingleParameters<T extends abstract new (arg: unknown) => unknown> = T extends abstract new (arg: infer P) => unknown ? P : never;
-declare class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
+declare abstract class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
     #private;
     constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox'>);
+    protected get type(): type;
+    protected get operation(): operation;
     protected get environment(): "PRODUCTION" | "SANDBOX";
     protected get endpoints(): {
         readonly PIX: {
@@ -3248,6 +3250,11 @@ declare class ApiRequest<type extends EnvironmentTypes, operation extends Operat
         searchParams?: SearchParams;
         ResponseClass: ResponseClassType;
     }): Promise<InstanceType<ResponseClassType> | null>;
+    abstract useCredentials<T>(props: {
+        clientId: string;
+        clientSecret: string;
+        Instance: T;
+    }): T;
 }
 
 type TipoCob<type extends 'cob' | 'cobv' | undefined = undefined> = type extends undefined ? 'cob' | 'cobv' : type extends 'cob' ? 'cob' : type extends 'cobv' ? 'cobv' : never;
@@ -3947,6 +3954,13 @@ declare class UserAccount {
 
 type FormatLocales = 'af-ZA' | 'ar-SA' | 'ar-EG' | 'bg-BG' | 'ca-ES' | 'zh-CN' | 'zh-TW' | 'hr-HR' | 'cs-CZ' | 'da-DK' | 'nl-NL' | 'en-US' | 'en-GB' | 'et-EE' | 'fi-FI' | 'fr-FR' | 'de-DE' | 'el-GR' | 'he-IL' | 'hi-IN' | 'hu-HU' | 'id-ID' | 'it-IT' | 'ja-JP' | 'ko-KR' | 'lv-LV' | 'lt-LT' | 'ms-MY' | 'nb-NO' | 'pl-PL' | 'pt-BR' | 'pt-PT' | 'ro-RO' | 'ru-RU' | 'sr-RS' | 'sk-SK' | 'sl-SI' | 'es-ES' | 'sv-SE' | 'th-TH' | 'tr-TR' | 'uk-UA' | 'vi-VN';
 type FormatCurrencies = 'AED' | 'AFN' | 'ALL' | 'AMD' | 'ANG' | 'AOA' | 'ARS' | 'AUD' | 'AWG' | 'AZN' | 'BAM' | 'BBD' | 'BDT' | 'BGN' | 'BHD' | 'BIF' | 'BMD' | 'BND' | 'BOB' | 'BRL' | 'BSD' | 'BTN' | 'BWP' | 'BYN' | 'BYR' | 'BZD' | 'CAD' | 'CDF' | 'CHF' | 'CLF' | 'CLP' | 'CNY' | 'COP' | 'CRC' | 'CUC' | 'CUP' | 'CVE' | 'CZK' | 'DJF' | 'DKK' | 'DOP' | 'DZD' | 'EGP' | 'ERN' | 'ETB' | 'EUR' | 'FJD' | 'FKP' | 'FOK' | 'GBP' | 'GEL' | 'GGP' | 'GHS' | 'GIP' | 'GMD' | 'GNF' | 'GTQ' | 'GYD' | 'HKD' | 'HNL' | 'HRK' | 'HTG' | 'HUF' | 'IDR' | 'ILS' | 'IMP' | 'INR' | 'IQD' | 'IRR' | 'ISK' | 'JEP' | 'JMD' | 'JOD' | 'JPY' | 'KES' | 'KGS' | 'KHR' | 'KID' | 'KMF' | 'KRW' | 'KWD' | 'KYD' | 'KZT' | 'LAK' | 'LBP' | 'LKR' | 'LRD' | 'LSL' | 'LYD' | 'MAD' | 'MDL' | 'MGA' | 'MKD' | 'MMK' | 'MNT' | 'MOP' | 'MRU' | 'MUR' | 'MVR' | 'MWK' | 'MXN' | 'MYR' | 'MZN' | 'NAD' | 'NGN' | 'NIO' | 'NOK' | 'NPR' | 'NZD' | 'OMR' | 'PAB' | 'PEN' | 'PGK' | 'PHP' | 'PKR' | 'PLN' | 'PYG' | 'QAR' | 'RON' | 'RSD' | 'RUB' | 'RWF' | 'SAR' | 'SBD' | 'SCR' | 'SDG' | 'SEK' | 'SGD' | 'SHP' | 'SLE' | 'SLL' | 'SOS' | 'SRD' | 'SSP' | 'STD' | 'STN' | 'SVC' | 'SYP' | 'SZL' | 'THB' | 'TJS' | 'TMT' | 'TND' | 'TOP' | 'TRY' | 'TTD' | 'TVD' | 'TWD' | 'TZS' | 'UAH' | 'UGX' | 'USD' | 'UYU' | 'UZS' | 'VES' | 'VND' | 'VUV' | 'WST' | 'XAF' | 'XCD' | 'XDR' | 'XOF' | 'XPF' | 'YER' | 'ZAR' | 'ZMW' | 'ZWL';
+interface MonetaryValueFormatProps {
+    locale: FormatLocales;
+    currency: FormatCurrencies;
+}
+interface MonetaryValueToObjectProps {
+    formatProps?: Partial<MonetaryValueFormatProps>;
+}
 declare class MonetaryValue {
     #private;
     constructor(value: number | string);
@@ -3956,8 +3970,12 @@ declare class MonetaryValue {
      * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
      */
     get originalValue(): string;
-    format(locale: FormatLocales, currency: FormatCurrencies): string;
-    toObject(formatProps?: Partial<Parameters<typeof this.format>>): {
+    protected getFormatParameters(props?: Partial<MonetaryValueFormatProps>): {
+        locale: FormatLocales;
+        currency: FormatCurrencies;
+    };
+    format(props?: Partial<MonetaryValueFormatProps>): string;
+    toObject(props: MonetaryValueToObjectProps): {
         cents: number;
         units: number;
         /**
@@ -4005,6 +4023,313 @@ declare class TxId {
     generate(id?: string): string;
 }
 
+/**
+ * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
+ */
+type PixDueChargeResponseTypeValor = PixDueChargeResponseType['valor'];
+interface PixDueChargeValueContractProps extends PixDueChargeResponseTypeValor {
+}
+declare abstract class PixDueChargeValueContract {
+    #private;
+    constructor(props: PixDueChargeValueContractProps);
+    /**
+     * Detalhes sobre a transação
+     */
+    protected get props(): {
+        /**
+         * Valor original da cobrança.string `\d{1,10}\ .\d{2}`
+         */
+        original: MonetaryValue;
+        /**
+         * Multa aplicada à cobrança. `object`
+         */
+        multa: {
+            modalidade: 1 | 2;
+            valorPerc: string;
+        };
+        /**
+         * Juros aplicado à cobrança. `object`
+         */
+        juros: {
+            modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+            valorPerc: string;
+        };
+        /**
+         * Abatimento aplicado à cobrança. `object`
+         */
+        abatimento: {
+            modalidade: 1 | 2;
+            valorPerc: string;
+        } | undefined;
+        /**
+         * Descontos aplicados à cobrança. `object`
+         */
+        desconto: {
+            modalidade: 1 | 2 | 3 | 4 | 5 | 6;
+            descontoDataFixa: {
+                data: `${string}-${string}-${string}`;
+                valorPerc: string;
+            }[];
+        };
+    };
+}
+
+declare class PixDueChargeValueDetailsAbatimento extends PixDueChargeValueContract {
+    get data(): {
+        modalidade: 1 | 2;
+        valorPerc: string;
+    } | undefined;
+    get details(): {
+        value: MonetaryValue;
+        modalidade: {
+            type: "Valor Fixo" | "Valor Percentual";
+        };
+    } | undefined;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        data: {
+            modalidade: 1 | 2;
+            valorPerc: string;
+        } | undefined;
+        details: {
+            modalidade: {
+                type: "Valor Fixo" | "Valor Percentual";
+            } | undefined;
+            value: string | undefined;
+        };
+    };
+}
+
+declare class PixDueChargeValueDetailsDesconto extends PixDueChargeValueContract {
+    get data(): {
+        modalidade: 1 | 2;
+        valorPerc: string;
+    } | undefined;
+    get details(): {
+        modalidade: {
+            type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+            interest: "Percentual" | "Valor";
+        };
+        descontoDataFixa: {
+            data: `${string}-${string}-${string}`;
+            value: MonetaryValue;
+        }[];
+    };
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        data: {
+            modalidade: 1 | 2;
+            valorPerc: string;
+        } | undefined;
+        details: {
+            modalidade: {
+                type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                interest: "Percentual" | "Valor";
+            };
+            value: {
+                data: `${string}-${string}-${string}`;
+                value: string;
+            }[];
+        };
+    };
+}
+
+declare class PixDueChargeValueDetailsJuros extends PixDueChargeValueContract {
+    get data(): {
+        modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+        valorPerc: string;
+    };
+    get details(): {
+        value: MonetaryValue;
+        modalidade: {
+            type: "dias corridos" | "dias úteis";
+            interest: "Percentual" | "Valor";
+            periodicity: "dia" | "mês" | "ano";
+            format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+        };
+    };
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        data: {
+            modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+            valorPerc: string;
+        };
+        details: {
+            modalidade: {
+                type: "dias corridos" | "dias úteis";
+                interest: "Percentual" | "Valor";
+                periodicity: "dia" | "mês" | "ano";
+                format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+            };
+            value: string;
+        };
+    };
+}
+
+declare class PixDueChargeValueDetailsMulta extends PixDueChargeValueContract {
+    get data(): {
+        modalidade: 1 | 2;
+        valorPerc: string;
+    };
+    get details(): MonetaryValue;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        data: {
+            modalidade: 1 | 2;
+            valorPerc: string;
+        };
+        details: {
+            cents: number;
+            units: number;
+            originalValue: string;
+            format: string;
+        };
+    };
+}
+
+declare class PixDueChargeValueDetails extends PixDueChargeValueContract {
+    #private;
+    constructor(props: PixDueChargeValueContractProps);
+    get multa(): PixDueChargeValueDetailsMulta;
+    get juros(): PixDueChargeValueDetailsJuros;
+    get abatimento(): PixDueChargeValueDetailsAbatimento;
+    get desconto(): PixDueChargeValueDetailsDesconto;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        multa: {
+            data: {
+                modalidade: 1 | 2;
+                valorPerc: string;
+            };
+            details: {
+                cents: number;
+                units: number;
+                originalValue: string;
+                format: string;
+            };
+        };
+        juros: {
+            data: {
+                modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                valorPerc: string;
+            };
+            details: {
+                modalidade: {
+                    type: "dias corridos" | "dias úteis";
+                    interest: "Percentual" | "Valor";
+                    periodicity: "dia" | "mês" | "ano";
+                    format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+                };
+                value: string;
+            };
+        };
+        abatimento: {
+            data: {
+                modalidade: 1 | 2;
+                valorPerc: string;
+            } | undefined;
+            details: {
+                modalidade: {
+                    type: "Valor Fixo" | "Valor Percentual";
+                } | undefined;
+                value: string | undefined;
+            };
+        };
+        desconto: {
+            data: {
+                modalidade: 1 | 2;
+                valorPerc: string;
+            } | undefined;
+            details: {
+                modalidade: {
+                    type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                    interest: "Percentual" | "Valor";
+                };
+                value: {
+                    data: `${string}-${string}-${string}`;
+                    value: string;
+                }[];
+            };
+        };
+    };
+}
+
+interface PixDueChargeValueProps extends PixDueChargeValueContractProps {
+}
+declare class PixDueChargeValue extends PixDueChargeValueContract {
+    #private;
+    constructor(props: PixDueChargeValueProps);
+    get details(): PixDueChargeValueDetails;
+    get value(): MonetaryValue;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        details: {
+            multa: {
+                data: {
+                    modalidade: 1 | 2;
+                    valorPerc: string;
+                };
+                details: {
+                    cents: number;
+                    units: number;
+                    originalValue: string;
+                    format: string;
+                };
+            };
+            juros: {
+                data: {
+                    modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                    valorPerc: string;
+                };
+                details: {
+                    modalidade: {
+                        type: "dias corridos" | "dias úteis";
+                        interest: "Percentual" | "Valor";
+                        periodicity: "dia" | "mês" | "ano";
+                        format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+                    };
+                    value: string;
+                };
+            };
+            abatimento: {
+                data: {
+                    modalidade: 1 | 2;
+                    valorPerc: string;
+                } | undefined;
+                details: {
+                    modalidade: {
+                        type: "Valor Fixo" | "Valor Percentual";
+                    } | undefined;
+                    value: string | undefined;
+                };
+            };
+            desconto: {
+                data: {
+                    modalidade: 1 | 2;
+                    valorPerc: string;
+                } | undefined;
+                details: {
+                    modalidade: {
+                        type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                        interest: "Percentual" | "Valor";
+                    };
+                    value: {
+                        data: `${string}-${string}-${string}`;
+                        value: string;
+                    }[];
+                };
+            };
+        };
+        value: string;
+    };
+}
+
 declare class PixDueChargeResponse {
     #private;
     constructor(props: PixDueChargeResponseType);
@@ -4018,15 +4343,12 @@ declare class PixDueChargeResponse {
     get location(): string;
     get status(): Status$1;
     get devedor(): UserAccount;
-    get valor(): MonetaryValue;
+    get valor(): PixDueChargeValue;
     get chave(): string;
     get solicitacaoPagador(): string;
     get pixCopiaECola(): string;
     toObject(props?: {
-        valueFormat?: {
-            format?: Parameters<PixDueChargeResponse['valor']['format']>[0];
-            currency?: Parameters<PixDueChargeResponse['valor']['format']>[1];
-        };
+        valueFormat?: MonetaryValueToObjectProps['formatProps'];
     }): {
         calendario: {
             criacao: Date;
@@ -4076,10 +4398,64 @@ declare class PixDueChargeResponse {
             meioDeNotificacao: ("whatsapp" | "sms")[] | undefined;
         };
         valor: {
-            cents: number;
-            units: number;
-            originalValue: string;
-            format: string;
+            details: {
+                multa: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    };
+                    details: {
+                        cents: number;
+                        units: number;
+                        originalValue: string;
+                        format: string;
+                    };
+                };
+                juros: {
+                    data: {
+                        modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                        valorPerc: string;
+                    };
+                    details: {
+                        modalidade: {
+                            type: "dias corridos" | "dias úteis";
+                            interest: "Percentual" | "Valor";
+                            periodicity: "dia" | "mês" | "ano";
+                            format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+                        };
+                        value: string;
+                    };
+                };
+                abatimento: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    } | undefined;
+                    details: {
+                        modalidade: {
+                            type: "Valor Fixo" | "Valor Percentual";
+                        } | undefined;
+                        value: string | undefined;
+                    };
+                };
+                desconto: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    } | undefined;
+                    details: {
+                        modalidade: {
+                            type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                            interest: "Percentual" | "Valor";
+                        };
+                        value: {
+                            data: `${string}-${string}-${string}`;
+                            value: string;
+                        }[];
+                    };
+                };
+            };
+            value: string;
         };
         chave: string;
         solicitacaoPagador: string;
@@ -4215,10 +4591,64 @@ declare class PixDueChargeResponseArray extends ApiArrayResponse<typeof PixDueCh
                 meioDeNotificacao: ("whatsapp" | "sms")[] | undefined;
             };
             valor: {
-                cents: number;
-                units: number;
-                originalValue: string;
-                format: string;
+                details: {
+                    multa: {
+                        data: {
+                            modalidade: 1 | 2;
+                            valorPerc: string;
+                        };
+                        details: {
+                            cents: number;
+                            units: number;
+                            originalValue: string;
+                            format: string;
+                        };
+                    };
+                    juros: {
+                        data: {
+                            modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                            valorPerc: string;
+                        };
+                        details: {
+                            modalidade: {
+                                type: "dias corridos" | "dias úteis";
+                                interest: "Percentual" | "Valor";
+                                periodicity: "dia" | "mês" | "ano";
+                                format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+                            };
+                            value: string;
+                        };
+                    };
+                    abatimento: {
+                        data: {
+                            modalidade: 1 | 2;
+                            valorPerc: string;
+                        } | undefined;
+                        details: {
+                            modalidade: {
+                                type: "Valor Fixo" | "Valor Percentual";
+                            } | undefined;
+                            value: string | undefined;
+                        };
+                    };
+                    desconto: {
+                        data: {
+                            modalidade: 1 | 2;
+                            valorPerc: string;
+                        } | undefined;
+                        details: {
+                            modalidade: {
+                                type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                                interest: "Percentual" | "Valor";
+                            };
+                            value: {
+                                data: `${string}-${string}-${string}`;
+                                value: string;
+                            }[];
+                        };
+                    };
+                };
+                value: string;
             };
             chave: string;
             solicitacaoPagador: string;
@@ -4259,6 +4689,10 @@ declare class PixDueCharge<type extends EnvironmentTypes> extends ApiRequest<typ
      * @returns `PixDueChargeResponseArray | null`
      */
     findMany({ searchParams }: PixDueChargeFindManyProps): Promise<PixDueChargeResponseArray | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixDueCharge<type>;
 }
 
 interface CalendarImediateChargeProps {
@@ -4589,10 +5023,7 @@ declare class PixImediateChargeResponse extends ApiResponse {
     get solicitacaoPagador(): string;
     get pixCopiaECola(): string;
     toObject(props?: {
-        valueFormat?: {
-            format?: Parameters<PixImediateChargeResponse['valor']['format']>[0];
-            currency?: Parameters<PixImediateChargeResponse['valor']['format']>[1];
-        };
+        valueFormat?: MonetaryValueToObjectProps['formatProps'];
     }): {
         calendario: {
             criacao: Date;
@@ -4750,6 +5181,10 @@ declare class PixImediateCharge<type extends EnvironmentTypes> extends ApiReques
      * @returns
      */
     findMany({ searchParams }: PixImediateChargeFindManyProps): Promise<PixImediateChargeResponseArray | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixImediateCharge<type>;
 }
 
 interface PixRequestProps<type extends EnvironmentTypes> {
@@ -4774,6 +5209,10 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
      */
     get dueCharge(): PixDueCharge<type>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixRequest<type>;
 }
 
 type OptionsCredentials = {

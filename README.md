@@ -199,16 +199,16 @@ import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
 
 const efi = new EfiPay('SANDBOX')
 
-efi.pix.imediateCharge.create({
+efi.pix.dueCharge.create({
   // passe os parâmetros necessários
 })
-efi.pix.imediateCharge.update({
+efi.pix.dueCharge.update({
   // passe os parâmetros necessários
 })
-efi.pix.imediateCharge.findUnique({
+efi.pix.dueCharge.findUnique({
   // passe os parâmetros necessários
 })
-efi.pix.imediateCharge.findMany({
+efi.pix.dueCharge.findMany({
   // passe os parâmetros necessários
 })
 ```

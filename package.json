@@ -54,7 +54,7 @@
     "pix"
   ],
   "license": "ISC",
-  "description": "**Gerencianet TypeScript SDK - Integração Completa e Avançada**\n\nEste pacote oferece uma SDK moderna e abrangente para integrar a API da Gerencianet com TypeScript. Diferente da SDK oficial, esta versão foi desenvolvida com foco total no TypeScript, proporcionando segurança de tipos, melhor reportagem de erros e sugestões de código inteligentes.\n\n\n**Atenção**: O pacote está em desenvolvimento ativo. Atualmente, apenas a API de PIX para cobranças imediatas e cobranças com data limite está com a integração completa. Outras funcionalidades serão implementadas em futuras atualizações.",
+  "description": "Este pacote oferece uma SDK moderna para integrar a API da Gerencianet com TypeScript. Diferente da SDK oficial, esta versão foi desenvolvida com foco total no TypeScript, proporcionando segurança de tipos, melhor reportagem de erros e sugestões de código inteligentes.\n\n\n**Atenção**: O pacote está em desenvolvimento ativo. Atualmente, apenas a API de PIX para cobranças imediatas e cobranças com data limite está com a integração completa. Outras funcionalidades serão implementadas em futuras atualizações.",
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/node": "^22.2.0",

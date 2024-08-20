@@ -1,5 +1,8 @@
 import { UserAccount } from '@apisEnterprise/entities/user-account'
-import { MonetaryValue } from '@apisEnterprise/entities/value-objects/monetary-value'
+import {
+  MonetaryValue,
+  MonetaryValueToObjectProps,
+} from '@apisEnterprise/entities/value-objects/monetary-value'
 import { CalendarImediateCharge } from '@pixEnterprise/value-objects/calendar-imediate-charge-response'
 import { PixLocation } from '@pixEnterprise/value-objects/pix-location'
 import { TxId } from '@pixEnterprise/value-objects/tx-id'
@@ -126,21 +129,9 @@ export class PixImediateChargeResponse extends ApiResponse {
   }
 
   toObject(props?: {
-    valueFormat?: {
-      format?: Parameters<PixImediateChargeResponse['valor']['format']>[0]
-      currency?: Parameters<PixImediateChargeResponse['valor']['format']>[1]
-    }
+    valueFormat?: MonetaryValueToObjectProps['formatProps']
   }) {
-    type ToObjectParams = Parameters<
-      PixImediateChargeResponse['valor']['toObject']
-    >[0]
-
-    const valueFormat = props?.valueFormat
-      ? ([
-          props.valueFormat.format,
-          props.valueFormat.currency,
-        ] satisfies ToObjectParams)
-      : undefined
+    const formatProps = props?.valueFormat
 
     return {
       calendario: this.calendario.toObject(),
@@ -159,7 +150,7 @@ export class PixImediateChargeResponse extends ApiResponse {
       location: this.location,
       status: this.status,
       devedor: this.devedor.toObject(),
-      valor: this.valor.toObject(valueFormat),
+      valor: this.valor.toObject({ formatProps }),
       chave: this.chave,
       solicitacaoPagador: this.solicitacaoPagador,
       pixCopiaECola: this.pixCopiaECola,

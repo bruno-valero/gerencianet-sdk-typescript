@@ -72,6 +72,21 @@ describe('Pix due change', () => {
     expect(resp).toBeInstanceOf(PixDueChargeResponse)
   })
 
+  it('should be able to update a pix due charge', async () => {
+    const resp = await sut.update({
+      txid: '363d1190f23b48698e0b39e5085c3474',
+      body: {
+        valor: {
+          original: '23.15',
+        },
+      },
+    })
+
+    expect(resp).not.toBeNull()
+    expect(resp).toBeInstanceOf(PixDueChargeResponse)
+    expect(resp?.valor.value.units).toEqual(23.15)
+  })
+
   it("should be able to find one pix due charge by it's Txid", async () => {
     const resp = await sut.findUnique({
       txid: '8016bb64775742d1bb122ee67393faa1',

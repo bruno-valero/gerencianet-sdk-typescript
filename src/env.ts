@@ -23,9 +23,7 @@ const envSchema = z.object({
   CLIENT_SECRET_PRODUCAO: z
     .string()
     .min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_RAMDOM_KEY: z
-    .string()
-    .min(1, 'environment variable "PIX_RAMDOM_KEY" is missing'),
+  PIX_KEY: z.string().min(1, 'environment variable "PIX_KEY" is missing'),
 })
 
 const _env = envSchema.safeParse(process.env)

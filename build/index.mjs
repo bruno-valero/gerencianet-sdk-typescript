@@ -2277,7 +2277,7 @@ var envSchema = z4.object({
   CLIENT_SECRET_HOMOLOGACAO: z4.string().min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing'),
   CLIENT_ID_PRODUCAO: z4.string().min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing'),
   CLIENT_SECRET_PRODUCAO: z4.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_RAMDOM_KEY: z4.string().min(1, 'environment variable "PIX_RAMDOM_KEY" is missing')
+  PIX_KEY: z4.string().min(1, 'environment variable "PIX_KEY" is missing')
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)

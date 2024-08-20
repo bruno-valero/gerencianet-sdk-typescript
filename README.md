@@ -32,7 +32,7 @@ CLIENT_SECRET_HOMOLOGACAO="Your_Client_Secret_for_Homologacao"
 CLIENT_ID_PRODUCAO="Your_Client_Id_for_Producao"
 CLIENT_SECRET_PRODUCAO="Your_Client_Secret_for_Producao"
 # PIX
-PIX_RAMDOM_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
+PIX_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
 ```
 
 - Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o case, execute:
@@ -79,9 +79,9 @@ const envSchema = z.object({
   CLIENT_SECRET_PRODUCAO: z
     .string()
     .min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_RAMDOM_KEY: z
+  PIX_KEY: z
     .string()
-    .min(1, 'environment variable "PIX_RAMDOM_KEY" is missing'),
+    .min(1, 'environment variable "PIX_KEY" is missing'),
 })
 
 const _env = envSchema.safeParse(process.env)
@@ -103,7 +103,7 @@ export const env = _env.data
 
 ## Credenciais
 
-Para poder utilizar as APIs da Efí Pay é necessário fornecer algumas credenciais que serão passadas através das **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)**, vamos entender ada uma delas.
+Para poder utilizar as APIs da Efí Pay é necessário fornecer algumas credenciais que serão passadas através das **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)**, vamos entender cada uma delas.
 
 ### Primeiro Passo -  Criação da Conta
 
@@ -121,6 +121,8 @@ Para ter acesso às suas credenciais é necessário criar um aplicativo. Ele rep
 
 Depois de criada, acesse a aba **Aplicações** de suas APIs. Ela listará todas as suas aplicações criadas. Escolha a aplicação que você acabou de criar e então terá acesso às suas credenciais **Client ID** e **Client Secret** de Produção e de Homologação.
 
+Com essas credenciais, alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CLIENT_ID_HOMOLOGACAO`, `CLIENT_SECRET_HOMOLOGACAO` e `CLIENT_ID_PRODUCAO`, `CLIENT_SECRET_PRODUCAO`
+
 ### Terceiro Passo - Criação dos Certificados
 
 Acesse a aba **Meus Certificados** abaixo da aba **Aplicações** e então crie um certificado para Produção e outro para Homologação.
@@ -128,6 +130,15 @@ Acesse a aba **Meus Certificados** abaixo da aba **Aplicações** e então crie 
 Ao criar um certificado, você receberá um arquivo que deve ser baixado no seu computador, **certifique-se de não perder este arquivo**, pois ele só pode ser baixado no momento da criação do certificado e **não estará disponível para download posteriormente**.
 
 Salve o arquivo am algum lugar dentro do seu projeto e após fazer isso alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CERTIFICADO_HOMOLOGACAO_PATH` e `CERTIFICADO_PRODUCAO_PATH` com o caminho do arquivo onde você salvou os certificados, exemplo: `"./src/certificados/homologacao.p12"`.
+
+
+### Quarto Passo - Criação da Chave Pix
+
+Para receber uma transação PIX é necessário criar uma chave PIX, que pode ser seu **CPF**, **Número de Celular**, **Email** ou uma **Chave Aleatória**. 
+
+Entre em sua conta da Efí Pay, vá até a aba **Pix** e escolha a opção **Minhas Chaves** então clique no botão **Cadastrar Chave**, escolha o tipo de chave, exemplo *CPF*, *Email*, etc. Por fim alimente a **[Variável de Ambiente](#variáveis-de-ambiente-environment-variables)** `PIX_KEY` com o valor de sua chave.
+
+![Criar a Chave PIX](README_IMAGES/create-pix-key.png)
 
 **Após cumprir estes passos, todas as credenciais necessárias para o funcionamento do sdk estão configuradas.**
 

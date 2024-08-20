@@ -45,4 +45,27 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   get dueCharge() {
     return this.#dueCharge
   }
+
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret,
+  }: {
+    clientId: string
+    clientSecret: string
+  }) {
+    const type = this.type
+    const options = this.options
+    const pix = new PixRequest({
+      type,
+      options: {
+        ...options,
+        client_id: clientId,
+        client_secret: clientSecret,
+      },
+    })
+
+    return pix
+  }
 }

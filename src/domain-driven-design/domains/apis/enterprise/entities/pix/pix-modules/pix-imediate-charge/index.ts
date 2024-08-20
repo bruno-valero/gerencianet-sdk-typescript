@@ -103,4 +103,24 @@ export class PixImediateCharge<
 
     return resp
   }
+
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret,
+  }: {
+    clientId: string
+    clientSecret: string
+  }) {
+    const type = this.type
+    const options = this.options
+    const pix = new PixImediateCharge(type, 'PIX', {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret,
+    })
+
+    return pix
+  }
 }

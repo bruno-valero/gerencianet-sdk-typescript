@@ -16,7 +16,7 @@ export type ConstructorSingleParameters<
   T extends abstract new (arg: unknown) => unknown,
 > = T extends abstract new (arg: infer P) => unknown ? P : never
 
-export class ApiRequest<
+export abstract class ApiRequest<
   type extends EnvironmentTypes,
   operation extends OperationTypes,
 > {
@@ -25,6 +25,8 @@ export class ApiRequest<
   #options: EfiConfig<type, operation>
   #auth: Auth<type, operation>
   #baseUrl: ConstantsCallbacks['APIS'][operation]['URL'][type]
+  #type: type
+  #operation: operation
   constructor(
     type: type,
     operation: operation,
@@ -33,6 +35,8 @@ export class ApiRequest<
     this.#constants = constantsCallbacks
     this.#endpoints = this.#constants.APIS[operation]
     this.#baseUrl = this.#endpoints.URL[type]
+    this.#type = type
+    this.#operation = operation
 
     const optionsComplete: EfiConfig<type, operation> = {
       ...options,
@@ -46,6 +50,14 @@ export class ApiRequest<
     }
     this.#options = optionsComplete
     this.#auth = new Auth<type, operation>(optionsComplete)
+  }
+
+  protected get type() {
+    return this.#type
+  }
+
+  protected get operation() {
+    return this.#operation
   }
 
   protected get environment() {
@@ -200,4 +212,10 @@ export class ApiRequest<
       return null
     }
   }
+
+  abstract useCredentials<T>(props: {
+    clientId: string
+    clientSecret: string
+    Instance: T
+  }): T
 }

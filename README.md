@@ -35,7 +35,7 @@ CLIENT_SECRET_PRODUCAO="Your_Client_Secret_for_Producao"
 PIX_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
 ```
 
-- Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o case, execute:
+- Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o caso, execute:
 
 ```bash
 npm i dotenv

@@ -9,9 +9,9 @@
     "types": "tsc --noEmit",
     "lint": "eslint src --fix",
     "build": "tsup src/index.ts --format esm,cjs --dts --out-dir build",
-    "deploy:patch": "npm version patch && git push origin --tags && git push origin dev && npm publish",
-    "deploy:minor": "npm version minor && git push origin --tags && git push origin dev && npm publish",
-    "deploy:major": "npm version major && git push origin --tags && git push origin dev && npm publish",
+    "patch": "npm version patch && git push origin --tags && git push origin dev && npm publish",
+    "minor": "npm version minor && git push origin --tags && git push origin dev && npm publish",
+    "major": "npm version major && git push origin --tags && git push origin dev && npm publish",
     "git-add": "git add .",
     "add": "run-s types lint build git-add",
     "test": "vitest ./tests"

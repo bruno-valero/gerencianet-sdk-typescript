@@ -7,7 +7,7 @@ import { PixImediateChargeResponseArray } from '@/domain-driven-design/domains/a
 import { TxId } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id'
 import { env } from '@/env'
 
-describe.skip('Pix Imediate charge', () => {
+describe('Pix Imediate charge', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixImediateCharge<'SANDBOX'>
 

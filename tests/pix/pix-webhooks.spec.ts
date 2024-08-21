@@ -10,7 +10,7 @@ import { PixWebhooksResponse } from '@/domain-driven-design/domains/apis/enterpr
 import { PixWebhooksResponseArray } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response-array'
 import { env } from '@/env'
 
-describe.skip('Pix Webhooks', () => {
+describe('Pix Webhooks', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixWebhooks<'SANDBOX'>
 

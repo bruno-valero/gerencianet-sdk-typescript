@@ -32,7 +32,7 @@ CLIENT_SECRET_HOMOLOGACAO="Your_Client_Secret_for_Homologacao"
 CLIENT_ID_PRODUCAO="Your_Client_Id_for_Producao"
 CLIENT_SECRET_PRODUCAO="Your_Client_Secret_for_Producao"
 # PIX
-PIX_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
+PIX_KEY="you-pix-key-might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
 ```
 
 - Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o caso, execute:
@@ -164,6 +164,10 @@ A API PIX da Efí Pay é destinada a realizar transações financeiras através 
 
 Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
 
+---
+
+- **Testes de Integração Realizados**
+
 Para entender mais sobre as **cobranças imediatas**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas)
 
 Para utilizar as **cobranças imediatas** através do SDK acesse a propriedade `imediateCharge` da api PIX, dessa forma:
@@ -190,6 +194,10 @@ efi.pix.imediateCharge.findMany({
 #### Cobranças com vencimento - **dueCharge**
 Responsável pela gestão de cobranças com vencimento. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
 
+---
+
+- **Testes de Integração Realizados**
+
 Para entender mais sobre as **cobranças com vencimento**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento)
 
 Para utilizar as **cobranças com vencimento** através do SDK acesse a propriedade `dueCharge` da api PIX, dessa forma:
@@ -209,6 +217,97 @@ efi.pix.dueCharge.findUnique({
   // passe os parâmetros necessários
 })
 efi.pix.dueCharge.findMany({
+  // passe os parâmetros necessários
+})
+```
+
+#### Envio e Pagamento Pix - **sendAndPayment**
+
+Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamento de QR Codes Pix
+
+---
+
+- **Testes de Integração *Não Realizados***
+
+Para entender mais sobre as **envio e pagamento pix**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix)
+
+Para utilizar as **envio e pagamento pix** através do SDK acesse a propriedade `sendAndPayment` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.sendAndPayment.send({
+  // passe os parâmetros necessários
+})
+```
+
+#### Webhooks - **webhooks**
+
+Gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
+
+---
+
+- **Testes de Integração Realizados**
+
+Para entender mais sobre as **webhooks**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/webhooks)
+
+Para utilizar as **webhooks** através do SDK acesse a propriedade `webhooks` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.webhooks.add({
+  // passe os parâmetros necessários
+})
+
+efi.pix.webhooks.findUnique({
+  // passe os parâmetros necessários
+})
+
+efi.pix.webhooks.findMany({
+  // passe os parâmetros necessários
+})
+
+efi.pix.webhooks.delete({
+  // passe os parâmetros necessários
+})
+```
+
+
+#### Gestão de Pix - **manage**
+
+Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
+
+---
+
+- **Testes de Integração *Não Realizados***
+
+Para entender mais sobre as **gestão de pix**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/gestao-de-pix)
+
+Para utilizar as **gestão de pix** através do SDK acesse a propriedade `manage` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.manage.consult({
+  // passe os parâmetros necessários
+})
+
+efi.pix.manage.consultMany({
+  // passe os parâmetros necessários
+})
+
+efi.pix.manage.return({
+  // passe os parâmetros necessários
+})
+
+efi.pix.manage.consultReturn({
   // passe os parâmetros necessários
 })
 ```

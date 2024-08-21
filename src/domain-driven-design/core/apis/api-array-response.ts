@@ -3,26 +3,30 @@ import dayjs from 'dayjs'
 import { ConstructorSingleParameters } from './api-request'
 import { ApiResponse } from './api-response'
 
-interface ApiArrayResponseProps<Cob> {
-  parametros: {
-    inicio: string
-    fim: string
-    paginacao: {
-      paginaAtual: number
-      itensPorPagina: number
-      quantidadeDePaginas: number
-      quantidadeTotalDeItens: number
-    }
+export type ArrayKey = 'cobs' | 'webhooks'
+
+export type ArrayParameters = {
+  inicio: string
+  fim: string
+  paginacao: {
+    paginaAtual: number
+    itensPorPagina: number
+    quantidadeDePaginas: number
+    quantidadeTotalDeItens: number
   }
-  cobs: Cob[]
+}
+
+export interface ApiArrayResponseProps<ArrayData> {
+  parametros: ArrayParameters
+  arrayData: ArrayData[]
 }
 
 export abstract class ApiArrayResponse<
-  Cob extends new (
+  ArrayData extends new (
     // eslint-disable-next-line
       // @ts-ignore
-    props: ConstructorSingleParameters<Cob>,
-  ) => InstanceType<Cob>,
+    props: ConstructorSingleParameters<ArrayData>,
+  ) => InstanceType<ArrayData>,
 > extends ApiResponse {
   protected props: {
     parametros: {
@@ -35,18 +39,18 @@ export abstract class ApiArrayResponse<
         quantidadeTotalDeItens: number
       }
     }
-    cobs: InstanceType<Cob>[]
+    arrayData: InstanceType<ArrayData>[]
   }
 
   constructor(
     // eslint-disable-next-line
     // @ts-ignore
-    props: ApiArrayResponseProps<ConstructorSingleParameters<Cob>>,
-    CobClass: Cob,
+    props: ApiArrayResponseProps<ConstructorSingleParameters<ArrayData>>,
+    CobClass: ArrayData,
   ) {
     super()
     this.props = {
-      cobs: props.cobs.map((item) => new CobClass(item)),
+      arrayData: props.arrayData.map((item) => new CobClass(item)),
       parametros: {
         inicio: new Date(props.parametros.inicio),
         fim: new Date(props.parametros.fim),
@@ -106,9 +110,16 @@ export abstract class ApiArrayResponse<
   /**
    * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
    */
-  get cobs() {
-    return this.props.cobs
+  protected get arrayData() {
+    return this.props.arrayData
   }
 
   abstract toObject(...props: unknown[]): unknown
+
+  toJson(
+    replacer?: Parameters<typeof JSON.stringify>[1],
+    space?: Parameters<typeof JSON.stringify>[2],
+  ) {
+    return JSON.stringify(this.toObject(), replacer, space)
+  }
 }

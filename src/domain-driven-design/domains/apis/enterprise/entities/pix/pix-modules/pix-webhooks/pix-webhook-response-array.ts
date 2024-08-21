@@ -4,21 +4,23 @@ import {
 } from '@/domain-driven-design/core/apis/api-array-response'
 
 import { PixChargeResponseTypeArray } from '../@interfaces-common'
-import { PixDueChargeResponseType } from './@interfaces-pix-due-charge'
-import { PixDueChargeResponse } from './pix-due-charge-response'
+import { PixWebhooksResponseType } from './@interfaces-pix-webhooks'
+import { PixWebhooksResponse } from './pix-webhook-response'
 
-export class PixDueChargeResponseArray extends ApiArrayResponse<
-  typeof PixDueChargeResponse
+export class PixWebhooksResponseArray extends ApiArrayResponse<
+  typeof PixWebhooksResponse
 > {
-  constructor(props: PixChargeResponseTypeArray<PixDueChargeResponseType>) {
-    const data: ApiArrayResponseProps<PixDueChargeResponseType> = {
-      arrayData: props.cobs,
+  constructor(
+    props: PixChargeResponseTypeArray<PixWebhooksResponseType, 'webhooks'>,
+  ) {
+    const data: ApiArrayResponseProps<PixWebhooksResponseType> = {
+      arrayData: props.webhooks,
       parametros: props.parametros,
     }
-    super(data, PixDueChargeResponse)
+    super(data, PixWebhooksResponse)
   }
 
-  get cobs() {
+  get webhooks() {
     return this.arrayData
   }
 
@@ -32,7 +34,7 @@ export class PixDueChargeResponseArray extends ApiArrayResponse<
         quantidadeDePaginas: this.quantidadeDePaginas,
         quantidadeTotalDeItens: this.quantidadeTotalDeItens,
       },
-      cobs: this.cobs.map((item) => item.toObject()),
+      webhooks: this.webhooks.map((item) => item.toObject()),
     }
   }
 }

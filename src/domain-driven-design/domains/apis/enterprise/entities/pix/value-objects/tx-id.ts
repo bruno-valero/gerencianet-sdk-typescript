@@ -19,7 +19,6 @@ export class TxId {
   generate(id?: string) {
     const uuid = new UniqueEntityId(id)
     const txid = uuid.value.replaceAll(/[^0-9a-z]/gi, '')
-    this.#value = txid
     return txid
   }
 }

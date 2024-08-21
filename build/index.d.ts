@@ -3407,6 +3407,149 @@ type PaginaAtualFilterSearch = number
  */
 type ItensPorPaginaFilterSearch = number
 
+declare abstract class ApiResponse {
+    abstract toObject(...props: unknown[]): unknown;
+    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
+}
+
+type ArrayParameters = {
+    inicio: string;
+    fim: string;
+    paginacao: {
+        paginaAtual: number;
+        itensPorPagina: number;
+        quantidadeDePaginas: number;
+        quantidadeTotalDeItens: number;
+    };
+};
+interface ApiArrayResponseProps<ArrayData> {
+    parametros: ArrayParameters;
+    arrayData: ArrayData[];
+}
+declare abstract class ApiArrayResponse<ArrayData extends new (props: ConstructorSingleParameters<ArrayData>) => InstanceType<ArrayData>> extends ApiResponse {
+    protected props: {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginacao: {
+                paginaAtual: number;
+                itensPorPagina: number;
+                quantidadeDePaginas: number;
+                quantidadeTotalDeItens: number;
+            };
+        };
+        arrayData: InstanceType<ArrayData>[];
+    };
+    constructor(props: ApiArrayResponseProps<ConstructorSingleParameters<ArrayData>>, CobClass: ArrayData);
+    /**
+     * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
+     */
+    get inicio(): dayjs.Dayjs;
+    /**
+     * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
+     */
+    get fim(): dayjs.Dayjs;
+    /**
+     * Paginação - indica a página atual.
+     */
+    get paginaAtual(): number;
+    /**
+     * Paginação - indica a quantidade de itens por página.
+     */
+    get itensPorPagina(): number;
+    /**
+     * Paginação - indica a quantidade total de páginas.
+     */
+    get quantidadeDePaginas(): number;
+    /**
+     * Paginação - indica a quantidade total de itens.
+     */
+    get quantidadeTotalDeItens(): number;
+    /**
+     * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
+     */
+    protected get arrayData(): InstanceType<ArrayData>[];
+    abstract toObject(...props: unknown[]): unknown;
+    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
+}
+
+// type Parameters = {
+//   inicio: string
+//   fim: string
+//   paginacao: {
+//     paginaAtual: number
+//     itensPorPagina: number
+//     quantidadeDePaginas: number
+//     quantidadeTotalDeItens: number
+//   }
+// }
+
+type ArrayKey = 'cobs' | 'webhooks'
+
+type PixChargeResponseTypeArray<
+  ArrayData,
+  ArrKey extends ArrayKey = 'cobs',
+> = ArrKey extends 'cobs'
+  ? {
+      parametros: ArrayParameters
+      cobs: ArrayData[]
+    }
+  : ArrKey extends 'webhooks'
+    ? {
+        parametros: ArrayParameters
+        webhooks: ArrayData[]
+      }
+    : never
+
+interface PixFilterSearchProps {
+  searchParams: {
+    /**
+     * Filtra os registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
+     *
+     * - `string`
+     */
+    inicio: InicioFilterSearch
+    /**
+     * Filtra os registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
+     *
+     * - `string`
+     */
+    fim: FimFilterSearch
+    /**
+     * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
+     *
+     * - string `/^\d{11}$/`
+     */
+    cpf?: CpfFilterSearch
+    /**
+     * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
+     *
+     * - string `/^\d{14}$/`
+     */
+    cnpj?: CnpjFilterSearch
+    /**
+     * Filtro pelo status da cobrança.
+     *
+     * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
+     */
+    status?: StatusFilterSearch
+    /**
+     * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
+     *
+     * - integer {int32} (Página atual) `>= 0`
+     * - Default: `0`
+     */
+    'paginacao.paginaAtual'?: PaginaAtualFilterSearch
+    /**
+     * Quantidade máxima de registros retornados em cada página. Apenas a última página pode conter uma quantidade menor de registros.
+     *
+     * - integer {int32} (Página atual) `[1 .. 1000]`
+     * - Default: `100`
+     */
+    'paginacao.itensPorPagina'?: ItensPorPaginaFilterSearch
+  }
+}
+
 declare const statesShortSchema: z.ZodEnum<["AM", "PA", "RR", "AP", "AC", "RO", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO", "DF"]>;
 type StatesShort = z.infer<typeof statesShortSchema>;
 declare const statesStatesVerboseSchema: z.ZodEnum<["Amazonas", "Pará", "Roraima", "Amapá", "Acre", "Rondônia", "Tocantins", "Maranhão", "Piauí", "Ceará", "Rio Grande do Norte", "Paraíba", "Pernambuco", "Alagoas", "Sergipe", "Bahia", "Minas Gerais", "Espírito Santo", "Rio de Janeiro", "São Paulo", "Paraná", "Santa Catarina", "Rio Grande do Sul", "Mato Grosso do Sul", "Mato Grosso", "Goiás", "Distrito Federal"]>;
@@ -3494,7 +3637,7 @@ type CalendarioResponse$1 = CalendarioRequest$1 & {
 /**
  * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
  */
-type Valor$1 = {
+type Valor$2 = {
     /**
      * Valor original da cobrança.string `\d{1,10}\ .\d{2}`
      */
@@ -3616,7 +3759,7 @@ interface PixDueChargeCreateProps {
         /**
          * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
          */
-        valor: Valor$1;
+        valor: Valor$2;
         /**
          * Identificador da localização do payload. Para associar a location a uma cobrança com vencimento, este location gerado deve ser do tipo cobv.
          */
@@ -3673,7 +3816,7 @@ interface PixDueChargeUpdateProps {
         /**
          * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
          */
-        valor?: Partial<Valor$1>;
+        valor?: Partial<Valor$2>;
         /**
          * O campo solicitacaoPagador, opcional, determina um texto a ser apresentado ao pagador para que ele possa digitar uma informação correlata, em formato livre, a ser enviada ao recebedor. Esse texto será preenchido, na pacs.008, pelo PSP do pagador, no campo RemittanceInformation . O tamanho do campo na pacs.008 está limitado a 140 caracteres.
          *
@@ -3707,53 +3850,7 @@ interface PixDueChargeFindUniqueProps {
         revisao?: Revisao;
     };
 }
-interface PixDueChargeFindManyProps {
-    searchParams: {
-        /**
-         * Filtra os registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-         *
-         * - `string`
-         */
-        inicio: InicioFilterSearch;
-        /**
-         * Filtra os registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-         *
-         * - `string`
-         */
-        fim: FimFilterSearch;
-        /**
-         * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
-         *
-         * - string `/^\d{11}$/`
-         */
-        cpf?: CpfFilterSearch;
-        /**
-         * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
-         *
-         * - string `/^\d{14}$/`
-         */
-        cnpj?: CnpjFilterSearch;
-        /**
-         * Filtro pelo status da cobrança.
-         *
-         * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
-         */
-        status?: StatusFilterSearch;
-        /**
-         * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
-         *
-         * - integer {int32} (Página atual) `>= 0`
-         * - Default: `0`
-         */
-        'paginacao.paginaAtual'?: PaginaAtualFilterSearch;
-        /**
-         * Quantidade máxima de registros retornados em cada página. Apenas a última página pode conter uma quantidade menor de registros.
-         *
-         * - integer {int32} (Página atual) `[1 .. 1000]`
-         * - Default: `100`
-         */
-        'paginacao.itensPorPagina'?: ItensPorPaginaFilterSearch;
-    };
+interface PixDueChargeFindManyProps extends PixFilterSearchProps {
 }
 /**
  * Resposta padrão de uma cobrança pix do tipo DueCharge
@@ -3801,7 +3898,7 @@ interface PixDueChargeResponseType {
     /**
      * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
      */
-    valor: Valor$1;
+    valor: Valor$2;
     /**
      * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
      *
@@ -4463,85 +4560,9 @@ declare class PixDueChargeResponse {
     };
 }
 
-declare abstract class ApiResponse {
-    abstract toObject(...props: unknown[]): unknown;
-}
-
-interface ApiArrayResponseProps<Cob> {
-    parametros: {
-        inicio: string;
-        fim: string;
-        paginacao: {
-            paginaAtual: number;
-            itensPorPagina: number;
-            quantidadeDePaginas: number;
-            quantidadeTotalDeItens: number;
-        };
-    };
-    cobs: Cob[];
-}
-declare abstract class ApiArrayResponse<Cob extends new (props: ConstructorSingleParameters<Cob>) => InstanceType<Cob>> extends ApiResponse {
-    protected props: {
-        parametros: {
-            inicio: Date;
-            fim: Date;
-            paginacao: {
-                paginaAtual: number;
-                itensPorPagina: number;
-                quantidadeDePaginas: number;
-                quantidadeTotalDeItens: number;
-            };
-        };
-        cobs: InstanceType<Cob>[];
-    };
-    constructor(props: ApiArrayResponseProps<ConstructorSingleParameters<Cob>>, CobClass: Cob);
-    /**
-     * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-     */
-    get inicio(): dayjs.Dayjs;
-    /**
-     * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-     */
-    get fim(): dayjs.Dayjs;
-    /**
-     * Paginação - indica a página atual.
-     */
-    get paginaAtual(): number;
-    /**
-     * Paginação - indica a quantidade de itens por página.
-     */
-    get itensPorPagina(): number;
-    /**
-     * Paginação - indica a quantidade total de páginas.
-     */
-    get quantidadeDePaginas(): number;
-    /**
-     * Paginação - indica a quantidade total de itens.
-     */
-    get quantidadeTotalDeItens(): number;
-    /**
-     * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
-     */
-    get cobs(): InstanceType<Cob>[];
-    abstract toObject(...props: unknown[]): unknown;
-}
-
-interface PixChargeResponseTypeArray<Cob> {
-  parametros: {
-    inicio: string
-    fim: string
-    paginacao: {
-      paginaAtual: number
-      itensPorPagina: number
-      quantidadeDePaginas: number
-      quantidadeTotalDeItens: number
-    }
-  }
-  cobs: Cob[]
-}
-
 declare class PixDueChargeResponseArray extends ApiArrayResponse<typeof PixDueChargeResponse> {
     constructor(props: PixChargeResponseTypeArray<PixDueChargeResponseType>);
+    get cobs(): PixDueChargeResponse[];
     toObject(): {
         parametros: {
             inicio: Date;
@@ -4744,7 +4765,7 @@ type Devedor = {
 /**
  * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
  */
-type Valor = {
+type Valor$1 = {
   /**
    * Valor original da cobrança.string `\d{1,10}\.\d{2}`
    */
@@ -4788,7 +4809,7 @@ interface PixImediateChargeCreateProps {
     /**
      * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
      */
-    valor: Valor
+    valor: Valor$1
     /**
      * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
      *
@@ -4838,7 +4859,7 @@ interface PixImediateChargeUpdateProps {
     /**
      * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
      */
-    valor?: Valor
+    valor?: Valor$1
     /**
      * O campo solicitacaoPagador, opcional, determina um texto a ser apresentado ao pagador para que ele possa digitar uma informação correlata, em formato livre, a ser enviada ao recebedor. Esse texto será preenchido, na pacs.008, pelo PSP do pagador, no campo RemittanceInformation . O tamanho do campo na pacs.008 está limitado a 140 caracteres.
      *
@@ -4874,54 +4895,7 @@ interface PixImediateChargeFindUniqueProps {
   }
 }
 
-interface PixImediateChargeFindManyProps {
-  searchParams: {
-    /**
-     * Filtra os registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-     *
-     * - `string`
-     */
-    inicio: InicioFilterSearch
-    /**
-     * Filtra os registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-     *
-     * - `string`
-     */
-    fim: FimFilterSearch
-    /**
-     * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
-     *
-     * - string `/^\d{11}$/`
-     */
-    cpf?: CpfFilterSearch
-    /**
-     * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
-     *
-     * - string `/^\d{14}$/`
-     */
-    cnpj?: CnpjFilterSearch
-    /**
-     * Filtro pelo status da cobrança.
-     *
-     * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
-     */
-    status?: StatusFilterSearch
-    /**
-     * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
-     *
-     * - integer {int32} (Página atual) `>= 0`
-     * - Default: `0`
-     */
-    'paginacao.paginaAtual'?: PaginaAtualFilterSearch
-    /**
-     * Quantidade máxima de registros retornados em cada página. Apenas a última página pode conter uma quantidade menor de registros.
-     *
-     * - integer {int32} (Página atual) `[1 .. 1000]`
-     * - Default: `100`
-     */
-    'paginacao.itensPorPagina'?: ItensPorPaginaFilterSearch
-  }
-}
+interface PixImediateChargeFindManyProps extends PixFilterSearchProps {}
 
 /**
  * Resposta padrão de uma cobrança pix do tipo ImediateCharge
@@ -4963,7 +4937,7 @@ interface PixImediateChargeResponseType {
   /**
    * Todos os campos que indicam valores monetários obedecem ao formato do ID 54 da especificação EMV/BR Code para QR Codes. O separador decimal é o caractere ponto. Não é aplicável utilizar separador de milhar. Exemplos de valores aderentes ao padrão: “0.00”, “1.00”, “123.99”, “123456789.23”
    */
-  valor: Valor
+  valor: Valor$1
   /**
    * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
    *
@@ -5085,6 +5059,7 @@ declare class PixImediateChargeResponse extends ApiResponse {
 
 declare class PixImediateChargeResponseArray extends ApiArrayResponse<typeof PixImediateChargeResponse> {
     constructor(props: PixChargeResponseTypeArray<PixImediateChargeResponseType>);
+    get cobs(): PixImediateChargeResponse[];
     toObject(): {
         parametros: {
             inicio: Date;
@@ -5187,6 +5162,411 @@ declare class PixImediateCharge<type extends EnvironmentTypes> extends ApiReques
     }): PixImediateCharge<type>;
 }
 
+/**
+ * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
+ */
+type IdEnvio = string
+
+/**
+ * Valores monetários referentes à cobrança.
+ *
+ * string `\d{1,10}\.\d{2}`
+ */
+type Valor = string
+
+/**
+ * O campo pagador contém a chave Pix associada a conta autenticada que será debitado o valor definido.
+ */
+type Pagador = {
+  /**
+   * O campo chave determina a chave Pix registrada no DICT que será utilizada identificar o pagador do Pix. string (Chave DICT do pagador) `≤ 77 characters`
+   */
+  chave: string
+  /**
+   * Informação do pagador sobre o Pix a ser enviado. `string < 140`
+   */
+  infoPagador?: string
+}
+
+/**
+ * O campo favorecido contém a chave Pix ou os dados bancários que será creditado o valor definido.
+ */
+type Favorecido =
+  | {
+      /**
+       * O campo chave determina a chave Pix registrada no DICT que será utilizada identificar o recebedor do Pix. string (Chave DICT do recebedor) `≤ 77 characters`
+       */
+      chave: string
+      /**
+       * O campo cpf valida se a chave Pix registrada no DICT pertence ao titular do documento informado
+       */
+      cpf?: string
+      /**
+       * O campo cnpj valida se a chave Pix registrada no DICT pertence ao titular do documento informado
+       */
+      cnpj?: string
+    }
+  | {
+      contaBanco:
+        | {
+            /**
+             * Nome do recebedor (string) `< 200 characters`
+             */
+            nome: string
+            /**
+             * CPF do recebedor (string) `^[0-9]{11}$`
+             */
+            cpf: string
+            /**
+             *  [ISPB do Banco do recebedor](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.pdf) (string) `^[0-9]{8}$`
+             */
+            codigoBanco: string
+            /**
+             * Agência do recebedor no seu Banco, sem o dígito verificador (string) `^[0-9]{1,4}$`
+             */
+            agencia: string
+            /**
+             * Conta do recebedor no seu Banco com o dígito verificador, sem traço - (string) `^[0-9]+`
+             */
+            conta: string
+            /**
+             * Tipo da conta do recebedor no seu Banco, podendo ser: `cacc` (Conta corrente) ou `svgs` (poupança)
+             */
+            tipoConta: 'cacc' | 'svgs'
+          }
+        | {
+            /**
+             * Nome do recebedor (string) `< 200 characters`
+             */
+            nome: string
+            /**
+             * CNPJ do recebedor (string) ^[0-9]{14}$
+             */
+            cnpj: string
+            /**
+             *  [ISPB do Banco do recebedor](https://www.bcb.gov.br/content/estabilidadefinanceira/str1/ParticipantesSTR.pdf) (string) `^[0-9]{8}$`
+             */
+            codigoBanco: string
+            /**
+             * Agência do recebedor no seu Banco, sem o dígito verificador (string) `^[0-9]{1,4}$`
+             */
+            agencia: string
+            /**
+             * Conta do recebedor no seu Banco com o dígito verificador, sem traço - (string) `^[0-9]+`
+             */
+            conta: string
+            /**
+             * Tipo da conta do recebedor no seu Banco, podendo ser: `cacc` (Conta corrente) ou `svgs` (poupança)
+             */
+            tipoConta: 'cacc' | 'svgs'
+          }
+    }
+
+interface PixSendAndPaymentSendProps {
+  /**
+   * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
+   */
+  idEnvio: IdEnvio
+  body: {
+    /**
+     * Valores monetários referentes à cobrança.
+     *
+     * string `\d{1,10}\.\d{2}`
+     */
+    valor: Valor
+    /**
+     * O campo pagador contém a chave Pix associada a conta autenticada que será debitado o valor definido.
+     */
+    pagador: Pagador
+    /**
+     * O campo favorecido contém a chave Pix ou os dados bancários que será creditado o valor definido.
+     */
+    favorecido: Favorecido
+  }
+}
+
+interface PixSendAndPaymentSendResponseType {
+  /**
+   * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
+   */
+  idEnvio: IdEnvio
+  /**
+   * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+   */
+  e2eId: E2eId
+  /**
+   * Valores monetários referentes à cobrança.
+   *
+   * string `\d{1,10}\.\d{2}`
+   */
+  valor: Valor
+  /**
+   * Contém o horário em que a transação foi feita.
+   *
+   */
+  horario: {
+    /**
+     * Horário em que a transação foi feita.
+     *
+     * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+     */
+    solicitacao: string
+  }
+  /**
+   * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+   *
+   * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+   */
+  status: Status
+}
+
+declare class PixSendAndPaymentSendResponse extends ApiResponse {
+    #private;
+    constructor(props: PixSendAndPaymentSendResponseType);
+    get props(): PixSendAndPaymentSendResponseType;
+    toObject(...props: unknown[]): unknown;
+}
+
+/**
+ *  Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamento de QR Codes Pix
+ */
+declare class PixSendAndPayment<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     * Destinado a realizar o envio direto de um Pix para uma chave Pix cadastrada em um PSP seja da Efí ou outro. Esse endpoint poderá sofrer alterações quando entrar no escopo de padronização do BACEN. Neste caso, os clientes habilitados serão avisados com antecedência.
+     *
+     * Para utilização do endpoint de Requisitar envio de Pix, além da liberação do escopo `pix.send` na conta, **é necessário que a chave Pix do pagador tenha um webhook associado a ela**. Por meio do webhook a Efí irá informar a você se o envio do Pix foi realizado com sucesso ou não.
+     *
+     * Caso a sua aplicação tenha sido criada anterior à data 29/07/2024, será necessário alterar os escopos (?), desativando e ativando novamente o escopo `pix.send`, dentro de API Pix, para utilizar o recurso.
+     *
+     * ---
+     *
+     * ## Testes em Homologação
+     *
+     * Se você precisa testar o endpoint de envio de Pix, temos um ambiente funcional de homologação onde é possível simular todos os status retornados pela nossa API e pelo webhook.
+     *
+     * - Se o valor do Pix está entre **R$ 0.01** à **R$ 10.00**: Pix é confirmado, informação virá via Webhook.
+     * - Se o valor do Pix está entre **R$ 10.01** à **R$ 20.00**: Pix é rejeitado, informação virá via Webhook.
+     * - Se o valor do Pix é acima de **R$ 20.00**: Pix é rejeitado já na requisição, informação não virá via Webhook.
+     * - Os pagamentos enviados com valor de **R$ 4,00** irão gerar duas devoluções recebidas no valor de **R$ 2,00**.
+     * - Os pagamentos enviados com valor de **R$ 5,00** irão gerar uma devolução recebida no valor de **R$ 5,00**.
+     * - Os pagamentos enviados via chave só serão confirmados ou rejeitados se for utilizada a chave de homologação: `efipay@sejaefi.com.br`. Caso contrário, um erro de chave inválida será informado.
+     * - Os pagamentos enviados via dados bancários não sofrem alterações.
+     *
+     * ### Atenção!
+     *
+     * Para melhorar o desempenho do serviço e evitar conflitos de saldo, recomendamos que **o envio de Pix por API seja condicionado à conclusão da transação anterior, que é notificada por meio do webhook**. Se essa prática não for seguida e várias requisições de envio forem feitas ao mesmo tempo, o integrador pode enfrentar problemas no envio.
+     *
+     * @param PixSendAndPaymentSendProps
+     */
+    send({ body, idEnvio }: PixSendAndPaymentSendProps): Promise<PixSendAndPaymentSendResponse | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixSendAndPayment<type>;
+}
+
+/**
+ * Url para onde a notificação vai ser enviada
+ */
+type WebhookUrl = string;
+/**
+ * Horário em que o webhook foi criado.
+ *
+ * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+ */
+type Criacao = string;
+
+interface PixWebhooksAddProps {
+    /**
+     * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+     *
+     * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+     *
+     * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+     *
+     * - string (Chave DICT do recebedor) `≤ 77 characters`
+     */
+    chave: Chave;
+    body: {
+        /**
+         * Url para onde a notificação vai ser enviada
+         */
+        webhookUrl: WebhookUrl;
+    };
+}
+interface PixWebhooksFindUniqueProps {
+    /**
+     * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+     *
+     * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+     *
+     * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+     *
+     * - string (Chave DICT do recebedor) `≤ 77 characters`
+     */
+    chave: Chave;
+}
+interface PixWebhooksFindManyProps extends PixFilterSearchProps {
+}
+interface PixWebhooksDeleteProps {
+    /**
+     * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+     *
+     * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+     *
+     * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+     *
+     * - string (Chave DICT do recebedor) `≤ 77 characters`
+     */
+    chave: Chave;
+}
+interface PixWebhooksResponseType {
+    /**
+     * Url para onde a notificação vai ser enviada
+     */
+    webhookUrl: string;
+    /**
+     * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+     *
+     * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+     *
+     * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+     *
+     * - string (Chave DICT do recebedor) `≤ 77 characters`
+     */
+    chave: Chave;
+    /**
+     * Horário em que o webhook foi criado.
+     *
+     * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+     */
+    criacao: Criacao;
+}
+
+type PixWebhooksAddResponseType = {
+    webhookUrl: string;
+};
+declare class PixWebhooksAddResponse extends ApiResponse {
+    #private;
+    constructor(props: PixWebhooksAddResponseType);
+    /**
+     * Url para onde a notificação vai ser enviada
+     */
+    get webhookUrl(): string;
+    toObject(): {
+        /**
+         * Url para onde a notificação vai ser enviada
+         */
+        webhookUrl: string;
+    };
+}
+
+type PixWebhooksDeleteResponseType = Record<string, string>;
+declare class PixWebhooksDeleteResponse extends ApiResponse {
+    #private;
+    constructor(props: PixWebhooksDeleteResponseType);
+    get props(): PixWebhooksDeleteResponseType;
+    get status(): string;
+    toObject(): {
+        status: string;
+    };
+}
+
+declare class PixWebhooksResponse extends ApiResponse {
+    #private;
+    constructor(props: PixWebhooksResponseType);
+    /**
+     * Url para onde a notificação vai ser enviada
+     */
+    get webhookUrl(): string;
+    /**
+     * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+     *
+     * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+     *
+     * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+     *
+     * - string (Chave DICT do recebedor) `≤ 77 characters`
+     */
+    get chave(): string;
+    /**
+     * Horário em que o webhook foi criado.
+     *
+     * @return instância do `dayjs`
+     */
+    get criacao(): dayjs.Dayjs;
+    toObject(): {
+        /**
+         * Url para onde a notificação vai ser enviada
+         */
+        webhookUrl: string;
+        /**
+         * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+         *
+         * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+         *
+         * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+         *
+         * - string (Chave DICT do recebedor) `≤ 77 characters`
+         */
+        chave: string;
+        /**
+         * Horário em que o webhook foi criado.
+         *
+         * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+         */
+        criacao: string;
+    };
+}
+
+declare class PixWebhooksResponseArray extends ApiArrayResponse<typeof PixWebhooksResponse> {
+    constructor(props: PixChargeResponseTypeArray<PixWebhooksResponseType, 'webhooks'>);
+    get webhooks(): PixWebhooksResponse[];
+    toObject(): {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginaAtual: number;
+            itensPorPagina: number;
+            quantidadeDePaginas: number;
+            quantidadeTotalDeItens: number;
+        };
+        webhooks: {
+            webhookUrl: string;
+            chave: string;
+            criacao: string;
+        }[];
+    };
+}
+
+/**
+ * gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
+ */
+declare class PixWebhooks<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     * Configuração do serviço de notificações acerca de Pix recebidos. Pix oriundos de cobranças estáticas só serão notificados se estiverem associados a um txid.
+     *
+     * ---
+     *
+     * - ### Lembrete
+     * Uma URL de webhook pode estar associada a várias chaves Pix. **Por outro lado, uma chave Pix só pode estar vinculada a uma única URL de webhook**.
+     *
+     * ---
+     *
+     * - ### Informação
+     * Ao cadastrar seu webhook, enviaremos uma notificação de teste para a URL cadastrada, porém quando de fato uma notificação for enviada, o caminho `/pix` será acrescentado ao final da URL cadastrada. Para não precisar de duas rotas distintas, você poder adicionar um parâmetro `?ignorar=` ao final da URL cadastrada, para que o `/pix` não seja acrescentado na rota da sua URL.
+     *
+     */
+    add({ body, chave }: PixWebhooksAddProps): Promise<PixWebhooksAddResponse | null>;
+    findUnique({ chave }: PixWebhooksFindUniqueProps): Promise<PixWebhooksResponse | null>;
+    findMany({ searchParams }: PixWebhooksFindManyProps): Promise<PixWebhooksResponseArray | null>;
+    delete({ chave }: PixWebhooksDeleteProps): Promise<PixWebhooksDeleteResponse | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixWebhooks<type>;
+}
+
 interface PixRequestProps<type extends EnvironmentTypes> {
     type: type;
     options: Optional<EfiConfig<type, 'PIX'>, 'sandbox'>;
@@ -5209,6 +5589,14 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
      */
     get dueCharge(): PixDueCharge<type>;
+    /**
+     *  Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamento de QR Codes Pix
+     */
+    get sendAndPayment(): PixSendAndPayment<type>;
+    /**
+     * gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
+     */
+    get webhooks(): PixWebhooks<type>;
     useCredentials({ clientId, clientSecret, }: {
         clientId: string;
         clientSecret: string;

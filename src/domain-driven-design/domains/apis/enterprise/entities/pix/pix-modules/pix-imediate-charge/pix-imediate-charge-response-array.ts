@@ -1,4 +1,7 @@
-import { ApiArrayResponse } from '@/domain-driven-design/core/apis/api-array-response'
+import {
+  ApiArrayResponse,
+  ApiArrayResponseProps,
+} from '@/domain-driven-design/core/apis/api-array-response'
 
 import { PixChargeResponseTypeArray } from '../@interfaces-common'
 import { PixImediateChargeResponseType } from './@interfaces-pix-imediate-charge'
@@ -10,7 +13,15 @@ export class PixImediateChargeResponseArray extends ApiArrayResponse<
   constructor(
     props: PixChargeResponseTypeArray<PixImediateChargeResponseType>,
   ) {
-    super(props, PixImediateChargeResponse)
+    const data: ApiArrayResponseProps<PixImediateChargeResponseType> = {
+      arrayData: props.cobs,
+      parametros: props.parametros,
+    }
+    super(data, PixImediateChargeResponse)
+  }
+
+  get cobs() {
+    return this.arrayData
   }
 
   toObject() {

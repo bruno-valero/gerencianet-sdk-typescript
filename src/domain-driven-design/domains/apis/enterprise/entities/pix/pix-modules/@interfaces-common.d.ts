@@ -21,7 +21,7 @@ import {
 //   }
 // }
 
-type ArrayKey = 'cobs' | 'webhooks'
+type ArrayKey = 'cobs' | 'webhooks' | 'pix'
 
 export type PixChargeResponseTypeArray<
   ArrayData,
@@ -36,7 +36,12 @@ export type PixChargeResponseTypeArray<
         parametros: ArrayParameters
         webhooks: ArrayData[]
       }
-    : never
+    : ArrKey extends 'pix'
+      ? {
+          parametros: ArrayParameters
+          pix: ArrayData[]
+        }
+      : never
 
 export interface PixFilterSearchProps {
   searchParams: {

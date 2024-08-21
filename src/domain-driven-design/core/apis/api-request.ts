@@ -112,7 +112,7 @@ export abstract class ApiRequest<
   protected makeRequest<
     Method,
     Url extends string,
-    SearchParams extends Record<string, string | number | Date>,
+    SearchParams extends Record<string, string | number | Date | boolean>,
     Body,
   >({
     accessToken,
@@ -158,7 +158,7 @@ export abstract class ApiRequest<
   protected async sendRequest<
     Route extends string,
     Method extends string,
-    SearchParams extends Record<string, string | number | Date>,
+    SearchParams extends Record<string, string | number | Date | boolean>,
     Body,
     ResponseClassType extends new (
       // eslint-disable-next-line

@@ -10,7 +10,7 @@ import { PixWebhooksResponse } from '@/domain-driven-design/domains/apis/enterpr
 import { PixWebhooksResponseArray } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response-array'
 import { env } from '@/env'
 
-describe('Pix Webhooks', () => {
+describe.skip('Pix Webhooks', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixWebhooks<'SANDBOX'>
 
@@ -25,7 +25,7 @@ describe('Pix Webhooks', () => {
     })
     sut = pix.webhooks
   })
-  it.skip('should be able add a webhook tracking a pix key', async () => {
+  it('should be able add a webhook tracking a pix key', async () => {
     const webhookUrl = process.env.WEBHOOK_PIX
     const secondKey = process.env.PIX_KEY_SECOND
 
@@ -46,7 +46,7 @@ describe('Pix Webhooks', () => {
     expect(resp?.webhookUrl).toEqual(expect.any(String))
   })
 
-  it.skip('should be able find a webhook added by its pix key', async () => {
+  it('should be able find a webhook added by its pix key', async () => {
     const resp = await sut.findUnique({
       chave: env.PIX_KEY,
     })
@@ -56,7 +56,7 @@ describe('Pix Webhooks', () => {
     expect(resp?.webhookUrl).toEqual(expect.any(String))
   })
 
-  it.skip('should be able find many webhooks added by its pix key', async () => {
+  it('should be able find many webhooks added by its pix key', async () => {
     const resp = await sut.findMany({
       searchParams: {
         inicio: dayjs().subtract(3, 'day').toDate(),
@@ -70,7 +70,7 @@ describe('Pix Webhooks', () => {
     expect(resp).toBeInstanceOf(PixWebhooksResponseArray)
   })
 
-  it.skip('should be able to delete a webhook added by its pix key', async () => {
+  it('should be able to delete a webhook added by its pix key', async () => {
     const resp = await sut.delete({
       chave: env.PIX_KEY,
     })

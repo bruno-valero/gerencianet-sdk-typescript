@@ -3222,7 +3222,7 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
     } & {
         'partner-token'?: string;
     };
-    protected makeRequest<Method, Url extends string, SearchParams extends Record<string, string | number | Date>, Body>({ accessToken, method, searchParams, routeUrl, body, }: {
+    protected makeRequest<Method, Url extends string, SearchParams extends Record<string, string | number | Date | boolean>, Body>({ accessToken, method, searchParams, routeUrl, body, }: {
         accessToken: string;
         method: Method;
         searchParams?: SearchParams;
@@ -3243,7 +3243,7 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
     } & {
         httpsAgent?: https.Agent;
     };
-    protected sendRequest<Route extends string, Method extends string, SearchParams extends Record<string, string | number | Date>, Body, ResponseClassType extends new (args: ConstructorSingleParameters<ResponseClassType>) => InstanceType<ResponseClassType>>({ route, body, method, searchParams, ResponseClass, }: {
+    protected sendRequest<Route extends string, Method extends string, SearchParams extends Record<string, string | number | Date | boolean>, Body, ResponseClassType extends new (args: ConstructorSingleParameters<ResponseClassType>) => InstanceType<ResponseClassType>>({ route, body, method, searchParams, ResponseClass, }: {
         route: Route;
         body?: Body;
         method: Method;
@@ -3301,6 +3301,11 @@ declare class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> {
 type TxId$1 = string
 
 /**
+ * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+ */
+type E2eId$2 = string
+
+/**
  * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
  *
  * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
@@ -3355,6 +3360,13 @@ type InfoAdicionais = {
    */
   valor: string
 }[]
+
+/**
+ * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+ *
+ * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+ */
+type PixStatus = 'EM_PROCESSAMENTO' | 'REALIZADO' | 'NAO_REALIZADO'
 
 type Status$1 =
   | 'ATIVA'
@@ -3484,7 +3496,7 @@ declare abstract class ApiArrayResponse<ArrayData extends new (props: Constructo
 //   }
 // }
 
-type ArrayKey = 'cobs' | 'webhooks'
+type ArrayKey = 'cobs' | 'webhooks' | 'pix'
 
 type PixChargeResponseTypeArray<
   ArrayData,
@@ -3499,7 +3511,12 @@ type PixChargeResponseTypeArray<
         parametros: ArrayParameters
         webhooks: ArrayData[]
       }
-    : never
+    : ArrKey extends 'pix'
+      ? {
+          parametros: ArrayParameters
+          pix: ArrayData[]
+        }
+      : never
 
 interface PixFilterSearchProps {
   searchParams: {
@@ -4072,7 +4089,7 @@ declare class MonetaryValue {
         currency: FormatCurrencies;
     };
     format(props?: Partial<MonetaryValueFormatProps>): string;
-    toObject(props: MonetaryValueToObjectProps): {
+    toObject(props?: MonetaryValueToObjectProps): {
         cents: number;
         units: number;
         /**
@@ -4107,17 +4124,26 @@ declare class CalendarDueCharge {
     };
 }
 
+interface IdProp {
+    size: number;
+    value?: string;
+}
+declare class Id {
+    #private;
+    constructor({ size, value }: IdProp);
+    get value(): string;
+    protected generateNew(size?: number): string;
+}
+
 /**
  * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
  *
  * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
  * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
  */
-declare class TxId {
-    #private;
+declare class TxId extends Id {
     constructor(id?: string);
-    get value(): string;
-    generate(id?: string): string;
+    generate(): string;
 }
 
 /**
@@ -5162,6 +5188,277 @@ declare class PixImediateCharge<type extends EnvironmentTypes> extends ApiReques
     }): PixImediateCharge<type>;
 }
 
+interface PixManageConsultProps {
+    /**
+     * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+     */
+    e2eId: E2eId$2;
+}
+type PixWebhooksConsultManyPropsSearchParams = Omit<PixFilterSearchProps['searchParams'], 'status'> & {
+    /**
+     * Filtra os Pix recebidos que têm ou não txid associadas
+     */
+    txIdPresente?: boolean;
+    /**
+     * Filtra os Pix recebidos que têm ou não devoluções associadas
+     */
+    devolucaoPresente?: boolean;
+};
+interface PixWebhooksConsultManyProps extends PixFilterSearchProps {
+    searchParams: PixWebhooksConsultManyPropsSearchParams;
+}
+interface PixWebhooksReturnProps {
+    /**
+     * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+     */
+    e2eId: E2eId$2;
+    /**
+     * Id gerado pelo cliente para representar unicamente uma devolução.
+     *
+     * string `^[a-zA-Z0-9]{32} {1,35}`
+     */
+    id: string;
+    body: {
+        /**
+         * Valor solicitado para devolução. A soma dos valores de todas as devolucões não podem ultrapassar o valor total do Pix.
+         *
+         * string `\d{1,10}\.\d{2}`
+         */
+        valor: string;
+    };
+}
+interface PixWebhooksConsultReturnProps extends Omit<PixWebhooksReturnProps, 'body'> {
+}
+interface PixManageReturnResponseType {
+    id: string;
+    rtrId: string;
+    /**
+     * Valor da devolução
+     *
+     * string `\d{1,10}\.\d{2}`
+     */
+    valor: string;
+    /**
+     * Contém o horário em que a devolução foi feita.
+     *
+     */
+    horario: {
+        /**
+         * Horário em que a devolução foi feita.
+         *
+         * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+         */
+        solicitacao: string;
+    };
+    /**
+     * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+     *
+     * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+     */
+    status: PixStatus;
+}
+interface PixManageResponseType {
+    /**
+     * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+     */
+    endToEndId: E2eId$2;
+    /**
+     * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+     *
+     * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+     *
+     * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+     * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+     *
+     * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+     */
+    txid: TxId$1;
+    /**
+     * Valor da transação
+     *
+     * string `\d{1,10}\.\d{2}`
+     */
+    valor: string;
+    /**
+     * Horário em que a transação foi feita.
+     *
+     * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+     */
+    horario: string;
+    infoPagador: string;
+    devolucoes?: PixManageReturnResponseType[];
+}
+
+/**
+ * Determina o identificador da transação.
+ *
+ * - string (Id da Transação) `^[a-zA-Z0-9]{1,35}$`
+ */
+declare class E2eId$1 extends Id {
+    constructor(id?: string);
+    generate(): string;
+}
+
+declare class PixManageReturnResponse extends ApiResponse {
+    #private;
+    constructor(props: PixManageReturnResponseType);
+    get id(): string;
+    get rtrId(): string;
+    /**
+     * Valor da devolução
+     *
+     * string `\d{1,10}\.\d{2}`
+     */
+    get valor(): MonetaryValue;
+    /**
+     * Contém o horário em que a devolução foi feita.
+     *
+     */
+    get horario(): {
+        /**
+         * Horário em que a devolução foi feita.
+         *
+         * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+         */
+        solicitacao: dayjs.Dayjs;
+    };
+    /**
+     * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+     *
+     * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+     */
+    get status(): PixStatus;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        id: string;
+        rtrId: string;
+        valor: {
+            cents: number;
+            units: number;
+            originalValue: string;
+            format: string;
+        };
+        horario: {
+            solicitacao: Date;
+        };
+        status: PixStatus;
+    };
+}
+
+declare class PixManageResponse extends ApiResponse {
+    #private;
+    constructor(props: PixManageResponseType);
+    get endToEndId(): E2eId$1;
+    get txid(): TxId;
+    get valor(): MonetaryValue;
+    get horario(): dayjs.Dayjs;
+    get infoPagador(): string;
+    get devolucoes(): PixManageReturnResponse[] | undefined;
+    toObject(props?: {
+        formatProps?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        endToEndId: string;
+        txid: string;
+        valor: {
+            cents: number;
+            units: number;
+            originalValue: string;
+            format: string;
+        };
+        horario: Date;
+        infoPagador: string;
+        devolucoes: {
+            id: string;
+            rtrId: string;
+            valor: {
+                cents: number;
+                units: number;
+                originalValue: string;
+                format: string;
+            };
+            horario: {
+                solicitacao: Date;
+            };
+            status: PixStatus;
+        }[] | undefined;
+    };
+}
+
+/**
+ * Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
+ */
+declare class PixManage<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     *
+     * ---
+     *
+     *  Consultar um Pix através de um `e2eId`.
+     *
+     * ---
+     *
+     * ### Atenção
+     * Este endpoint retorna apenas informações sobre Pix recebidos.
+     *
+     * ---
+     *
+     * @param PixManageConsultProps
+     * @returns `PixManageResponse | null`
+     */
+    consult({ e2eId }: PixManageConsultProps): Promise<PixManageResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar vários Pix recebidos.
+     *
+     * ---
+     *
+     * @param PixWebhooksConsultManyProps
+     * @returns `PixManageResponse | null`
+     */
+    consultMany({ searchParams }: PixWebhooksConsultManyProps): Promise<PixManageResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Solicitar uma devolução usando o `e2eId` do Pix e o `ID da devolução`. O motivo atribuído à PACS.004 será “Devolução solicitada pelo usuário recebedor do pagamento original”, com a sigla “MD06”, conforme consta na aba RTReason da PACS.004 no Catálogo de Mensagens do Pix.
+     *
+     * ---
+     *
+     * ### Instruções
+     * Você pode simular a rejeição da devolução usando o valor de **R$ 0,01**. Essas devoluções serão rejeitadas e notificadas para simular o fluxo de produção. Devoluções com valores diferentes de **R$ 0,01**, seguirão o fluxo normal de devolução com várias outras validações. Se estiverem em conformidade, serão confirmadas e notificadas, simulando o fluxo de produção.
+     *
+     * ---
+     *
+     * @param PixWebhooksReturnProps
+     * @returns `PixManageReturnResponse | null`
+     */
+    return({ e2eId, id, body }: PixWebhooksReturnProps): Promise<PixManageReturnResponse | null>;
+    /**
+     * ---
+     *
+     * Consultar uma devolução através de um `e2eId` do Pix e do `ID da devolução`.
+     *
+     * ---
+     *
+     * ### Instruções
+     * É possível consultar informações de uma devolução simulada pelo endpoint de Envio de Devolução no ambiente de homologação.
+     *
+     * A funcionalidade ocorre exatamente como no ambiente de produção.
+     *
+     * ---
+     *
+     * @param PixWebhooksReturnProps
+     * @returns `PixManageReturnResponse | null`
+     */
+    consultReturn({ e2eId, id }: PixWebhooksConsultReturnProps): Promise<PixManageReturnResponse | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixManage<type>;
+}
+
 /**
  * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
  */
@@ -5317,7 +5614,7 @@ interface PixSendAndPaymentSendResponseType {
    *
    * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
    */
-  status: Status
+  status: PixStatus
 }
 
 declare class PixSendAndPaymentSendResponse extends ApiResponse {
@@ -5515,7 +5812,7 @@ declare class PixWebhooksResponse extends ApiResponse {
          *
          * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
          */
-        criacao: string;
+        criacao: Date;
     };
 }
 
@@ -5534,7 +5831,7 @@ declare class PixWebhooksResponseArray extends ApiArrayResponse<typeof PixWebhoo
         webhooks: {
             webhookUrl: string;
             chave: string;
-            criacao: string;
+            criacao: Date;
         }[];
     };
 }
@@ -5597,6 +5894,10 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
      */
     get webhooks(): PixWebhooks<type>;
+    /**
+     * Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
+     */
+    get manage(): PixManage<type>;
     useCredentials({ clientId, clientSecret, }: {
         clientId: string;
         clientSecret: string;

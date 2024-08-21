@@ -1621,19 +1621,45 @@ var UniqueEntityId = class {
   }
 };
 
-// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id.ts
-var TxId = class {
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/id.ts
+var Id = class {
   #value;
-  constructor(id) {
-    this.#value = this.generate(id);
+  #size;
+  constructor({ size, value }) {
+    this.#size = size;
+    if (value) {
+      this.#value = value;
+    } else {
+      this.#value = this.generateNew(size);
+    }
   }
   get value() {
     return this.#value;
   }
-  generate(id) {
-    const uuid = new UniqueEntityId(id);
-    const txid = uuid.value.replaceAll(/[^0-9a-z]/gi, "");
-    return txid;
+  generateNew(size) {
+    size = size || this.#size;
+    function getOnlyAlphaNumeric(str) {
+      return str.replaceAll(/[^0-9a-z]/gi, "");
+    }
+    let id = getOnlyAlphaNumeric(new UniqueEntityId().value);
+    while (id.length < size) {
+      id += getOnlyAlphaNumeric(new UniqueEntityId().value);
+    }
+    const data = id.slice(0, size);
+    return data;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id.ts
+var TxId = class extends Id {
+  constructor(id) {
+    const min = 26;
+    const max = 35;
+    const mean = Math.ceil((min + max) / 2);
+    super({ size: mean, value: id });
+  }
+  generate() {
+    return this.generateNew();
   }
 };
 
@@ -1706,7 +1732,7 @@ var MonetaryValue = class {
     }).format(this.units);
   }
   toObject(props) {
-    const formatProps = props.formatProps;
+    const formatProps = props?.formatProps;
     const format = this.format(formatProps);
     return {
       cents: this.cents,
@@ -2543,6 +2569,259 @@ var PixImediateCharge = class _PixImediateCharge extends ApiRequest {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-response.ts
+import dayjs7 from "dayjs";
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/e2e-id.ts
+var E2eId = class extends Id {
+  constructor(id) {
+    super({ size: 35, value: id });
+  }
+  generate() {
+    return this.generateNew();
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-return-response.ts
+import dayjs6 from "dayjs";
+var PixManageReturnResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      id: props.id,
+      rtrId: props.rtrId,
+      valor: new MonetaryValue(props.valor),
+      horario: {
+        solicitacao: new Date(props.horario.solicitacao)
+      },
+      status: props.status
+    };
+  }
+  get id() {
+    return this.#props.id;
+  }
+  get rtrId() {
+    return this.#props.rtrId;
+  }
+  /**
+   * Valor da devolução
+   *
+   * string `\d{1,10}\.\d{2}`
+   */
+  get valor() {
+    return this.#props.valor;
+  }
+  /**
+   * Contém o horário em que a devolução foi feita.
+   *
+   */
+  get horario() {
+    return {
+      /**
+       * Horário em que a devolução foi feita.
+       *
+       * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+       */
+      solicitacao: dayjs6(this.#props.horario.solicitacao)
+    };
+  }
+  /**
+   * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+   *
+   * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+   */
+  get status() {
+    return this.#props.status;
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      id: this.id,
+      rtrId: this.rtrId,
+      valor: this.valor.toObject({ formatProps }),
+      horario: {
+        solicitacao: this.horario.solicitacao.toDate()
+      },
+      status: this.status
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-response.ts
+var PixManageResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      endToEndId: new E2eId(props.endToEndId),
+      txid: new TxId(props.txid),
+      valor: new MonetaryValue(props.valor),
+      horario: new Date(props.horario),
+      infoPagador: props.infoPagador,
+      devolucoes: props.devolucoes?.map((item) => {
+        return new PixManageReturnResponse(item);
+      })
+    };
+  }
+  get endToEndId() {
+    return this.#props.endToEndId;
+  }
+  get txid() {
+    return this.#props.txid;
+  }
+  get valor() {
+    return this.#props.valor;
+  }
+  get horario() {
+    return dayjs7(this.#props.horario);
+  }
+  get infoPagador() {
+    return this.#props.infoPagador;
+  }
+  get devolucoes() {
+    return this.#props.devolucoes;
+  }
+  toObject(props) {
+    const formatProps = props?.formatProps;
+    return {
+      endToEndId: this.endToEndId.value,
+      txid: this.txid.value,
+      valor: this.valor.toObject({ formatProps }),
+      horario: this.horario.toDate(),
+      infoPagador: this.infoPagador,
+      devolucoes: this.devolucoes?.map((item) => {
+        return item.toObject();
+      })
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/index.ts
+var PixManage = class _PixManage extends ApiRequest {
+  /**
+   *
+   * ---
+   *
+   *  Consultar um Pix através de um `e2eId`.
+   *
+   * ---
+   *
+   * ### Atenção
+   * Este endpoint retorna apenas informações sobre Pix recebidos.
+   *
+   * ---
+   *
+   * @param PixManageConsultProps
+   * @returns `PixManageResponse | null`
+   */
+  async consult({ e2eId }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDetailReceived({
+      e2eId
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixManageResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar vários Pix recebidos.
+   *
+   * ---
+   *
+   * @param PixWebhooksConsultManyProps
+   * @returns `PixManageResponse | null`
+   */
+  async consultMany({ searchParams }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixReceivedList();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixManageResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Solicitar uma devolução usando o `e2eId` do Pix e o `ID da devolução`. O motivo atribuído à PACS.004 será “Devolução solicitada pelo usuário recebedor do pagamento original”, com a sigla “MD06”, conforme consta na aba RTReason da PACS.004 no Catálogo de Mensagens do Pix.
+   *
+   * ---
+   *
+   * ### Instruções
+   * Você pode simular a rejeição da devolução usando o valor de **R$ 0,01**. Essas devoluções serão rejeitadas e notificadas para simular o fluxo de produção. Devoluções com valores diferentes de **R$ 0,01**, seguirão o fluxo normal de devolução com várias outras validações. Se estiverem em conformidade, serão confirmadas e notificadas, simulando o fluxo de produção.
+   *
+   * ---
+   *
+   * @param PixWebhooksReturnProps
+   * @returns `PixManageReturnResponse | null`
+   */
+  async return({ e2eId, id, body }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDevolution({
+      e2eId,
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixManageReturnResponse
+    });
+    return resp;
+  }
+  /**
+   * ---
+   *
+   * Consultar uma devolução através de um `e2eId` do Pix e do `ID da devolução`.
+   *
+   * ---
+   *
+   * ### Instruções
+   * É possível consultar informações de uma devolução simulada pelo endpoint de Envio de Devolução no ambiente de homologação.
+   *
+   * A funcionalidade ocorre exatamente como no ambiente de produção.
+   *
+   * ---
+   *
+   * @param PixWebhooksReturnProps
+   * @returns `PixManageReturnResponse | null`
+   */
+  async consultReturn({ e2eId, id }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDetailDevolution({
+      e2eId,
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixManageReturnResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixManage(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/pix-send-and-payment-send-response.ts
 var PixSendAndPaymentSendResponse = class extends ApiResponse {
   #props;
@@ -2660,7 +2939,7 @@ var PixWebhooksDeleteResponse = class extends ApiResponse {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response.ts
-import dayjs6 from "dayjs";
+import dayjs8 from "dayjs";
 var PixWebhooksResponse = class extends ApiResponse {
   #props;
   constructor(props) {
@@ -2691,7 +2970,7 @@ var PixWebhooksResponse = class extends ApiResponse {
    * @return instância do `dayjs`
    */
   get criacao() {
-    return dayjs6(this.#props.criacao);
+    return dayjs8(this.#props.criacao);
   }
   toObject() {
     return {
@@ -2714,7 +2993,7 @@ var PixWebhooksResponse = class extends ApiResponse {
        *
        * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
        */
-      criacao: this.criacao.toISOString()
+      criacao: this.criacao.toDate()
     };
   }
 };
@@ -2829,6 +3108,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
   #dueCharge;
   #sendAndPayment;
   #webhooks;
+  #manage;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
@@ -2836,6 +3116,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
     this.#dueCharge = new PixDueCharge(type, "PIX", options);
     this.#sendAndPayment = new PixSendAndPayment(type, "PIX", options);
     this.#webhooks = new PixWebhooks(type, "PIX", options);
+    this.#manage = new PixManage(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -2860,6 +3141,12 @@ var PixRequest = class _PixRequest extends ApiRequest {
    */
   get webhooks() {
     return this.#webhooks;
+  }
+  /**
+   * Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
+   */
+  get manage() {
+    return this.#manage;
   }
   // eslint-disable-next-line
   // @ts-ignore

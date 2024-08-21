@@ -2,17 +2,6 @@
  * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
  */
 export type IdEnvio = string
-/**
- * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
- */
-export type E2eId = string
-
-/**
- * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
- *
- * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
- */
-export type Status = 'EM_PROCESSAMENTO' | 'REALIZADO' | 'NAO_REALIZADO'
 
 /**
  * Valores monetários referentes à cobrança.

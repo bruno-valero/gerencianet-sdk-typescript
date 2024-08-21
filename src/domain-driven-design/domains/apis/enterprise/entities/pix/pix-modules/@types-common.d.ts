@@ -13,6 +13,11 @@ import { TipoCob } from '../value-objects/pix-location'
 export type TxId = string
 
 /**
+ * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
+ */
+export type E2eId = string
+
+/**
  * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
  *
  * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
@@ -67,6 +72,13 @@ export type InfoAdicionais = {
    */
   valor: string
 }[]
+
+/**
+ * O campo status no retorno do webhook representa a situação da requisição de envio direto de um Pix para uma chave Pix, podendo assumir os seguintes estados:
+ *
+ * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
+ */
+export type PixStatus = 'EM_PROCESSAMENTO' | 'REALIZADO' | 'NAO_REALIZADO'
 
 export type Status =
   | 'ATIVA'

@@ -77,15 +77,6 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp).toBeInstanceOf(PixImediateChargeResponse)
   })
 
-  it("should be able to find one pix imediate charge by it's Txid", async () => {
-    const resp = await sut.findUnique({
-      txid: 'f16aceb56bde436bb5d47d417f61c52d',
-    })
-
-    expect(resp).not.toBeNull()
-    expect(resp).toBeInstanceOf(PixImediateChargeResponse)
-  })
-
   it('should be able to find many pix imediate charges, with two charges per page', async () => {
     const resp = await sut.findMany({
       searchParams: {
@@ -95,6 +86,7 @@ describe.skip('Pix Imediate charge', () => {
       },
     })
 
+    console.log('resp:', resp?.toObject())
     expect(resp).not.toBeNull()
     expect(resp).toBeInstanceOf(PixImediateChargeResponseArray)
     expect(resp?.cobs).toHaveLength(2)

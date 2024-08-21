@@ -168,6 +168,8 @@ Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da
 
 - **Testes de Integração Realizados**
 
+---
+
 Para entender mais sobre as **cobranças imediatas**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-imediatas)
 
 Para utilizar as **cobranças imediatas** através do SDK acesse a propriedade `imediateCharge` da api PIX, dessa forma:
@@ -197,6 +199,8 @@ Responsável pela gestão de cobranças com vencimento. As cobranças, no contex
 ---
 
 - **Testes de Integração Realizados**
+
+---
 
 Para entender mais sobre as **cobranças com vencimento**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento)
 
@@ -229,6 +233,8 @@ Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamen
 
 - **Testes de Integração *Não Realizados***
 
+---
+
 Para entender mais sobre as **envio e pagamento pix**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/envio-pagamento-pix)
 
 Para utilizar as **envio e pagamento pix** através do SDK acesse a propriedade `sendAndPayment` da api PIX, dessa forma:
@@ -250,6 +256,8 @@ Gerenciamento de notificações por parte do PSP recebedor a pessoa usuária rec
 ---
 
 - **Testes de Integração Realizados**
+
+---
 
 Para entender mais sobre as **webhooks**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/webhooks)
 
@@ -285,6 +293,8 @@ Gestão das transações Pix, isto é, a manutenção dos recebimentos e devolu�
 ---
 
 - **Testes de Integração *Não Realizados***
+
+---
 
 Para entender mais sobre as **gestão de pix**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/gestao-de-pix)
 

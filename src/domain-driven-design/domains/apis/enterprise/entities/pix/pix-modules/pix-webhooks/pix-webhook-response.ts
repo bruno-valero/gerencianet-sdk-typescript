@@ -61,7 +61,7 @@ export class PixWebhooksResponse extends ApiResponse {
        *
        * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
        */
-      criacao: this.criacao.toISOString(),
+      criacao: this.criacao.toDate(),
     }
   }
 }

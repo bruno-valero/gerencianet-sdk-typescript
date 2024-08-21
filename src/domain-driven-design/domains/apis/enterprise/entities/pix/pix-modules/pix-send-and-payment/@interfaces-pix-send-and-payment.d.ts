@@ -1,3 +1,4 @@
+import { PixStatus } from '../@types-common'
 import {
   Favorecido,
   IdEnvio,
@@ -60,5 +61,5 @@ export interface PixSendAndPaymentSendResponseType {
    *
    * `"EM_PROCESSAMENTO","REALIZADO", "NAO_REALIZADO"`
    */
-  status: Status
+  status: PixStatus
 }

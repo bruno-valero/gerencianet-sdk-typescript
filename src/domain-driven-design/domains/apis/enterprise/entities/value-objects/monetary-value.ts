@@ -313,8 +313,8 @@ export class MonetaryValue {
     }).format(this.units)
   }
 
-  toObject(props: MonetaryValueToObjectProps) {
-    const formatProps = props.formatProps
+  toObject(props?: MonetaryValueToObjectProps) {
+    const formatProps = props?.formatProps
 
     const format = this.format(formatProps)
 

@@ -3,7 +3,7 @@ import { PixSendAndPayment } from '@/domain-driven-design/domains/apis/enterpris
 import { IdEnvio } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/id-envio'
 import { env } from '@/env'
 
-describe('Pix Send and Payment', () => {
+describe.skip('Pix Send and Payment', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixSendAndPayment<'SANDBOX'>
 

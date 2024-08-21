@@ -5,6 +5,7 @@ import { Optional } from '@/domain-driven-design/core/types/optional'
 
 import { PixDueCharge } from './pix-modules/pix-due-charge'
 import { PixImediateCharge } from './pix-modules/pix-imediate-charge'
+import { PixManage } from './pix-modules/pix-manage'
 import { PixSendAndPayment } from './pix-modules/pix-send-and-payment'
 import { PixWebhooks } from './pix-modules/pix-webhooks'
 
@@ -28,6 +29,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   #dueCharge: PixDueCharge<type>
   #sendAndPayment: PixSendAndPayment<type>
   #webhooks: PixWebhooks<type>
+  #manage: PixManage<type>
 
   constructor({ type, options }: PixRequestProps<type>) {
     super(type, 'PIX', options)
@@ -36,6 +38,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
     this.#dueCharge = new PixDueCharge(type, 'PIX', options)
     this.#sendAndPayment = new PixSendAndPayment(type, 'PIX', options)
     this.#webhooks = new PixWebhooks(type, 'PIX', options)
+    this.#manage = new PixManage(type, 'PIX', options)
   }
 
   /**
@@ -64,6 +67,13 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
    */
   get webhooks() {
     return this.#webhooks
+  }
+
+  /**
+   * Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
+   */
+  get manage() {
+    return this.#manage
   }
 
   // eslint-disable-next-line

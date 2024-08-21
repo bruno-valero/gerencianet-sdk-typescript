@@ -1661,7 +1661,6 @@ var TxId = class {
   generate(id) {
     const uuid = new UniqueEntityId(id);
     const txid = uuid.value.replaceAll(/[^0-9a-z]/gi, "");
-    this.#value = txid;
     return txid;
   }
 };
@@ -2130,6 +2129,9 @@ var import_dayjs4 = __toESM(require("dayjs"));
 
 // src/domain-driven-design/core/apis/api-response.ts
 var ApiResponse = class {
+  toJson(replacer, space) {
+    return JSON.stringify(this.toObject(), replacer, space);
+  }
 };
 
 // src/domain-driven-design/core/apis/api-array-response.ts
@@ -2138,7 +2140,7 @@ var ApiArrayResponse = class extends ApiResponse {
   constructor(props, CobClass) {
     super();
     this.props = {
-      cobs: props.cobs.map((item) => new CobClass(item)),
+      arrayData: props.arrayData.map((item) => new CobClass(item)),
       parametros: {
         inicio: new Date(props.parametros.inicio),
         fim: new Date(props.parametros.fim),
@@ -2190,15 +2192,25 @@ var ApiArrayResponse = class extends ApiResponse {
   /**
    * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
    */
-  get cobs() {
-    return this.props.cobs;
+  get arrayData() {
+    return this.props.arrayData;
+  }
+  toJson(replacer, space) {
+    return JSON.stringify(this.toObject(), replacer, space);
   }
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/pix-due-charge-response-array.ts
 var PixDueChargeResponseArray = class extends ApiArrayResponse {
   constructor(props) {
-    super(props, PixDueChargeResponse);
+    const data = {
+      arrayData: props.cobs,
+      parametros: props.parametros
+    };
+    super(data, PixDueChargeResponse);
+  }
+  get cobs() {
+    return this.arrayData;
   }
   toObject() {
     return {
@@ -2442,7 +2454,14 @@ var PixImediateChargeResponse = class extends ApiResponse {
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-imediate-charge/pix-imediate-charge-response-array.ts
 var PixImediateChargeResponseArray = class extends ApiArrayResponse {
   constructor(props) {
-    super(props, PixImediateChargeResponse);
+    const data = {
+      arrayData: props.cobs,
+      parametros: props.parametros
+    };
+    super(data, PixImediateChargeResponse);
+  }
+  get cobs() {
+    return this.arrayData;
   }
   toObject() {
     return {
@@ -2552,15 +2571,299 @@ var PixImediateCharge = class _PixImediateCharge extends ApiRequest {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/pix-send-and-payment-send-response.ts
+var PixSendAndPaymentSendResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = props;
+  }
+  get props() {
+    return this.#props;
+  }
+  toObject(...props) {
+    return props;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/index.ts
+var PixSendAndPayment = class _PixSendAndPayment extends ApiRequest {
+  /**
+   * Destinado a realizar o envio direto de um Pix para uma chave Pix cadastrada em um PSP seja da Efí ou outro. Esse endpoint poderá sofrer alterações quando entrar no escopo de padronização do BACEN. Neste caso, os clientes habilitados serão avisados com antecedência.
+   *
+   * Para utilização do endpoint de Requisitar envio de Pix, além da liberação do escopo `pix.send` na conta, **é necessário que a chave Pix do pagador tenha um webhook associado a ela**. Por meio do webhook a Efí irá informar a você se o envio do Pix foi realizado com sucesso ou não.
+   *
+   * Caso a sua aplicação tenha sido criada anterior à data 29/07/2024, será necessário alterar os escopos (?), desativando e ativando novamente o escopo `pix.send`, dentro de API Pix, para utilizar o recurso.
+   *
+   * ---
+   *
+   * ## Testes em Homologação
+   *
+   * Se você precisa testar o endpoint de envio de Pix, temos um ambiente funcional de homologação onde é possível simular todos os status retornados pela nossa API e pelo webhook.
+   *
+   * - Se o valor do Pix está entre **R$ 0.01** à **R$ 10.00**: Pix é confirmado, informação virá via Webhook.
+   * - Se o valor do Pix está entre **R$ 10.01** à **R$ 20.00**: Pix é rejeitado, informação virá via Webhook.
+   * - Se o valor do Pix é acima de **R$ 20.00**: Pix é rejeitado já na requisição, informação não virá via Webhook.
+   * - Os pagamentos enviados com valor de **R$ 4,00** irão gerar duas devoluções recebidas no valor de **R$ 2,00**.
+   * - Os pagamentos enviados com valor de **R$ 5,00** irão gerar uma devolução recebida no valor de **R$ 5,00**.
+   * - Os pagamentos enviados via chave só serão confirmados ou rejeitados se for utilizada a chave de homologação: `efipay@sejaefi.com.br`. Caso contrário, um erro de chave inválida será informado.
+   * - Os pagamentos enviados via dados bancários não sofrem alterações.
+   *
+   * ### Atenção!
+   *
+   * Para melhorar o desempenho do serviço e evitar conflitos de saldo, recomendamos que **o envio de Pix por API seja condicionado à conclusão da transação anterior, que é notificada por meio do webhook**. Se essa prática não for seguida e várias requisições de envio forem feitas ao mesmo tempo, o integrador pode enfrentar problemas no envio.
+   *
+   * @param PixSendAndPaymentSendProps
+   */
+  async send({ body, idEnvio }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSend({
+      idEnvio
+    });
+    const resp = await this.sendRequest({
+      body,
+      method,
+      route,
+      ResponseClass: PixSendAndPaymentSendResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixSendAndPayment(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-add-response.ts
+var PixWebhooksAddResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = props;
+  }
+  /**
+   * Url para onde a notificação vai ser enviada
+   */
+  get webhookUrl() {
+    return this.#props.webhookUrl;
+  }
+  toObject() {
+    return {
+      /**
+       * Url para onde a notificação vai ser enviada
+       */
+      webhookUrl: this.webhookUrl
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-delete-response.ts
+var PixWebhooksDeleteResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = props;
+  }
+  get props() {
+    return this.#props;
+  }
+  get status() {
+    return "webhook deleted!";
+  }
+  toObject() {
+    return {
+      status: this.status
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response.ts
+var import_dayjs6 = __toESM(require("dayjs"));
+var PixWebhooksResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = props;
+  }
+  /**
+   * Url para onde a notificação vai ser enviada
+   */
+  get webhookUrl() {
+    return this.#props.webhookUrl;
+  }
+  /**
+   * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+   *
+   * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+   *
+   * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+   *
+   * - string (Chave DICT do recebedor) `≤ 77 characters`
+   */
+  get chave() {
+    return this.#props.chave;
+  }
+  /**
+   * Horário em que o webhook foi criado.
+   *
+   * @return instância do `dayjs`
+   */
+  get criacao() {
+    return (0, import_dayjs6.default)(this.#props.criacao);
+  }
+  toObject() {
+    return {
+      /**
+       * Url para onde a notificação vai ser enviada
+       */
+      webhookUrl: this.webhookUrl,
+      /**
+       * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
+       *
+       * Os tipos de chave podem ser: telefone, e-mail, cpf/cnpj ou EVP.
+       *
+       * O formato das chaves pode ser encontrado na seção "Formatação das chaves do DICT no BR Code" do [Manual de Padrões para iniciação do Pix.](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+       *
+       * - string (Chave DICT do recebedor) `≤ 77 characters`
+       */
+      chave: this.chave,
+      /**
+       * Horário em que o webhook foi criado.
+       *
+       * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
+       */
+      criacao: this.criacao.toISOString()
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response-array.ts
+var PixWebhooksResponseArray = class extends ApiArrayResponse {
+  constructor(props) {
+    const data = {
+      arrayData: props.webhooks,
+      parametros: props.parametros
+    };
+    super(data, PixWebhooksResponse);
+  }
+  get webhooks() {
+    return this.arrayData;
+  }
+  toObject() {
+    return {
+      parametros: {
+        inicio: this.inicio.toDate(),
+        fim: this.fim.toDate(),
+        paginaAtual: this.paginaAtual,
+        itensPorPagina: this.itensPorPagina,
+        quantidadeDePaginas: this.quantidadeDePaginas,
+        quantidadeTotalDeItens: this.quantidadeTotalDeItens
+      },
+      webhooks: this.webhooks.map((item) => item.toObject())
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/index.ts
+var PixWebhooks = class _PixWebhooks extends ApiRequest {
+  /**
+   * Configuração do serviço de notificações acerca de Pix recebidos. Pix oriundos de cobranças estáticas só serão notificados se estiverem associados a um txid.
+   *
+   * ---
+   *
+   * - ### Lembrete
+   * Uma URL de webhook pode estar associada a várias chaves Pix. **Por outro lado, uma chave Pix só pode estar vinculada a uma única URL de webhook**.
+   *
+   * ---
+   *
+   * - ### Informação
+   * Ao cadastrar seu webhook, enviaremos uma notificação de teste para a URL cadastrada, porém quando de fato uma notificação for enviada, o caminho `/pix` será acrescentado ao final da URL cadastrada. Para não precisar de duas rotas distintas, você poder adicionar um parâmetro `?ignorar=` ao final da URL cadastrada, para que o `/pix` não seja acrescentado na rota da sua URL.
+   *
+   */
+  async add({ body, chave }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixConfigWebhook({
+      chave
+    });
+    const resp = await this.sendRequest({
+      body,
+      method,
+      route,
+      ResponseClass: PixWebhooksAddResponse
+    });
+    return resp;
+  }
+  async findUnique({ chave }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDetailWebhook({
+      chave
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixWebhooksResponse
+    });
+    return resp;
+  }
+  async findMany({ searchParams }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixListWebhook();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixWebhooksResponseArray
+    });
+    return resp;
+  }
+  async delete({ chave }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDeleteWebhook({
+      chave
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixWebhooksDeleteResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixWebhooks(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix.ts
 var PixRequest = class _PixRequest extends ApiRequest {
   #imediateCharge;
   #dueCharge;
+  #sendAndPayment;
+  #webhooks;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
     this.#imediateCharge = new PixImediateCharge(type, "PIX", options);
     this.#dueCharge = new PixDueCharge(type, "PIX", options);
+    this.#sendAndPayment = new PixSendAndPayment(type, "PIX", options);
+    this.#webhooks = new PixWebhooks(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -2573,6 +2876,18 @@ var PixRequest = class _PixRequest extends ApiRequest {
    */
   get dueCharge() {
     return this.#dueCharge;
+  }
+  /**
+   *  Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamento de QR Codes Pix
+   */
+  get sendAndPayment() {
+    return this.#sendAndPayment;
+  }
+  /**
+   * gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
+   */
+  get webhooks() {
+    return this.#webhooks;
   }
   // eslint-disable-next-line
   // @ts-ignore

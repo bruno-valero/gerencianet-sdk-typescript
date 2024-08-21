@@ -5,6 +5,8 @@ import { Optional } from '@/domain-driven-design/core/types/optional'
 
 import { PixDueCharge } from './pix-modules/pix-due-charge'
 import { PixImediateCharge } from './pix-modules/pix-imediate-charge'
+import { PixSendAndPayment } from './pix-modules/pix-send-and-payment'
+import { PixWebhooks } from './pix-modules/pix-webhooks'
 
 interface PixRequestProps<type extends EnvironmentTypes> {
   type: type
@@ -24,12 +26,16 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
 > {
   #imediateCharge: PixImediateCharge<type>
   #dueCharge: PixDueCharge<type>
+  #sendAndPayment: PixSendAndPayment<type>
+  #webhooks: PixWebhooks<type>
 
   constructor({ type, options }: PixRequestProps<type>) {
     super(type, 'PIX', options)
     options.authRoute = this.endpoints.ENDPOINTS.authorize()
     this.#imediateCharge = new PixImediateCharge(type, 'PIX', options)
     this.#dueCharge = new PixDueCharge(type, 'PIX', options)
+    this.#sendAndPayment = new PixSendAndPayment(type, 'PIX', options)
+    this.#webhooks = new PixWebhooks(type, 'PIX', options)
   }
 
   /**
@@ -44,6 +50,20 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
    */
   get dueCharge() {
     return this.#dueCharge
+  }
+
+  /**
+   *  Traz as funcionalidades disponíveis para a gestão do Envio de Pix e do Pagamento de QR Codes Pix
+   */
+  get sendAndPayment() {
+    return this.#sendAndPayment
+  }
+
+  /**
+   * gerenciamento de notificações por parte do PSP recebedor a pessoa usuária recebedora.
+   */
+  get webhooks() {
+    return this.#webhooks
   }
 
   // eslint-disable-next-line

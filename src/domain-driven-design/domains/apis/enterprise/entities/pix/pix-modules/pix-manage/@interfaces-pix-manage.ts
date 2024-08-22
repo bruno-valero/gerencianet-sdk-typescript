@@ -1,4 +1,4 @@
-import { PixFilterSearchProps } from '../@interfaces-common'
+import { PixFilterSearchParamsProps } from '../@interfaces-common'
 import { E2eId, PixStatus, TxId } from '../@types-common'
 
 export interface PixManageConsultProps {
@@ -9,7 +9,7 @@ export interface PixManageConsultProps {
 }
 
 type PixWebhooksConsultManyPropsSearchParams = Omit<
-  PixFilterSearchProps['searchParams'],
+  PixFilterSearchParamsProps,
   'status'
 > & {
   /**
@@ -22,7 +22,7 @@ type PixWebhooksConsultManyPropsSearchParams = Omit<
   devolucaoPresente?: boolean
 }
 
-export interface PixWebhooksConsultManyProps extends PixFilterSearchProps {
+export interface PixWebhooksConsultManyProps {
   searchParams: PixWebhooksConsultManyPropsSearchParams
 }
 

@@ -16,6 +16,8 @@ export type ConstructorSingleParameters<
   T extends abstract new (arg: unknown) => unknown,
 > = T extends abstract new (arg: infer P) => unknown ? P : never
 
+export type SearchParamsType = Record<string, string | number | Date | boolean>
+
 export abstract class ApiRequest<
   type extends EnvironmentTypes,
   operation extends OperationTypes,
@@ -112,7 +114,7 @@ export abstract class ApiRequest<
   protected makeRequest<
     Method,
     Url extends string,
-    SearchParams extends Record<string, string | number | Date | boolean>,
+    SearchParams extends SearchParamsType,
     Body,
   >({
     accessToken,

@@ -9,7 +9,7 @@ import { PixPayloadLocationsResponse } from '@/domain-driven-design/domains/apis
 import { PixPayloadLocationsResponseArray } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payload-locations/pix-payload-locations-response-array'
 import { env } from '@/env'
 
-describe.skip('Pix Manage', () => {
+describe.skip('Pix Payload Locations', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixPayloadLocations<'SANDBOX'>
 

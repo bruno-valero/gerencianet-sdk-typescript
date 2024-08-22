@@ -119,6 +119,26 @@ export const pixEndpoints = {
         route: `/v2/webhook/${chave}`,
         method: `delete`,
       }) as const,
+    pixCreateDueChargeBatch: ({ id }: { id: number }) =>
+      ({
+        route: `/v2/lotecobv/${id}`,
+        method: `put`,
+      }) as const,
+    pixUpdateDueChargeBatch: ({ id }: { id: number }) =>
+      ({
+        route: `/v2/lotecobv/${id}`,
+        method: `patch`,
+      }) as const,
+    pixDetailDueChargeBatch: ({ id }: { id: number }) =>
+      ({
+        route: `/v2/lotecobv/${id}`,
+        method: `get`,
+      }) as const,
+    pixListDueChargeBatch: () =>
+      ({
+        route: `/v2/lotecobv/`,
+        method: `get`,
+      }) as const,
     pixCreateLocation: () =>
       ({
         route: `/v2/loc`,

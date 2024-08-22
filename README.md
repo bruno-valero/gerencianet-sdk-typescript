@@ -156,6 +156,8 @@ const efi = new EfiPay('SANDBOX')
 - Tipo "PRODUCTION": É a conexão com as APIs de Produção, ou seja, destinado a transações financeiras reais
 - Tipo "SANDBOX": É a conexão com as APIs de Homologação, ou seja, destinado a transações financeiras fictícias
 
+---
+
 ### API PIX
 
 A API PIX da Efí Pay é destinada a realizar transações financeiras através de PIX, ela tem duas modalidades integradas até então, que são, **Cobranças imediatas** e **Cobranças com vencimento** que possuem quatro métodos, `create`, `update`, `findUnique` e `findMany`. 
@@ -318,6 +320,45 @@ efi.pix.manage.return({
 })
 
 efi.pix.manage.consultReturn({
+  // passe os parâmetros necessários
+})
+```
+
+#### Payload Locations - **payloadLocations**
+
+Destinado a lidar com configuração e remoção de locations para uso dos payloads.
+
+---
+
+- **Testes de Integração Realizados**
+
+---
+
+Para entender mais sobre as **payload locations**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/payload-locations/)
+
+Para utilizar as **payload locations** através do SDK acesse a propriedade `payloadLocations` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.payloadLocations.create({
+  // passe os parâmetros necessários
+})
+
+efi.pix.payloadLocations.findUnique({
+  // passe os parâmetros necessários
+})
+
+efi.pix.payloadLocations.findMany({
+  // passe os parâmetros necessários
+})
+
+efi.pix.payloadLocations.generateQrCode({
+  // passe os parâmetros necessários
+})
+efi.pix.payloadLocations.detachTxId({
   // passe os parâmetros necessários
 })
 ```

@@ -144,21 +144,21 @@ declare const constantsCallbacks: {
                     readonly method: "get";
                 };
                 readonly pixDetailLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}`;
+                    readonly route: `/v2/loc/${number}`;
                     readonly method: "get";
                 };
                 readonly pixGenerateQRCode: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/qrcode`;
+                    readonly route: `/v2/loc/${number}/qrcode`;
                     readonly method: "get";
                 };
                 readonly pixUnlinkTxidLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/txid`;
+                    readonly route: `/v2/loc/${number}/txid`;
                     readonly method: "delete";
                 };
                 readonly pixCreateEvp: () => {
@@ -873,21 +873,21 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly method: "get";
                 };
                 readonly pixDetailLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}`;
+                    readonly route: `/v2/loc/${number}`;
                     readonly method: "get";
                 };
                 readonly pixGenerateQRCode: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/qrcode`;
+                    readonly route: `/v2/loc/${number}/qrcode`;
                     readonly method: "get";
                 };
                 readonly pixUnlinkTxidLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/txid`;
+                    readonly route: `/v2/loc/${number}/txid`;
                     readonly method: "delete";
                 };
                 readonly pixCreateEvp: () => {
@@ -1493,21 +1493,21 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly method: "get";
                 };
                 readonly pixDetailLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}`;
+                    readonly route: `/v2/loc/${number}`;
                     readonly method: "get";
                 };
                 readonly pixGenerateQRCode: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/qrcode`;
+                    readonly route: `/v2/loc/${number}/qrcode`;
                     readonly method: "get";
                 };
                 readonly pixUnlinkTxidLocation: ({ id }: {
-                    id: string;
+                    id: number;
                 }) => {
-                    readonly route: `/v2/loc/${string}/txid`;
+                    readonly route: `/v2/loc/${number}/txid`;
                     readonly method: "delete";
                 };
                 readonly pixCreateEvp: () => {
@@ -2113,21 +2113,21 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly method: "get";
                     };
                     readonly pixDetailLocation: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}`;
+                        readonly route: `/v2/loc/${number}`;
                         readonly method: "get";
                     };
                     readonly pixGenerateQRCode: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}/qrcode`;
+                        readonly route: `/v2/loc/${number}/qrcode`;
                         readonly method: "get";
                     };
                     readonly pixUnlinkTxidLocation: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}/txid`;
+                        readonly route: `/v2/loc/${number}/txid`;
                         readonly method: "delete";
                     };
                     readonly pixCreateEvp: () => {
@@ -2733,21 +2733,21 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly method: "get";
                     };
                     readonly pixDetailLocation: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}`;
+                        readonly route: `/v2/loc/${number}`;
                         readonly method: "get";
                     };
                     readonly pixGenerateQRCode: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}/qrcode`;
+                        readonly route: `/v2/loc/${number}/qrcode`;
                         readonly method: "get";
                     };
                     readonly pixUnlinkTxidLocation: ({ id }: {
-                        id: string;
+                        id: number;
                     }) => {
-                        readonly route: `/v2/loc/${string}/txid`;
+                        readonly route: `/v2/loc/${number}/txid`;
                         readonly method: "delete";
                     };
                     readonly pixCreateEvp: () => {
@@ -3257,19 +3257,20 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
     }): T;
 }
 
+declare abstract class ApiResponse {
+    abstract toObject(...props: unknown[]): unknown;
+    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
+}
+
 type TipoCob<type extends 'cob' | 'cobv' | undefined = undefined> = type extends undefined ? 'cob' | 'cobv' : type extends 'cob' ? 'cob' : type extends 'cobv' ? 'cobv' : never;
-interface PixLocationProps<type extends 'cob' | 'cobv' | undefined = undefined> {
-    id: number;
-    location: string;
-    tipoCob: TipoCob<type>;
-    criacao?: string;
+interface PixLocationProps<type extends 'cob' | 'cobv' | undefined = undefined> extends Loc<type> {
 }
 /**
  * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
  */
-declare class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> {
+declare class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> extends ApiResponse {
     #private;
-    constructor({ id, location, tipoCob, criacao }: PixLocationProps<type>);
+    constructor({ id, location, tipoCob, criacao, txid, }: PixLocationProps<type>);
     get id(): number;
     /**
      * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
@@ -3303,7 +3304,7 @@ type TxId$1 = string
 /**
  * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
  */
-type E2eId$2 = string
+type E2eId$1 = string
 
 /**
  * O campo chave determina a chave Pix registrada no DICT que será utilizada para a cobrança. Essa chave será lida pelo aplicativo do PSP do pagador para consulta ao DICT, que retornará a informação que identificará o recebedor da cobrança.
@@ -3345,6 +3346,8 @@ type Loc<type extends 'cob' | 'cobv' | undefined = undefined> = {
    */
   location: Location$1
   tipoCob: TipoCob<type>
+  criacao?: string
+  txid?: string
 }
 
 /**
@@ -3419,11 +3422,6 @@ type PaginaAtualFilterSearch = number
  */
 type ItensPorPaginaFilterSearch = number
 
-declare abstract class ApiResponse {
-    abstract toObject(...props: unknown[]): unknown;
-    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
-}
-
 type ArrayParameters = {
     inicio: string;
     fim: string;
@@ -3496,7 +3494,7 @@ declare abstract class ApiArrayResponse<ArrayData extends new (props: Constructo
 //   }
 // }
 
-type ArrayKey = 'cobs' | 'webhooks' | 'pix'
+type ArrayKey = 'cobs' | 'webhooks' | 'pix' | 'loc'
 
 type PixChargeResponseTypeArray<
   ArrayData,
@@ -3516,7 +3514,12 @@ type PixChargeResponseTypeArray<
           parametros: ArrayParameters
           pix: ArrayData[]
         }
-      : never
+      : ArrKey extends 'loc'
+        ? {
+            parametros: ArrayParameters
+            loc: ArrayData[]
+          }
+        : never
 
 interface PixFilterSearchProps {
   searchParams: {
@@ -5192,7 +5195,7 @@ interface PixManageConsultProps {
     /**
      * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
      */
-    e2eId: E2eId$2;
+    e2eId: E2eId$1;
 }
 type PixWebhooksConsultManyPropsSearchParams = Omit<PixFilterSearchProps['searchParams'], 'status'> & {
     /**
@@ -5211,7 +5214,7 @@ interface PixWebhooksReturnProps {
     /**
      * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
      */
-    e2eId: E2eId$2;
+    e2eId: E2eId$1;
     /**
      * Id gerado pelo cliente para representar unicamente uma devolução.
      *
@@ -5261,7 +5264,7 @@ interface PixManageResponseType {
     /**
      * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
      */
-    endToEndId: E2eId$2;
+    endToEndId: E2eId$1;
     /**
      * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
      *
@@ -5294,7 +5297,7 @@ interface PixManageResponseType {
  *
  * - string (Id da Transação) `^[a-zA-Z0-9]{1,35}$`
  */
-declare class E2eId$1 extends Id {
+declare class E2eId extends Id {
     constructor(id?: string);
     generate(): string;
 }
@@ -5349,7 +5352,7 @@ declare class PixManageReturnResponse extends ApiResponse {
 declare class PixManageResponse extends ApiResponse {
     #private;
     constructor(props: PixManageResponseType);
-    get endToEndId(): E2eId$1;
+    get endToEndId(): E2eId;
     get txid(): TxId;
     get valor(): MonetaryValue;
     get horario(): dayjs.Dayjs;
@@ -5457,6 +5460,153 @@ declare class PixManage<type extends EnvironmentTypes> extends ApiRequest<type, 
         clientId: string;
         clientSecret: string;
     }): PixManage<type>;
+}
+
+interface PixPayloadLocationsCreateProps {
+  body: {
+    tipoCob: TipoCob
+  }
+}
+
+interface PixPayloadLocationsFindUniqueProps {
+  /**
+   *  ID do location a ser associada a cobrança. int32
+   */
+  id: number
+}
+
+interface PixPayloadLocationsFindManyProps
+  extends PixFilterSearchProps {}
+
+interface PixPayloadLocationsGenerateQrCodeProps {
+  /**
+   *  ID do location a ser associada a cobrança. int32
+   */
+  id: number
+}
+
+interface PixPayloadLocationsDetachTxIdProps {
+  /**
+   *  ID do location a ser associada a cobrança. int32
+   */
+  id: number
+}
+
+interface PixPayloadLocationsResponseType extends PixLocationProps {}
+
+interface PixPayloadLocationsGenerateQrCodeResponseType {
+  /**
+   * BRCode ou copia e cola
+   */
+  qrcode: string
+  imagemQrcode: string
+  linkVisualizacao: string
+}
+
+declare class PixPayloadLocationsQRCodeResponse extends ApiResponse {
+    #private;
+    constructor(props: PixPayloadLocationsGenerateQrCodeResponseType);
+    /**
+     * BRCode ou copia e cola
+     */
+    get qrcode(): string;
+    get imagemQrcode(): string;
+    get linkVisualizacao(): string;
+    toObject(): {
+        qrcode: string;
+        imagemQrcode: string;
+        linkVisualizacao: string;
+    };
+}
+
+declare class PixPayloadLocationsResponse extends PixLocation {
+}
+
+declare class PixPayloadLocationsResponseArray extends ApiArrayResponse<typeof PixPayloadLocationsResponse> {
+    constructor(props: PixChargeResponseTypeArray<PixPayloadLocationsResponseType, 'loc'>);
+    get loc(): PixPayloadLocationsResponse[];
+    toObject(): {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginaAtual: number;
+            itensPorPagina: number;
+            quantidadeDePaginas: number;
+            quantidadeTotalDeItens: number;
+        };
+        loc: {
+            id: number;
+            location: string;
+            tipoCob: "cob" | "cobv";
+            criacao: Date | undefined;
+        }[];
+    };
+}
+
+/**
+ * Destinado a lidar com configuração e remoção de locations para uso dos payloads.
+ */
+declare class PixPayloadLocations<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     *
+     * ---
+     *
+     * Criar location do payload. Necessário enviar no body da requisição o atributo tipoCob com o valor COB ou COBV.
+     *
+     * ---
+     *
+     * @param PixPayloadLocationsCreateProps
+     * @returns `PixLocation<"cob" | "cobv" | undefined> | null`
+     */
+    create({ body }: PixPayloadLocationsCreateProps): Promise<PixPayloadLocationsResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Recuperar a location do payload
+     *
+     * ---
+     *
+     */
+    findUnique({ id }: PixPayloadLocationsFindUniqueProps): Promise<PixPayloadLocationsResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar locations cadastradas.
+     *
+     * ---
+     *
+     */
+    findMany({ searchParams }: PixPayloadLocationsFindManyProps): Promise<PixPayloadLocationsResponseArray | null>;
+    /**
+     *
+     * ---
+     *
+     * Gerar QR Code de um location.
+     *
+     * ---
+     *
+     */
+    generateQrCode({ id }: PixPayloadLocationsGenerateQrCodeProps): Promise<PixPayloadLocationsQRCodeResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Desvincular uma cobrança de um location.
+     *
+     * ---
+     *
+     * Se executado com sucesso, a entidade `loc` não apresentará mais um **txid**, como acontecia antes da chamada. Além disso, a entidade `cob` ou `cobv` associada ao txid desvinculado também não apresentará mais um location. Essa operação não altera o `status` da `cob` ou `cobv` em questão.
+     *
+     * ---
+     *
+     */
+    detachTxId({ id }: PixPayloadLocationsDetachTxIdProps): Promise<PixPayloadLocationsResponse | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixPayloadLocations<type>;
 }
 
 /**
@@ -5590,7 +5740,7 @@ interface PixSendAndPaymentSendResponseType {
   /**
    * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
    */
-  e2eId: E2eId
+  e2eId: E2eId$1
   /**
    * Valores monetários referentes à cobrança.
    *
@@ -5898,6 +6048,10 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * Gestão das transações Pix, isto é, a manutenção dos recebimentos e devoluções Pix.
      */
     get manage(): PixManage<type>;
+    /**
+     * Destinado a lidar com configuração e remoção de locations para uso dos payloads.
+     */
+    get payloadLocations(): PixPayloadLocations<type>;
     useCredentials({ clientId, clientSecret, }: {
         clientId: string;
         clientSecret: string;

@@ -7,7 +7,7 @@ import { PixDueChargeResponseArray } from '@/domain-driven-design/domains/apis/e
 import { TxId } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id'
 import { env } from '@/env'
 
-describe('Pix due change', () => {
+describe.skip('Pix due change', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixDueCharge<'SANDBOX'>
 

@@ -1563,41 +1563,11 @@ var CalendarDueCharge = class {
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/pix-location.ts
 import dayjs3 from "dayjs";
-var PixLocation = class {
-  #props;
-  constructor({ id, location, tipoCob, criacao }) {
-    this.#props = {
-      id,
-      location,
-      tipoCob,
-      criacao: criacao ? /* @__PURE__ */ new Date() : void 0
-    };
-  }
-  get id() {
-    return this.#props.id;
-  }
-  /**
-   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
-   */
-  get location() {
-    return this.#props.location;
-  }
-  get tipoCob() {
-    return this.#props.tipoCob;
-  }
-  get criacao() {
-    return this.#props.criacao ? dayjs3(this.#props.criacao) : void 0;
-  }
-  toObject() {
-    return {
-      id: this.id,
-      /**
-       * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
-       */
-      location: this.location,
-      tipoCob: this.tipoCob,
-      criacao: this.criacao?.toDate()
-    };
+
+// src/domain-driven-design/core/apis/api-response.ts
+var ApiResponse = class {
+  toJson(replacer, space) {
+    return JSON.stringify(this.toObject(), replacer, space);
   }
 };
 
@@ -1660,6 +1630,53 @@ var TxId = class extends Id {
   }
   generate() {
     return this.generateNew();
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/pix-location.ts
+var PixLocation = class extends ApiResponse {
+  #props;
+  constructor({
+    id,
+    location,
+    tipoCob,
+    criacao,
+    txid
+  }) {
+    super();
+    this.#props = {
+      id,
+      location,
+      tipoCob,
+      criacao: criacao ? /* @__PURE__ */ new Date() : void 0,
+      txid: txid ? new TxId(txid) : void 0
+    };
+  }
+  get id() {
+    return this.#props.id;
+  }
+  /**
+   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+   */
+  get location() {
+    return this.#props.location;
+  }
+  get tipoCob() {
+    return this.#props.tipoCob;
+  }
+  get criacao() {
+    return this.#props.criacao ? dayjs3(this.#props.criacao) : void 0;
+  }
+  toObject() {
+    return {
+      id: this.id,
+      /**
+       * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+       */
+      location: this.location,
+      tipoCob: this.tipoCob,
+      criacao: this.criacao?.toDate()
+    };
   }
 };
 
@@ -2124,15 +2141,6 @@ var PixDueChargeResponse = class {
 
 // src/domain-driven-design/core/apis/api-array-response.ts
 import dayjs4 from "dayjs";
-
-// src/domain-driven-design/core/apis/api-response.ts
-var ApiResponse = class {
-  toJson(replacer, space) {
-    return JSON.stringify(this.toObject(), replacer, space);
-  }
-};
-
-// src/domain-driven-design/core/apis/api-array-response.ts
 var ApiArrayResponse = class extends ApiResponse {
   props;
   constructor(props, CobClass) {
@@ -2822,6 +2830,188 @@ var PixManage = class _PixManage extends ApiRequest {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payload-locations/pix-payload-locations-qr-code-response.ts
+var PixPayloadLocationsQRCodeResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      qrcode: props.qrcode,
+      imagemQrcode: props.imagemQrcode,
+      linkVisualizacao: props.linkVisualizacao
+    };
+  }
+  /**
+   * BRCode ou copia e cola
+   */
+  get qrcode() {
+    return this.#props.qrcode;
+  }
+  get imagemQrcode() {
+    return this.#props.imagemQrcode;
+  }
+  get linkVisualizacao() {
+    return this.#props.linkVisualizacao;
+  }
+  toObject() {
+    return {
+      qrcode: this.qrcode,
+      imagemQrcode: this.imagemQrcode,
+      linkVisualizacao: this.linkVisualizacao
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payload-locations/pix-payload-locations-response.ts
+var PixPayloadLocationsResponse = class extends PixLocation {
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payload-locations/pix-payload-locations-response-array.ts
+var PixPayloadLocationsResponseArray = class extends ApiArrayResponse {
+  constructor(props) {
+    const data = {
+      arrayData: props.loc,
+      parametros: props.parametros
+    };
+    super(data, PixPayloadLocationsResponse);
+  }
+  get loc() {
+    return this.arrayData;
+  }
+  toObject() {
+    return {
+      parametros: {
+        inicio: this.inicio.toDate(),
+        fim: this.fim.toDate(),
+        paginaAtual: this.paginaAtual,
+        itensPorPagina: this.itensPorPagina,
+        quantidadeDePaginas: this.quantidadeDePaginas,
+        quantidadeTotalDeItens: this.quantidadeTotalDeItens
+      },
+      loc: this.loc.map((item) => item.toObject())
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payload-locations/index.ts
+var PixPayloadLocations = class _PixPayloadLocations extends ApiRequest {
+  /**
+   *
+   * ---
+   *
+   * Criar location do payload. Necessário enviar no body da requisição o atributo tipoCob com o valor COB ou COBV.
+   *
+   * ---
+   *
+   * @param PixPayloadLocationsCreateProps
+   * @returns `PixLocation<"cob" | "cobv" | undefined> | null`
+   */
+  async create({ body }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixCreateLocation();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixPayloadLocationsResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Recuperar a location do payload
+   *
+   * ---
+   *
+   */
+  async findUnique({ id }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDetailLocation({ id });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPayloadLocationsResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar locations cadastradas.
+   *
+   * ---
+   *
+   */
+  async findMany({ searchParams }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixLocationList();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixPayloadLocationsResponseArray
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Gerar QR Code de um location.
+   *
+   * ---
+   *
+   */
+  async generateQrCode({ id }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixGenerateQRCode({ id });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPayloadLocationsQRCodeResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Desvincular uma cobrança de um location.
+   *
+   * ---
+   *
+   * Se executado com sucesso, a entidade `loc` não apresentará mais um **txid**, como acontecia antes da chamada. Além disso, a entidade `cob` ou `cobv` associada ao txid desvinculado também não apresentará mais um location. Essa operação não altera o `status` da `cob` ou `cobv` em questão.
+   *
+   * ---
+   *
+   */
+  async detachTxId({ id }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixUnlinkTxidLocation({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPayloadLocationsResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixPayloadLocations(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/pix-send-and-payment-send-response.ts
 var PixSendAndPaymentSendResponse = class extends ApiResponse {
   #props;
@@ -3109,6 +3299,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
   #sendAndPayment;
   #webhooks;
   #manage;
+  #payloadLocations;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
@@ -3117,6 +3308,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
     this.#sendAndPayment = new PixSendAndPayment(type, "PIX", options);
     this.#webhooks = new PixWebhooks(type, "PIX", options);
     this.#manage = new PixManage(type, "PIX", options);
+    this.#payloadLocations = new PixPayloadLocations(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -3147,6 +3339,12 @@ var PixRequest = class _PixRequest extends ApiRequest {
    */
   get manage() {
     return this.#manage;
+  }
+  /**
+   * Destinado a lidar com configuração e remoção de locations para uso dos payloads.
+   */
+  get payloadLocations() {
+    return this.#payloadLocations;
   }
   // eslint-disable-next-line
   // @ts-ignore

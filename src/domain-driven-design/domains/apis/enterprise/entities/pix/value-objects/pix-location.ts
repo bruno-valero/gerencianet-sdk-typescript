@@ -1,5 +1,10 @@
 import dayjs from 'dayjs'
 
+import { ApiResponse } from '@/domain-driven-design/core/apis/api-response'
+
+import { Loc } from '../pix-modules/@types-common'
+import { TxId } from './tx-id'
+
 export type TipoCob<type extends 'cob' | 'cobv' | undefined = undefined> =
   type extends undefined
     ? 'cob' | 'cobv'
@@ -9,19 +14,16 @@ export type TipoCob<type extends 'cob' | 'cobv' | undefined = undefined> =
         ? 'cobv'
         : never
 
-interface PixLocationProps<
+export interface PixLocationProps<
   type extends 'cob' | 'cobv' | undefined = undefined,
-> {
-  id: number
-  location: string
-  tipoCob: TipoCob<type>
-  criacao?: string
-}
+> extends Loc<type> {}
 
 /**
  * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
  */
-export class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> {
+export class PixLocation<
+  type extends 'cob' | 'cobv' | undefined = undefined,
+> extends ApiResponse {
   #props: {
     id: number
     /**
@@ -30,14 +32,23 @@ export class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> {
     location: string
     tipoCob: TipoCob<type>
     criacao?: Date
+    txid?: TxId
   }
 
-  constructor({ id, location, tipoCob, criacao }: PixLocationProps<type>) {
+  constructor({
+    id,
+    location,
+    tipoCob,
+    criacao,
+    txid,
+  }: PixLocationProps<type>) {
+    super()
     this.#props = {
       id,
       location,
       tipoCob,
       criacao: criacao ? new Date() : undefined,
+      txid: txid ? new TxId(txid) : undefined,
     }
   }
 

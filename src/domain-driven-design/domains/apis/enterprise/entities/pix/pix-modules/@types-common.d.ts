@@ -57,6 +57,8 @@ export type Loc<type extends 'cob' | 'cobv' | undefined = undefined> = {
    */
   location: Location
   tipoCob: TipoCob<type>
+  criacao?: string
+  txid?: string
 }
 
 /**

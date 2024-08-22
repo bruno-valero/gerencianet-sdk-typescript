@@ -6,6 +6,7 @@ import { Optional } from '@/domain-driven-design/core/types/optional'
 import { PixDueCharge } from './pix-modules/pix-due-charge'
 import { PixImediateCharge } from './pix-modules/pix-imediate-charge'
 import { PixManage } from './pix-modules/pix-manage'
+import { PixPayloadLocations } from './pix-modules/pix-payload-locations'
 import { PixSendAndPayment } from './pix-modules/pix-send-and-payment'
 import { PixWebhooks } from './pix-modules/pix-webhooks'
 
@@ -30,6 +31,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   #sendAndPayment: PixSendAndPayment<type>
   #webhooks: PixWebhooks<type>
   #manage: PixManage<type>
+  #payloadLocations: PixPayloadLocations<type>
 
   constructor({ type, options }: PixRequestProps<type>) {
     super(type, 'PIX', options)
@@ -39,6 +41,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
     this.#sendAndPayment = new PixSendAndPayment(type, 'PIX', options)
     this.#webhooks = new PixWebhooks(type, 'PIX', options)
     this.#manage = new PixManage(type, 'PIX', options)
+    this.#payloadLocations = new PixPayloadLocations(type, 'PIX', options)
   }
 
   /**
@@ -74,6 +77,13 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
    */
   get manage() {
     return this.#manage
+  }
+
+  /**
+   * Destinado a lidar com configuração e remoção de locations para uso dos payloads.
+   */
+  get payloadLocations() {
+    return this.#payloadLocations
   }
 
   // eslint-disable-next-line

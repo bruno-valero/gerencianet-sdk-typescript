@@ -129,17 +129,17 @@ export const pixEndpoints = {
         route: `/v2/loc`,
         method: `get`,
       }) as const,
-    pixDetailLocation: ({ id }: { id: string }) =>
+    pixDetailLocation: ({ id }: { id: number }) =>
       ({
         route: `/v2/loc/${id}`,
         method: `get`,
       }) as const,
-    pixGenerateQRCode: ({ id }: { id: string }) =>
+    pixGenerateQRCode: ({ id }: { id: number }) =>
       ({
         route: `/v2/loc/${id}/qrcode`,
         method: `get`,
       }) as const,
-    pixUnlinkTxidLocation: ({ id }: { id: string }) =>
+    pixUnlinkTxidLocation: ({ id }: { id: number }) =>
       ({
         route: `/v2/loc/${id}/txid`,
         method: `delete`,

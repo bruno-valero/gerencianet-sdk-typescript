@@ -1,4 +1,4 @@
-import { PixStatus } from '../@types-common'
+import { E2eId, PixStatus } from '../@types-common'
 import {
   Favorecido,
   IdEnvio,

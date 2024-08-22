@@ -135,6 +135,28 @@ declare const constantsCallbacks: {
                     readonly route: `/v2/webhook/${string}`;
                     readonly method: "delete";
                 };
+                readonly pixCreateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "put";
+                };
+                readonly pixUpdateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "patch";
+                };
+                readonly pixDetailDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "get";
+                };
+                readonly pixListDueChargeBatch: () => {
+                    readonly route: "/v2/lotecobv/";
+                    readonly method: "get";
+                };
                 readonly pixCreateLocation: () => {
                     readonly route: "/v2/loc";
                     readonly method: "post";
@@ -727,6 +749,7 @@ declare class Auth<type extends EnvironmentTypes, operation extends OperationTyp
 }
 
 type ConstructorSingleParameters<T extends abstract new (arg: unknown) => unknown> = T extends abstract new (arg: infer P) => unknown ? P : never;
+type SearchParamsType = Record<string, string | number | Date | boolean>;
 declare abstract class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
     #private;
     constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox'>);
@@ -863,6 +886,28 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                 }) => {
                     readonly route: `/v2/webhook/${string}`;
                     readonly method: "delete";
+                };
+                readonly pixCreateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "put";
+                };
+                readonly pixUpdateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "patch";
+                };
+                readonly pixDetailDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "get";
+                };
+                readonly pixListDueChargeBatch: () => {
+                    readonly route: "/v2/lotecobv/";
+                    readonly method: "get";
                 };
                 readonly pixCreateLocation: () => {
                     readonly route: "/v2/loc";
@@ -1484,6 +1529,28 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly route: `/v2/webhook/${string}`;
                     readonly method: "delete";
                 };
+                readonly pixCreateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "put";
+                };
+                readonly pixUpdateDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "patch";
+                };
+                readonly pixDetailDueChargeBatch: ({ id }: {
+                    id: number;
+                }) => {
+                    readonly route: `/v2/lotecobv/${number}`;
+                    readonly method: "get";
+                };
+                readonly pixListDueChargeBatch: () => {
+                    readonly route: "/v2/lotecobv/";
+                    readonly method: "get";
+                };
                 readonly pixCreateLocation: () => {
                     readonly route: "/v2/loc";
                     readonly method: "post";
@@ -2103,6 +2170,28 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     }) => {
                         readonly route: `/v2/webhook/${string}`;
                         readonly method: "delete";
+                    };
+                    readonly pixCreateDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixDetailDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListDueChargeBatch: () => {
+                        readonly route: "/v2/lotecobv/";
+                        readonly method: "get";
                     };
                     readonly pixCreateLocation: () => {
                         readonly route: "/v2/loc";
@@ -2724,6 +2813,28 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly route: `/v2/webhook/${string}`;
                         readonly method: "delete";
                     };
+                    readonly pixCreateDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "put";
+                    };
+                    readonly pixUpdateDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "patch";
+                    };
+                    readonly pixDetailDueChargeBatch: ({ id }: {
+                        id: number;
+                    }) => {
+                        readonly route: `/v2/lotecobv/${number}`;
+                        readonly method: "get";
+                    };
+                    readonly pixListDueChargeBatch: () => {
+                        readonly route: "/v2/lotecobv/";
+                        readonly method: "get";
+                    };
                     readonly pixCreateLocation: () => {
                         readonly route: "/v2/loc";
                         readonly method: "post";
@@ -3222,7 +3333,7 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
     } & {
         'partner-token'?: string;
     };
-    protected makeRequest<Method, Url extends string, SearchParams extends Record<string, string | number | Date | boolean>, Body>({ accessToken, method, searchParams, routeUrl, body, }: {
+    protected makeRequest<Method, Url extends string, SearchParams extends SearchParamsType, Body>({ accessToken, method, searchParams, routeUrl, body, }: {
         accessToken: string;
         method: Method;
         searchParams?: SearchParams;
@@ -3258,6 +3369,67 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
 }
 
 declare abstract class ApiResponse {
+    abstract toObject(...props: unknown[]): unknown;
+    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
+}
+
+type ArrayParameters = {
+    inicio: string;
+    fim: string;
+    paginacao: {
+        paginaAtual: number;
+        itensPorPagina: number;
+        quantidadeDePaginas: number;
+        quantidadeTotalDeItens: number;
+    };
+};
+interface ApiArrayResponseProps<ArrayData> {
+    parametros: ArrayParameters;
+    arrayData: ArrayData[];
+}
+declare abstract class ApiArrayResponse<ArrayData extends new (props: ConstructorSingleParameters<ArrayData>) => InstanceType<ArrayData>> extends ApiResponse {
+    protected props: {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginacao: {
+                paginaAtual: number;
+                itensPorPagina: number;
+                quantidadeDePaginas: number;
+                quantidadeTotalDeItens: number;
+            };
+        };
+        arrayData: InstanceType<ArrayData>[];
+    };
+    constructor(props: ApiArrayResponseProps<ConstructorSingleParameters<ArrayData>>, CobClass: ArrayData);
+    /**
+     * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
+     */
+    get inicio(): dayjs.Dayjs;
+    /**
+     * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
+     */
+    get fim(): dayjs.Dayjs;
+    /**
+     * Paginação - indica a página atual.
+     */
+    get paginaAtual(): number;
+    /**
+     * Paginação - indica a quantidade de itens por página.
+     */
+    get itensPorPagina(): number;
+    /**
+     * Paginação - indica a quantidade total de páginas.
+     */
+    get quantidadeDePaginas(): number;
+    /**
+     * Paginação - indica a quantidade total de itens.
+     */
+    get quantidadeTotalDeItens(): number;
+    /**
+     * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
+     */
+    protected get arrayData(): InstanceType<ArrayData>[];
     abstract toObject(...props: unknown[]): unknown;
     toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
 }
@@ -3299,7 +3471,7 @@ declare class PixLocation<type extends 'cob' | 'cobv' | undefined = undefined> e
  *
  * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
  */
-type TxId$1 = string
+type TxId$2 = string
 
 /**
  * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
@@ -3371,7 +3543,7 @@ type InfoAdicionais = {
  */
 type PixStatus = 'EM_PROCESSAMENTO' | 'REALIZADO' | 'NAO_REALIZADO'
 
-type Status$1 =
+type Status$2 =
   | 'ATIVA'
   | 'CONCLUIDA'
   | 'REMOVIDA_PELO_USUARIO_RECEBEDOR'
@@ -3406,7 +3578,7 @@ type CnpjFilterSearch = string
  *
  * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
  */
-type StatusFilterSearch = Status$1
+type StatusFilterSearch = Status$2
 /**
  * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
  *
@@ -3422,67 +3594,6 @@ type PaginaAtualFilterSearch = number
  */
 type ItensPorPaginaFilterSearch = number
 
-type ArrayParameters = {
-    inicio: string;
-    fim: string;
-    paginacao: {
-        paginaAtual: number;
-        itensPorPagina: number;
-        quantidadeDePaginas: number;
-        quantidadeTotalDeItens: number;
-    };
-};
-interface ApiArrayResponseProps<ArrayData> {
-    parametros: ArrayParameters;
-    arrayData: ArrayData[];
-}
-declare abstract class ApiArrayResponse<ArrayData extends new (props: ConstructorSingleParameters<ArrayData>) => InstanceType<ArrayData>> extends ApiResponse {
-    protected props: {
-        parametros: {
-            inicio: Date;
-            fim: Date;
-            paginacao: {
-                paginaAtual: number;
-                itensPorPagina: number;
-                quantidadeDePaginas: number;
-                quantidadeTotalDeItens: number;
-            };
-        };
-        arrayData: InstanceType<ArrayData>[];
-    };
-    constructor(props: ApiArrayResponseProps<ConstructorSingleParameters<ArrayData>>, CobClass: ArrayData);
-    /**
-     * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-     */
-    get inicio(): dayjs.Dayjs;
-    /**
-     * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-     */
-    get fim(): dayjs.Dayjs;
-    /**
-     * Paginação - indica a página atual.
-     */
-    get paginaAtual(): number;
-    /**
-     * Paginação - indica a quantidade de itens por página.
-     */
-    get itensPorPagina(): number;
-    /**
-     * Paginação - indica a quantidade total de páginas.
-     */
-    get quantidadeDePaginas(): number;
-    /**
-     * Paginação - indica a quantidade total de itens.
-     */
-    get quantidadeTotalDeItens(): number;
-    /**
-     * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
-     */
-    protected get arrayData(): InstanceType<ArrayData>[];
-    abstract toObject(...props: unknown[]): unknown;
-    toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
-}
-
 // type Parameters = {
 //   inicio: string
 //   fim: string
@@ -3494,7 +3605,7 @@ declare abstract class ApiArrayResponse<ArrayData extends new (props: Constructo
 //   }
 // }
 
-type ArrayKey = 'cobs' | 'webhooks' | 'pix' | 'loc'
+type ArrayKey = 'cobs' | 'webhooks' | 'pix' | 'loc' | 'lotes'
 
 type PixChargeResponseTypeArray<
   ArrayData,
@@ -3519,55 +3630,84 @@ type PixChargeResponseTypeArray<
             parametros: ArrayParameters
             loc: ArrayData[]
           }
-        : never
+        : ArrKey extends 'lotes'
+          ? {
+              parametros: ArrayParameters
+              lotes: ArrayData[]
+            }
+          : never
+
+interface PixFilterSearchRawParamsProps extends SearchParamsType {
+  /**
+   * Filtra os registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
+   *
+   * - `string`
+   */
+  inicio: InicioFilterSearch
+  /**
+   * Filtra os registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
+   *
+   * - `string`
+   */
+  fim: FimFilterSearch
+  /**
+   * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
+   *
+   * - string `/^\d{11}$/`
+   */
+  cpf?: CpfFilterSearch
+  /**
+   * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
+   *
+   * - string `/^\d{14}$/`
+   */
+  cnpj?: CnpjFilterSearch
+  /**
+   * Filtro pelo status da cobrança.
+   *
+   * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
+   */
+  status?: StatusFilterSearch
+  /**
+   * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
+   *
+   * - integer {int32} (Página atual) `>= 0`
+   * - Default: `0`
+   */
+  'paginacao.paginaAtual'?: PaginaAtualFilterSearch
+  /**
+   * Quantidade máxima de registros retornados em cada página. Apenas a última página pode conter uma quantidade menor de registros.
+   *
+   * - integer {int32} (Página atual) `[1 .. 1000]`
+   * - Default: `100`
+   */
+  'paginacao.itensPorPagina'?: ItensPorPaginaFilterSearch
+}
+interface PixFilterSearchParamsProps
+  extends PixFilterSearchRawParamsProps,
+    SearchParamsType {
+  /**
+   * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
+   *
+   * - string `/^\d{11}$/`
+   */
+  cpf?: CpfFilterSearch
+  /**
+   * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
+   *
+   * - string `/^\d{14}$/`
+   */
+  cnpj?: CnpjFilterSearch
+  /**
+   * Filtro pelo status da cobrança.
+   *
+   * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
+   */
+  status?: StatusFilterSearch
+}
 
 interface PixFilterSearchProps {
-  searchParams: {
-    /**
-     * Filtra os registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-     *
-     * - `string`
-     */
-    inicio: InicioFilterSearch
-    /**
-     * Filtra os registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-     *
-     * - `string`
-     */
-    fim: FimFilterSearch
-    /**
-     * Filtro pelo CPF do pagador. Não pode ser utilizado ao mesmo tempo que o CNPJ.
-     *
-     * - string `/^\d{11}$/`
-     */
-    cpf?: CpfFilterSearch
-    /**
-     * Filtro pelo CNPJ do pagador. Não pode ser utilizado ao mesmo tempo que o CPF.
-     *
-     * - string `/^\d{14}$/`
-     */
-    cnpj?: CnpjFilterSearch
-    /**
-     * Filtro pelo status da cobrança.
-     *
-     * - Enum: `"ATIVA"`,`"CONCLUIDA"`, `"REMOVIDA_PELO_USUARIO_RECEBEDOR"`, `"REMOVIDA_PELO_PSP"`
-     */
-    status?: StatusFilterSearch
-    /**
-     * Página a ser retornada pela consulta. Se não for informada, o PSP assumirá que será 0.
-     *
-     * - integer {int32} (Página atual) `>= 0`
-     * - Default: `0`
-     */
-    'paginacao.paginaAtual'?: PaginaAtualFilterSearch
-    /**
-     * Quantidade máxima de registros retornados em cada página. Apenas a última página pode conter uma quantidade menor de registros.
-     *
-     * - integer {int32} (Página atual) `[1 .. 1000]`
-     * - Default: `100`
-     */
-    'paginacao.itensPorPagina'?: ItensPorPaginaFilterSearch
-  }
+  searchParams: PixFilterSearchParamsProps
 }
 
 declare const statesShortSchema: z.ZodEnum<["AM", "PA", "RR", "AP", "AC", "RO", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO", "DF"]>;
@@ -3764,7 +3904,7 @@ interface PixDueChargeCreateProps {
      *
      * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
      */
-    txid: TxId$1;
+    txid: TxId$2;
     body: {
         /**
          * Os campos aninhados sob o identificador calendário organizam informações a respeito de controle de tempo da cobrança.
@@ -3813,7 +3953,7 @@ interface PixDueChargeUpdateProps {
      *
      * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
      */
-    txid: TxId$1;
+    txid: TxId$2;
     body: {
         /**
          * Os campos aninhados sob o identificador calendário organizam informações a respeito de controle de tempo da cobrança.
@@ -3860,7 +4000,7 @@ interface PixDueChargeFindUniqueProps {
      *
      * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
      */
-    txid: TxId$1;
+    txid: TxId$2;
     searchParams?: {
         /**
          * Permite recuperar revisões anteriores de uma cobrança. Na ausência desse parâmetro, sempre será retornada a cobrança conforme consta em sua última revisão.
@@ -3890,7 +4030,7 @@ interface PixDueChargeResponseType {
      *
      * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
      */
-    txid: TxId$1;
+    txid: TxId$2;
     /**
      * Permite recuperar revisões anteriores de uma cobrança. Na ausência desse parâmetro, sempre será retornada a cobrança conforme consta em sua última revisão.
      *
@@ -3902,7 +4042,7 @@ interface PixDueChargeResponseType {
      * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
      */
     location: Location$1;
-    status: Status$1;
+    status: Status$2;
     /**
      * Os campos aninhados sob o objeto devedor são opcionais e identificam o devedor, ou seja, a pessoa ou a instituição a quem a cobrança está endereçada. Não identifica, necessariamente, quem irá efetivamente realizar o pagamento. Um CPF pode ser o devedor de uma cobrança, mas pode acontecer de outro CPF realizar, efetivamente, o pagamento do documento. Não é permitido que o campo pagador.cpf e campo pagador.cnpj estejam preenchidos ao mesmo tempo. Se o campo pagador.cnpj está preenchido, então o campo pagador.cpf não pode estar preenchido, e vice-versa. Se o campo pagador.nome está preenchido, então deve existir ou um pagador.cpf ou um campo pagador.cnpj preenchido.
      *
@@ -3936,6 +4076,391 @@ interface PixDueChargeResponseType {
      */
     solicitacaoPagador: SolicitacaoPagador;
     pixCopiaECola: string;
+}
+
+/**
+ * O campo id determina o Id do lote de cobranças com vencimento.
+ *
+ * - `integer (int64)`
+ */
+type BatchCollectionId = number
+
+/**
+ * Descrição do lote.
+ */
+type BatchCollectionDescription = string
+
+/**
+ * O objeto cobsv organiza as informações dos dados enviados para criação ou alteração da cobrança com vencimento via API Pix.
+ */
+type Cobvs = (PixDueChargeCreateProps['body'] & {
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  txid: TxId$2
+})[]
+
+type Status$1 = 'EM_PROCESSAMENTO' | 'CRIADA' | 'NEGADA'
+
+interface PixBatchCollectionsCreateOrUpdateDueChargeBatchProps {
+  /**
+   * O campo id determina o Id do lote de cobranças com vencimento.
+   *
+   * - `integer (int64)`
+   */
+  id: BatchCollectionId
+  body: {
+    /**
+     * Descrição do lote.
+     */
+    descricao: BatchCollectionDescription
+    /**
+     * O objeto cobsv organiza as informações dos dados enviados para criação ou alteração da cobrança com vencimento via API Pix.
+     */
+    cobsv: Cobvs
+  }
+}
+
+interface PixBatchCollectionsUpdateDueChargeBatchProps {
+  /**
+   * O campo id determina o Id do lote de cobranças com vencimento.
+   *
+   * - `integer (int64)`
+   */
+  id: BatchCollectionId
+  body: {
+    /**
+     * Descrição do lote.
+     */
+    descricao?: BatchCollectionDescription
+    /**
+     * O objeto cobsv organiza as informações dos dados enviados para criação ou alteração da cobrança com vencimento via API Pix.
+     */
+    cobsv: Cobvs
+  }
+}
+
+interface PixBatchCollectionsFindUniqueDueChargeBatchProps {
+  /**
+   * O campo id determina o Id do lote de cobranças com vencimento.
+   *
+   * - `integer (int64)`
+   */
+  id: BatchCollectionId
+}
+
+interface PixBatchCollectionsFindManyDueChargeBatchProps {
+  searchParams: Omit<PixFilterSearchParamsProps, 'status'> & {
+    status?: Status$1
+  }
+}
+
+interface PixBatchCollectionsBatchResponseType {
+  descricao: 'teste'
+  /**
+   * Data de criação do Lote de Cobrança
+   *
+   * ISO String no formato `{year}-{month}-{day}T{hour}:{minute}:{seconds}.{milliseconds}Z`
+   */
+  criacao: string
+  cobsv: {
+    /**
+     * Data de criação da cobrança com vencimento
+     *
+     * ISO String no formato `{year}-{month}-{day}T{hour}:{minute}:{seconds}.{milliseconds}Z`
+     */
+    criacao?: string
+
+    /**
+     * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+     *
+     * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+     *
+     * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+     * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+     *
+     * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+     */
+    txid: TxId
+    status: Status$1
+    /**
+     * Esta propriedade se apresenta apenas quando há uma rejeição durante a criação da cobrança
+     */
+    problema?: {
+      type: string
+      /** Título que representa a rejeição */
+      title: string
+      status: number
+      /** Descrição sobre a rejeição */
+      detail: string
+      /**
+       * Violações cometidas para que a rejeição ocorresse
+       */
+      violacoes: [
+        {
+          /**
+           * Descrição da violação
+           */
+          razao: string
+          /**
+           * Campo que originou a violação
+           */
+          propriedade: string
+        },
+      ]
+    }
+  }[]
+}
+
+declare class PixBatchCollectionsCreateOrUpdateDueChargeResponse extends ApiResponse {
+    #private;
+    constructor(props: '');
+    get success(): boolean;
+    toObject(): boolean;
+}
+
+interface IdProp {
+    size: number;
+    value?: string;
+}
+declare class Id {
+    #private;
+    constructor({ size, value }: IdProp);
+    get value(): string;
+    protected generateNew(size?: number): string;
+}
+
+/**
+ * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+ *
+ * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+ * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+ */
+declare class TxId$1 extends Id {
+    constructor(id?: string);
+    generate(): string;
+}
+
+declare class PixBatchCollectionsCobv extends ApiResponse {
+    #private;
+    constructor(props: PixBatchCollectionsBatchResponseType['cobsv'][0]);
+    /**
+     * Data de criação da cobrança com vencimento
+     *
+     * ISO String no formato `{year}-{month}-{day}T{hour}:{minute}:{seconds}.{milliseconds}Z`
+     */
+    get criacao(): dayjs.Dayjs;
+    /**
+     * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+     *
+     * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+     *
+     * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+     * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+     *
+     * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+     */
+    get txid(): TxId$1;
+    /**
+     * Esta propriedade se apresenta apenas quando há uma rejeição durante a criação da cobrança
+     */
+    get problema(): {
+        type: string;
+        /** Título que representa a rejeição */
+        title: string;
+        status: number;
+        /** Descrição sobre a rejeição */
+        detail: string;
+        /**
+         * Violações cometidas para que a rejeição ocorresse
+         */
+        violacoes: {
+            razao: string;
+            propriedade: string;
+        }[];
+    } | undefined;
+    get status(): Status$1;
+    toObject(): {
+        criacao: Date;
+        txid: string;
+        problema: {
+            type: string;
+            /** Título que representa a rejeição */
+            title: string;
+            status: number;
+            /** Descrição sobre a rejeição */
+            detail: string;
+            /**
+             * Violações cometidas para que a rejeição ocorresse
+             */
+            violacoes: {
+                razao: string;
+                propriedade: string;
+            }[];
+        } | undefined;
+        status: Status$1;
+    };
+}
+declare class PixBatchCollectionsResponse extends ApiResponse {
+    #private;
+    constructor(props: PixBatchCollectionsBatchResponseType);
+    get descricao(): string;
+    /**
+     * Data de criação do Lote de Cobrança
+     *
+     * Objeto `dayjs`
+     */
+    get criacao(): dayjs.Dayjs;
+    get cobsv(): PixBatchCollectionsCobv[];
+    toObject(): {
+        descricao: string;
+        criacao: Date;
+        cobsv: {
+            criacao: Date;
+            txid: string;
+            problema: {
+                type: string;
+                /** Título que representa a rejeição */
+                title: string;
+                status: number;
+                /** Descrição sobre a rejeição */
+                detail: string;
+                /**
+                 * Violações cometidas para que a rejeição ocorresse
+                 */
+                violacoes: {
+                    razao: string;
+                    propriedade: string;
+                }[];
+            } | undefined;
+            status: Status$1;
+        }[];
+    };
+}
+
+declare class PixBatchCollectionsResponseArray extends ApiArrayResponse<typeof PixBatchCollectionsResponse> {
+    constructor(props: PixChargeResponseTypeArray<PixBatchCollectionsBatchResponseType, 'lotes'>);
+    get lotes(): PixBatchCollectionsResponse[];
+    toObject(): {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginaAtual: number;
+            itensPorPagina: number;
+            quantidadeDePaginas: number;
+            quantidadeTotalDeItens: number;
+        };
+        lotes: {
+            descricao: string;
+            criacao: Date;
+            cobsv: {
+                criacao: Date;
+                txid: string;
+                problema: {
+                    type: string;
+                    title: string;
+                    status: number;
+                    detail: string;
+                    violacoes: {
+                        razao: string;
+                        propriedade: string;
+                    }[];
+                } | undefined;
+                status: Status$1;
+            }[];
+        }[];
+    };
+}
+
+/**
+ * Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+ */
+declare class PixBatchCollections<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     *
+     * ---
+     *
+     * Criar ou alterar um lote de cobranças com vencimento.
+     *
+     * ---
+     *
+     * ### Informação
+     *
+     * Uma solicitação de criação de cobrança com status "EM_PROCESSAMENTO" ou "NEGADA" está associada a uma cobrança não existe de fato, portanto não será listada em `GET /cobv` ou `GET /cobv/:txid`.
+     *
+     * Uma cobrança, uma vez criada via `PUT /cobv/:txid`, não pode ser associada a um lote posteriormente.
+     *
+     * Uma cobrança, uma vez criada via PUT `/lotecobv/:id`, não pode ser associada a um novo lote posteriormente.
+     *
+     * A criação do lote deve conter pelo menos **1** cobrança e no máximo **1000**.
+     *
+     * ---
+     *
+     * ### Dica
+     *
+     * Após a geração da cobrança em lote, você pode utilizar o endpoint de [Consultar lista de cobranças com vencimento](https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#consultar-lista-de-cobran%C3%A7as-com-vencimento), informado o parâmetro `loteCobvId` para retornar as informações do lote.
+     *
+     * ---
+     *
+     * @param PixBatchCollectionsCreateOrUpdateDueChargeBatchProps
+     * @returns `PixBatchCollectionsCreateOrUpdateDueChargeResponse | null`
+     */
+    createOrUpdateDueChargeBatch({ body, id, }: PixBatchCollectionsCreateOrUpdateDueChargeBatchProps): Promise<PixBatchCollectionsCreateOrUpdateDueChargeResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Revisar cobranças específicas dentro de um lote de cobranças com vencimento.
+     *
+     * ---
+     *
+     * ### Informação
+     *
+     * A diferença deste endpoint para o endpoint PUT (**`createOrUpdateDueChargeBatch`**) correlato é que este endpoint admite um array cobsv com menos solicitações de criação ou alteração de cobranças do que o array atribuído na requisição originária do lote.
+     *
+     * Não se pode, entretanto, utilizar esse endpoint para agregar ou remover solicitações de alteração ou criação de cobranças conforme constam na requisição originária do lote.
+     *
+     * ---
+     *
+     * @param PixBatchCollectionsUpdateDueChargeBatchProps
+     * @returns `PixBatchCollectionsCreateOrUpdateDueChargeResponse | null`
+     */
+    updateDueChargeBatch({ body, id, }: PixBatchCollectionsUpdateDueChargeBatchProps): Promise<PixBatchCollectionsCreateOrUpdateDueChargeResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar um lote específico de cobranças com vencimento.
+     *
+     * ---
+     *
+     * @param PixBatchCollectionsFindUniqueDueChargeBatchProps
+     * @returns `PixBatchCollectionsResponse | null`
+     */
+    findUniqueDueChargeBatch({ id, }: PixBatchCollectionsFindUniqueDueChargeBatchProps): Promise<PixBatchCollectionsResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar cobranças com vencimento através de parâmetros como início, fim, cpf, cnpj e status.
+     *
+     * ---
+     *
+     * @param PixBatchCollectionsFindManyDueChargeBatchProps
+     * @returns `PixBatchCollectionsResponseArray | null`
+     */
+    findManyDueChargeBatch({ searchParams, }: PixBatchCollectionsFindManyDueChargeBatchProps): Promise<PixBatchCollectionsResponseArray | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixBatchCollections<type>;
 }
 
 declare class Cep {
@@ -4125,28 +4650,6 @@ declare class CalendarDueCharge {
         dataDeVencimento: Date;
         validadeAposVencimento: number;
     };
-}
-
-interface IdProp {
-    size: number;
-    value?: string;
-}
-declare class Id {
-    #private;
-    constructor({ size, value }: IdProp);
-    get value(): string;
-    protected generateNew(size?: number): string;
-}
-
-/**
- * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
- *
- * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
- * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
- */
-declare class TxId extends Id {
-    constructor(id?: string);
-    generate(): string;
 }
 
 /**
@@ -4460,14 +4963,14 @@ declare class PixDueChargeResponse {
     #private;
     constructor(props: PixDueChargeResponseType);
     get calendario(): CalendarDueCharge;
-    get txid(): TxId;
+    get txid(): TxId$1;
     get revisao(): number;
     get loc(): PixLocation<"cobv">;
     /**
      * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
      */
     get location(): string;
-    get status(): Status$1;
+    get status(): Status$2;
     get devedor(): UserAccount;
     get valor(): PixDueChargeValue;
     get chave(): string;
@@ -4499,7 +5002,7 @@ declare class PixDueChargeResponse {
          * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
          */
         location: string;
-        status: Status$1;
+        status: Status$2;
         devedor: {
             clienteFinal: {
                 celular: string | undefined;
@@ -4616,7 +5119,7 @@ declare class PixDueChargeResponseArray extends ApiArrayResponse<typeof PixDueCh
                 criacao: Date | undefined;
             };
             location: string;
-            status: Status$1;
+            status: Status$2;
             devedor: {
                 clienteFinal: {
                     celular: string | undefined;
@@ -4822,7 +5325,7 @@ interface PixImediateChargeCreateProps {
    *
    * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
    */
-  txid?: TxId$1
+  txid?: TxId$2
   searchParams?: Record<string, string>
   body: {
     /**
@@ -4873,7 +5376,7 @@ interface PixImediateChargeUpdateProps {
    *
    * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
    */
-  txid: TxId$1
+  txid: TxId$2
   body: {
     /**
      * Identificador da localização do payload.
@@ -4913,7 +5416,7 @@ interface PixImediateChargeFindUniqueProps {
    *
    * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
    */
-  txid: TxId$1
+  txid: TxId$2
   searchParams?: {
     /**
      * Permite recuperar revisões anteriores de uma cobrança. Na ausência desse parâmetro, sempre será retornada a cobrança conforme consta em sua última revisão.
@@ -4944,7 +5447,7 @@ interface PixImediateChargeResponseType {
    *
    * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
    */
-  txid: TxId$1
+  txid: TxId$2
   /**
    * Permite recuperar revisões anteriores de uma cobrança. Na ausência desse parâmetro, sempre será retornada a cobrança conforme consta em sua última revisão.
    *
@@ -4996,14 +5499,14 @@ declare class PixImediateChargeResponse extends ApiResponse {
          * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
          * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
          */
-        txid: TxId;
+        txid: TxId$1;
         revisao: number;
         loc: PixLocation<'cob'>;
         /**
          * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
          */
         location: string;
-        status: Status$1;
+        status: Status$2;
         devedor: UserAccount;
         valor: MonetaryValue;
         chave: string;
@@ -5012,14 +5515,14 @@ declare class PixImediateChargeResponse extends ApiResponse {
     };
     constructor(props: PixImediateChargeResponseCreationProps);
     get calendario(): CalendarImediateCharge;
-    get txid(): TxId;
+    get txid(): TxId$1;
     get revisao(): number;
     get loc(): PixLocation<"cob">;
     /**
      * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
      */
     get location(): string;
-    get status(): Status$1;
+    get status(): Status$2;
     get devedor(): UserAccount;
     get valor(): MonetaryValue;
     get chave(): string;
@@ -5050,7 +5553,7 @@ declare class PixImediateChargeResponse extends ApiResponse {
          * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
          */
         location: string;
-        status: Status$1;
+        status: Status$2;
         devedor: {
             clienteFinal: {
                 celular: string | undefined;
@@ -5112,7 +5615,7 @@ declare class PixImediateChargeResponseArray extends ApiArrayResponse<typeof Pix
                 criacao: Date | undefined;
             };
             location: string;
-            status: Status$1;
+            status: Status$2;
             devedor: {
                 clienteFinal: {
                     celular: string | undefined;
@@ -5197,7 +5700,7 @@ interface PixManageConsultProps {
      */
     e2eId: E2eId$1;
 }
-type PixWebhooksConsultManyPropsSearchParams = Omit<PixFilterSearchProps['searchParams'], 'status'> & {
+type PixWebhooksConsultManyPropsSearchParams = Omit<PixFilterSearchParamsProps, 'status'> & {
     /**
      * Filtra os Pix recebidos que têm ou não txid associadas
      */
@@ -5207,7 +5710,7 @@ type PixWebhooksConsultManyPropsSearchParams = Omit<PixFilterSearchProps['search
      */
     devolucaoPresente?: boolean;
 };
-interface PixWebhooksConsultManyProps extends PixFilterSearchProps {
+interface PixWebhooksConsultManyProps {
     searchParams: PixWebhooksConsultManyPropsSearchParams;
 }
 interface PixWebhooksReturnProps {
@@ -5275,7 +5778,7 @@ interface PixManageResponseType {
      *
      * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
      */
-    txid: TxId$1;
+    txid: TxId$2;
     /**
      * Valor da transação
      *
@@ -5353,7 +5856,7 @@ declare class PixManageResponse extends ApiResponse {
     #private;
     constructor(props: PixManageResponseType);
     get endToEndId(): E2eId;
-    get txid(): TxId;
+    get txid(): TxId$1;
     get valor(): MonetaryValue;
     get horario(): dayjs.Dayjs;
     get infoPagador(): string;
@@ -6052,6 +6555,10 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * Destinado a lidar com configuração e remoção de locations para uso dos payloads.
      */
     get payloadLocations(): PixPayloadLocations<type>;
+    /**
+     * Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+     */
+    get batchCollections(): PixBatchCollections<type>;
     useCredentials({ clientId, clientSecret, }: {
         clientId: string;
         clientSecret: string;

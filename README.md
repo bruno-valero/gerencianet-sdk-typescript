@@ -363,3 +363,41 @@ efi.pix.payloadLocations.detachTxId({
 })
 ```
 
+#### Cobranças em Lote - **batchCollections**
+
+Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+
+---
+
+- **Testes de Integração Realizados**
+
+**Atenção** - Ainda não foram realizados corretamente para o método `updateDueChargeBatch`
+
+---
+
+Para entender mais sobre as **Cobranças em Lote**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/cobrancas-lote)
+
+Para utilizar as **Cobranças em Lote** através do SDK acesse a propriedade `batchCollections` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.batchCollections.createOrUpdateDueChargeBatch({
+  // passe os parâmetros necessários
+})
+
+efi.pix.batchCollections.updateDueChargeBatch({
+  // passe os parâmetros necessários
+})
+
+efi.pix.batchCollections.findUniqueDueChargeBatch({
+  // passe os parâmetros necessários
+})
+
+efi.pix.batchCollections.findManyDueChargeBatch({
+  // passe os parâmetros necessários
+})
+```
+

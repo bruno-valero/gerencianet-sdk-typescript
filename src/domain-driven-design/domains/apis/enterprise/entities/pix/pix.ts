@@ -3,6 +3,7 @@ import { EfiConfig } from '@/domain-driven-design/core/apis/config'
 import { EnvironmentTypes } from '@/domain-driven-design/core/apis/constants-callbacks'
 import { Optional } from '@/domain-driven-design/core/types/optional'
 
+import { PixBatchCollections } from './pix-modules/pix-batch-collections'
 import { PixDueCharge } from './pix-modules/pix-due-charge'
 import { PixImediateCharge } from './pix-modules/pix-imediate-charge'
 import { PixManage } from './pix-modules/pix-manage'
@@ -32,6 +33,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   #webhooks: PixWebhooks<type>
   #manage: PixManage<type>
   #payloadLocations: PixPayloadLocations<type>
+  #batchCollections: PixBatchCollections<type>
 
   constructor({ type, options }: PixRequestProps<type>) {
     super(type, 'PIX', options)
@@ -42,6 +44,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
     this.#webhooks = new PixWebhooks(type, 'PIX', options)
     this.#manage = new PixManage(type, 'PIX', options)
     this.#payloadLocations = new PixPayloadLocations(type, 'PIX', options)
+    this.#batchCollections = new PixBatchCollections(type, 'PIX', options)
   }
 
   /**
@@ -84,6 +87,13 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
    */
   get payloadLocations() {
     return this.#payloadLocations
+  }
+
+  /**
+   * Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   */
+  get batchCollections() {
+    return this.#batchCollections
   }
 
   // eslint-disable-next-line

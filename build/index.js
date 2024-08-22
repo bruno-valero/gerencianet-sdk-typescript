@@ -813,6 +813,22 @@ var pixEndpoints = {
       route: `/v2/webhook/${chave}`,
       method: `delete`
     }),
+    pixCreateDueChargeBatch: ({ id }) => ({
+      route: `/v2/lotecobv/${id}`,
+      method: `put`
+    }),
+    pixUpdateDueChargeBatch: ({ id }) => ({
+      route: `/v2/lotecobv/${id}`,
+      method: `patch`
+    }),
+    pixDetailDueChargeBatch: ({ id }) => ({
+      route: `/v2/lotecobv/${id}`,
+      method: `get`
+    }),
+    pixListDueChargeBatch: () => ({
+      route: `/v2/lotecobv/`,
+      method: `get`
+    }),
     pixCreateLocation: () => ({
       route: `/v2/loc`,
       method: `post`
@@ -1156,8 +1172,428 @@ var ApiRequest = class {
   }
 };
 
-// src/domain-driven-design/domains/apis/enterprise/entities/user-account.ts
+// src/domain-driven-design/core/apis/api-response.ts
+var ApiResponse = class {
+  toJson(replacer, space) {
+    return JSON.stringify(this.toObject(), replacer, space);
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-batch-collections/pix-batch-collections-create-or-update-due-charge-response.ts
+var PixBatchCollectionsCreateOrUpdateDueChargeResponse = class extends ApiResponse {
+  #success;
+  constructor(props) {
+    super();
+    this.#success = props === "";
+  }
+  get success() {
+    return this.#success;
+  }
+  toObject() {
+    return this.success;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-batch-collections/pix-batch-collections-response.ts
 var import_dayjs = __toESM(require("dayjs"));
+
+// src/domain-driven-design/core/entities/unique-entity-id.ts
+var import_node_crypto = require("crypto");
+var import_zod = __toESM(require("zod"));
+var uniqueEntityIdInstanceSchema = import_zod.default.custom(
+  (data) => data instanceof UniqueEntityId,
+  "must be an UniqueEntityId"
+);
+var UniqueEntityId = class {
+  _value;
+  constructor(id) {
+    this._value = id ?? (0, import_node_crypto.randomUUID)();
+  }
+  get value() {
+    return this._value;
+  }
+  equals(id) {
+    return id.value === this.value;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/id.ts
+var Id = class {
+  #value;
+  #size;
+  constructor({ size, value }) {
+    this.#size = size;
+    if (value) {
+      this.#value = value;
+    } else {
+      this.#value = this.generateNew(size);
+    }
+  }
+  get value() {
+    return this.#value;
+  }
+  generateNew(size) {
+    size = size || this.#size;
+    function getOnlyAlphaNumeric(str) {
+      return str.replaceAll(/[^0-9a-z]/gi, "");
+    }
+    let id = getOnlyAlphaNumeric(new UniqueEntityId().value);
+    while (id.length < size) {
+      id += getOnlyAlphaNumeric(new UniqueEntityId().value);
+    }
+    const data = id.slice(0, size);
+    return data;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id.ts
+var TxId = class extends Id {
+  constructor(id) {
+    const min = 26;
+    const max = 35;
+    const mean = Math.ceil((min + max) / 2);
+    super({ size: mean, value: id });
+  }
+  generate() {
+    return this.generateNew();
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-batch-collections/pix-batch-collections-response.ts
+var PixBatchCollectionsCobv = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      criacao: props.criacao ? new Date(props.criacao) : void 0,
+      txid: new TxId(props.txid),
+      problema: props.problema ? {
+        type: props.problema.type,
+        title: props.problema.title,
+        status: props.problema.status,
+        detail: props.problema.detail,
+        violacoes: props.problema.violacoes.map((violation) => {
+          return {
+            razao: violation.razao,
+            propriedade: violation.propriedade
+          };
+        })
+      } : void 0,
+      status: props.status
+    };
+  }
+  /**
+   * Data de criação da cobrança com vencimento
+   *
+   * ISO String no formato `{year}-{month}-{day}T{hour}:{minute}:{seconds}.{milliseconds}Z`
+   */
+  get criacao() {
+    return (0, import_dayjs.default)(this.#props.criacao);
+  }
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  get txid() {
+    return this.#props.txid;
+  }
+  /**
+   * Esta propriedade se apresenta apenas quando há uma rejeição durante a criação da cobrança
+   */
+  get problema() {
+    return this.#props.problema;
+  }
+  get status() {
+    return this.#props.status;
+  }
+  toObject() {
+    return {
+      criacao: this.criacao.toDate(),
+      txid: this.txid.value,
+      problema: this.problema,
+      status: this.status
+    };
+  }
+};
+var PixBatchCollectionsResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      descricao: props.descricao,
+      criacao: new Date(props.criacao),
+      cobsv: props.cobsv.map((item) => new PixBatchCollectionsCobv(item))
+    };
+  }
+  get descricao() {
+    return this.#props.descricao;
+  }
+  /**
+   * Data de criação do Lote de Cobrança
+   *
+   * Objeto `dayjs`
+   */
+  get criacao() {
+    return (0, import_dayjs.default)(this.#props.criacao);
+  }
+  get cobsv() {
+    return this.#props.cobsv;
+  }
+  toObject() {
+    return {
+      descricao: this.descricao,
+      criacao: this.criacao.toDate(),
+      cobsv: this.cobsv.map((item) => item.toObject())
+    };
+  }
+};
+
+// src/domain-driven-design/core/apis/api-array-response.ts
+var import_dayjs2 = __toESM(require("dayjs"));
+var ApiArrayResponse = class extends ApiResponse {
+  props;
+  constructor(props, CobClass) {
+    super();
+    this.props = {
+      arrayData: props.arrayData.map((item) => new CobClass(item)),
+      parametros: {
+        inicio: new Date(props.parametros.inicio),
+        fim: new Date(props.parametros.fim),
+        paginacao: {
+          paginaAtual: props.parametros.paginacao.paginaAtual,
+          itensPorPagina: props.parametros.paginacao.itensPorPagina,
+          quantidadeDePaginas: props.parametros.paginacao.quantidadeDePaginas,
+          quantidadeTotalDeItens: props.parametros.paginacao.quantidadeTotalDeItens
+        }
+      }
+    };
+  }
+  /**
+   * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
+   */
+  get inicio() {
+    return (0, import_dayjs2.default)(this.props.parametros.inicio);
+  }
+  /**
+   * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
+   */
+  get fim() {
+    return (0, import_dayjs2.default)(this.props.parametros.fim);
+  }
+  /**
+   * Paginação - indica a página atual.
+   */
+  get paginaAtual() {
+    return this.props.parametros.paginacao.paginaAtual;
+  }
+  /**
+   * Paginação - indica a quantidade de itens por página.
+   */
+  get itensPorPagina() {
+    return this.props.parametros.paginacao.itensPorPagina;
+  }
+  /**
+   * Paginação - indica a quantidade total de páginas.
+   */
+  get quantidadeDePaginas() {
+    return this.props.parametros.paginacao.quantidadeDePaginas;
+  }
+  /**
+   * Paginação - indica a quantidade total de itens.
+   */
+  get quantidadeTotalDeItens() {
+    return this.props.parametros.paginacao.quantidadeTotalDeItens;
+  }
+  /**
+   * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
+   */
+  get arrayData() {
+    return this.props.arrayData;
+  }
+  toJson(replacer, space) {
+    return JSON.stringify(this.toObject(), replacer, space);
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-batch-collections/pix-batch-collections-response-array.ts
+var PixBatchCollectionsResponseArray = class extends ApiArrayResponse {
+  constructor(props) {
+    const data = {
+      arrayData: props.lotes,
+      parametros: props.parametros
+    };
+    super(data, PixBatchCollectionsResponse);
+  }
+  get lotes() {
+    return this.arrayData;
+  }
+  toObject() {
+    return {
+      parametros: {
+        inicio: this.inicio.toDate(),
+        fim: this.fim.toDate(),
+        paginaAtual: this.paginaAtual,
+        itensPorPagina: this.itensPorPagina,
+        quantidadeDePaginas: this.quantidadeDePaginas,
+        quantidadeTotalDeItens: this.quantidadeTotalDeItens
+      },
+      lotes: this.lotes.map((item) => item.toObject())
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-batch-collections/index.ts
+var PixBatchCollections = class _PixBatchCollections extends ApiRequest {
+  /**
+   *
+   * ---
+   *
+   * Criar ou alterar um lote de cobranças com vencimento.
+   *
+   * ---
+   *
+   * ### Informação
+   *
+   * Uma solicitação de criação de cobrança com status "EM_PROCESSAMENTO" ou "NEGADA" está associada a uma cobrança não existe de fato, portanto não será listada em `GET /cobv` ou `GET /cobv/:txid`.
+   *
+   * Uma cobrança, uma vez criada via `PUT /cobv/:txid`, não pode ser associada a um lote posteriormente.
+   *
+   * Uma cobrança, uma vez criada via PUT `/lotecobv/:id`, não pode ser associada a um novo lote posteriormente.
+   *
+   * A criação do lote deve conter pelo menos **1** cobrança e no máximo **1000**.
+   *
+   * ---
+   *
+   * ### Dica
+   *
+   * Após a geração da cobrança em lote, você pode utilizar o endpoint de [Consultar lista de cobranças com vencimento](https://dev.efipay.com.br/docs/api-pix/cobrancas-com-vencimento#consultar-lista-de-cobran%C3%A7as-com-vencimento), informado o parâmetro `loteCobvId` para retornar as informações do lote.
+   *
+   * ---
+   *
+   * @param PixBatchCollectionsCreateOrUpdateDueChargeBatchProps
+   * @returns `PixBatchCollectionsCreateOrUpdateDueChargeResponse | null`
+   */
+  async createOrUpdateDueChargeBatch({
+    body,
+    id
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixCreateDueChargeBatch({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixBatchCollectionsCreateOrUpdateDueChargeResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Revisar cobranças específicas dentro de um lote de cobranças com vencimento.
+   *
+   * ---
+   *
+   * ### Informação
+   *
+   * A diferença deste endpoint para o endpoint PUT (**`createOrUpdateDueChargeBatch`**) correlato é que este endpoint admite um array cobsv com menos solicitações de criação ou alteração de cobranças do que o array atribuído na requisição originária do lote.
+   *
+   * Não se pode, entretanto, utilizar esse endpoint para agregar ou remover solicitações de alteração ou criação de cobranças conforme constam na requisição originária do lote.
+   *
+   * ---
+   *
+   * @param PixBatchCollectionsUpdateDueChargeBatchProps
+   * @returns `PixBatchCollectionsCreateOrUpdateDueChargeResponse | null`
+   */
+  async updateDueChargeBatch({
+    body,
+    id
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixUpdateDueChargeBatch({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixBatchCollectionsCreateOrUpdateDueChargeResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar um lote específico de cobranças com vencimento.
+   *
+   * ---
+   *
+   * @param PixBatchCollectionsFindUniqueDueChargeBatchProps
+   * @returns `PixBatchCollectionsResponse | null`
+   */
+  async findUniqueDueChargeBatch({
+    id
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixDetailDueChargeBatch({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixBatchCollectionsResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar cobranças com vencimento através de parâmetros como início, fim, cpf, cnpj e status.
+   *
+   * ---
+   *
+   * @param PixBatchCollectionsFindManyDueChargeBatchProps
+   * @returns `PixBatchCollectionsResponseArray | null`
+   */
+  async findManyDueChargeBatch({
+    searchParams
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixListDueChargeBatch();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixBatchCollectionsResponseArray
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixBatchCollections(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/user-account.ts
+var import_dayjs3 = __toESM(require("dayjs"));
 
 // src/domain-driven-design/domains/apis/enterprise/entities/value-objects/address/cep.ts
 var import_remask = require("remask");
@@ -1185,8 +1621,8 @@ var Cep = class {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/value-objects/address/state.ts
-var import_zod = __toESM(require("zod"));
-var statesShortSchema = import_zod.default.enum([
+var import_zod2 = __toESM(require("zod"));
+var statesShortSchema = import_zod2.default.enum([
   "AM",
   "PA",
   "RR",
@@ -1215,7 +1651,7 @@ var statesShortSchema = import_zod.default.enum([
   "GO",
   "DF"
 ]);
-var statesStatesVerboseSchema = import_zod.default.enum([
+var statesStatesVerboseSchema = import_zod2.default.enum([
   "Amazonas",
   "Par\xE1",
   "Roraima",
@@ -1244,7 +1680,7 @@ var statesStatesVerboseSchema = import_zod.default.enum([
   "Goi\xE1s",
   "Distrito Federal"
 ]);
-var stateInstanceSchema = import_zod.default.custom(
+var stateInstanceSchema = import_zod2.default.custom(
   (data) => data instanceof State,
   "must be a valide State"
 );
@@ -1459,7 +1895,7 @@ var Cpf = class {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/value-objects/user/email.ts
-var import_zod2 = __toESM(require("zod"));
+var import_zod3 = __toESM(require("zod"));
 var Email = class {
   #value;
   constructor(data) {
@@ -1470,7 +1906,7 @@ var Email = class {
     return this.#value;
   }
   isValid() {
-    const isEmail = import_zod2.default.string().email().safeParse(this.value).success;
+    const isEmail = import_zod3.default.string().email().safeParse(this.value).success;
     return isEmail;
   }
 };
@@ -1508,7 +1944,7 @@ var UserAccount = class {
   get clienteFinal() {
     return {
       ...this.#props.clienteFinal,
-      dataNascimento: (0, import_dayjs.default)(this.#props.clienteFinal.dataNascimento)
+      dataNascimento: (0, import_dayjs3.default)(this.#props.clienteFinal.dataNascimento)
     };
   }
   get meioDeNotificacao() {
@@ -1548,7 +1984,7 @@ var UserAccount = class {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/calendar-due-charge-response.ts
-var import_dayjs2 = __toESM(require("dayjs"));
+var import_dayjs4 = __toESM(require("dayjs"));
 var CalendarDueCharge = class {
   #props;
   constructor({
@@ -1563,10 +1999,10 @@ var CalendarDueCharge = class {
     };
   }
   get criacao() {
-    return (0, import_dayjs2.default)(this.#props.criacao);
+    return (0, import_dayjs4.default)(this.#props.criacao);
   }
   get dataDeVencimento() {
-    return (0, import_dayjs2.default)(this.#props.dataDeVencimento);
+    return (0, import_dayjs4.default)(this.#props.dataDeVencimento);
   }
   get validadeAposVencimento() {
     return this.#props.validadeAposVencimento;
@@ -1590,78 +2026,7 @@ var CalendarDueCharge = class {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/pix-location.ts
-var import_dayjs3 = __toESM(require("dayjs"));
-
-// src/domain-driven-design/core/apis/api-response.ts
-var ApiResponse = class {
-  toJson(replacer, space) {
-    return JSON.stringify(this.toObject(), replacer, space);
-  }
-};
-
-// src/domain-driven-design/core/entities/unique-entity-id.ts
-var import_node_crypto = require("crypto");
-var import_zod3 = __toESM(require("zod"));
-var uniqueEntityIdInstanceSchema = import_zod3.default.custom(
-  (data) => data instanceof UniqueEntityId,
-  "must be an UniqueEntityId"
-);
-var UniqueEntityId = class {
-  _value;
-  constructor(id) {
-    this._value = id ?? (0, import_node_crypto.randomUUID)();
-  }
-  get value() {
-    return this._value;
-  }
-  equals(id) {
-    return id.value === this.value;
-  }
-};
-
-// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/id.ts
-var Id = class {
-  #value;
-  #size;
-  constructor({ size, value }) {
-    this.#size = size;
-    if (value) {
-      this.#value = value;
-    } else {
-      this.#value = this.generateNew(size);
-    }
-  }
-  get value() {
-    return this.#value;
-  }
-  generateNew(size) {
-    size = size || this.#size;
-    function getOnlyAlphaNumeric(str) {
-      return str.replaceAll(/[^0-9a-z]/gi, "");
-    }
-    let id = getOnlyAlphaNumeric(new UniqueEntityId().value);
-    while (id.length < size) {
-      id += getOnlyAlphaNumeric(new UniqueEntityId().value);
-    }
-    const data = id.slice(0, size);
-    return data;
-  }
-};
-
-// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id.ts
-var TxId = class extends Id {
-  constructor(id) {
-    const min = 26;
-    const max = 35;
-    const mean = Math.ceil((min + max) / 2);
-    super({ size: mean, value: id });
-  }
-  generate() {
-    return this.generateNew();
-  }
-};
-
-// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/pix-location.ts
+var import_dayjs5 = __toESM(require("dayjs"));
 var PixLocation = class extends ApiResponse {
   #props;
   constructor({
@@ -1693,7 +2058,7 @@ var PixLocation = class extends ApiResponse {
     return this.#props.tipoCob;
   }
   get criacao() {
-    return this.#props.criacao ? (0, import_dayjs3.default)(this.#props.criacao) : void 0;
+    return this.#props.criacao ? (0, import_dayjs5.default)(this.#props.criacao) : void 0;
   }
   toObject() {
     return {
@@ -2167,73 +2532,6 @@ var PixDueChargeResponse = class {
   }
 };
 
-// src/domain-driven-design/core/apis/api-array-response.ts
-var import_dayjs4 = __toESM(require("dayjs"));
-var ApiArrayResponse = class extends ApiResponse {
-  props;
-  constructor(props, CobClass) {
-    super();
-    this.props = {
-      arrayData: props.arrayData.map((item) => new CobClass(item)),
-      parametros: {
-        inicio: new Date(props.parametros.inicio),
-        fim: new Date(props.parametros.fim),
-        paginacao: {
-          paginaAtual: props.parametros.paginacao.paginaAtual,
-          itensPorPagina: props.parametros.paginacao.itensPorPagina,
-          quantidadeDePaginas: props.parametros.paginacao.quantidadeDePaginas,
-          quantidadeTotalDeItens: props.parametros.paginacao.quantidadeTotalDeItens
-        }
-      }
-    };
-  }
-  /**
-   * Filtro dos registros cuja data de criação seja maior ou igual que a data de início. Respeita RFC 3339.
-   */
-  get inicio() {
-    return (0, import_dayjs4.default)(this.props.parametros.inicio);
-  }
-  /**
-   * Filtro dos registros cuja data de criação seja menor ou igual que a data de fim. Respeita RFC 3339.
-   */
-  get fim() {
-    return (0, import_dayjs4.default)(this.props.parametros.fim);
-  }
-  /**
-   * Paginação - indica a página atual.
-   */
-  get paginaAtual() {
-    return this.props.parametros.paginacao.paginaAtual;
-  }
-  /**
-   * Paginação - indica a quantidade de itens por página.
-   */
-  get itensPorPagina() {
-    return this.props.parametros.paginacao.itensPorPagina;
-  }
-  /**
-   * Paginação - indica a quantidade total de páginas.
-   */
-  get quantidadeDePaginas() {
-    return this.props.parametros.paginacao.quantidadeDePaginas;
-  }
-  /**
-   * Paginação - indica a quantidade total de itens.
-   */
-  get quantidadeTotalDeItens() {
-    return this.props.parametros.paginacao.quantidadeTotalDeItens;
-  }
-  /**
-   * Cobranças - retorna uma lista de cobranças, correspondendo à paginação atual.
-   */
-  get arrayData() {
-    return this.props.arrayData;
-  }
-  toJson(replacer, space) {
-    return JSON.stringify(this.toObject(), replacer, space);
-  }
-};
-
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/pix-due-charge-response-array.ts
 var PixDueChargeResponseArray = class extends ApiArrayResponse {
   constructor(props) {
@@ -2351,7 +2649,7 @@ var PixDueCharge = class _PixDueCharge extends ApiRequest {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/calendar-imediate-charge-response.ts
-var import_dayjs5 = __toESM(require("dayjs"));
+var import_dayjs6 = __toESM(require("dayjs"));
 var CalendarImediateCharge = class {
   #props;
   constructor({ criacao, expiracao }) {
@@ -2361,7 +2659,7 @@ var CalendarImediateCharge = class {
     };
   }
   get criacao() {
-    return (0, import_dayjs5.default)(this.#props.criacao);
+    return (0, import_dayjs6.default)(this.#props.criacao);
   }
   get expiracao() {
     return this.#props.expiracao;
@@ -2606,7 +2904,7 @@ var PixImediateCharge = class _PixImediateCharge extends ApiRequest {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-response.ts
-var import_dayjs7 = __toESM(require("dayjs"));
+var import_dayjs8 = __toESM(require("dayjs"));
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/e2e-id.ts
 var E2eId = class extends Id {
@@ -2619,7 +2917,7 @@ var E2eId = class extends Id {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-return-response.ts
-var import_dayjs6 = __toESM(require("dayjs"));
+var import_dayjs7 = __toESM(require("dayjs"));
 var PixManageReturnResponse = class extends ApiResponse {
   #props;
   constructor(props) {
@@ -2659,7 +2957,7 @@ var PixManageReturnResponse = class extends ApiResponse {
        *
        * ISO-String no formato `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`
        */
-      solicitacao: (0, import_dayjs6.default)(this.#props.horario.solicitacao)
+      solicitacao: (0, import_dayjs7.default)(this.#props.horario.solicitacao)
     };
   }
   /**
@@ -2710,7 +3008,7 @@ var PixManageResponse = class extends ApiResponse {
     return this.#props.valor;
   }
   get horario() {
-    return (0, import_dayjs7.default)(this.#props.horario);
+    return (0, import_dayjs8.default)(this.#props.horario);
   }
   get infoPagador() {
     return this.#props.infoPagador;
@@ -3157,7 +3455,7 @@ var PixWebhooksDeleteResponse = class extends ApiResponse {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-webhooks/pix-webhook-response.ts
-var import_dayjs8 = __toESM(require("dayjs"));
+var import_dayjs9 = __toESM(require("dayjs"));
 var PixWebhooksResponse = class extends ApiResponse {
   #props;
   constructor(props) {
@@ -3188,7 +3486,7 @@ var PixWebhooksResponse = class extends ApiResponse {
    * @return instância do `dayjs`
    */
   get criacao() {
-    return (0, import_dayjs8.default)(this.#props.criacao);
+    return (0, import_dayjs9.default)(this.#props.criacao);
   }
   toObject() {
     return {
@@ -3328,6 +3626,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
   #webhooks;
   #manage;
   #payloadLocations;
+  #batchCollections;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
@@ -3337,6 +3636,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
     this.#webhooks = new PixWebhooks(type, "PIX", options);
     this.#manage = new PixManage(type, "PIX", options);
     this.#payloadLocations = new PixPayloadLocations(type, "PIX", options);
+    this.#batchCollections = new PixBatchCollections(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -3373,6 +3673,12 @@ var PixRequest = class _PixRequest extends ApiRequest {
    */
   get payloadLocations() {
     return this.#payloadLocations;
+  }
+  /**
+   * Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   */
+  get batchCollections() {
+    return this.#batchCollections;
   }
   // eslint-disable-next-line
   // @ts-ignore

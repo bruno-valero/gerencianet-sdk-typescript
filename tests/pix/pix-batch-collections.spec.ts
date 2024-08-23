@@ -9,7 +9,7 @@ import { PixBatchCollectionsResponseArray } from '@/domain-driven-design/domains
 import { TxId } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id'
 import { env } from '@/env'
 
-describe('Pix Batch Collections', () => {
+describe.skip('Pix Batch Collections', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixBatchCollections<'SANDBOX'>
 

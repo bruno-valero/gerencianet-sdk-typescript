@@ -8,7 +8,7 @@ import { PixManageResponse } from '@/domain-driven-design/domains/apis/enterpris
 import { PixManageReturnResponse } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-return-response'
 import { env } from '@/env'
 
-describe.skip('Pix Manage', () => {
+describe('Pix Manage', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixManage<'SANDBOX'>
 
@@ -23,7 +23,7 @@ describe.skip('Pix Manage', () => {
     })
     sut = pix.manage
   })
-  it('should be able to consult a received pix', async () => {
+  it.skip('should be able to consult a received pix', async () => {
     const webhookUrl = process.env.WEBHOOK_PIX
     const secondKey = process.env.PIX_KEY_SECOND
 
@@ -40,7 +40,7 @@ describe.skip('Pix Manage', () => {
     expect(resp).toBeInstanceOf(PixManageResponse)
   })
 
-  it('should be able to consult many received pix', async () => {
+  it.skip('should be able to consult many received pix', async () => {
     const resp = await sut.consultMany({
       searchParams: {
         inicio: dayjs().subtract(3, 'day').toDate(),
@@ -49,11 +49,12 @@ describe.skip('Pix Manage', () => {
       },
     })
 
+    console.log('consultMany resp:', resp)
     expect(resp).not.toBeNull()
     expect(resp).toBeInstanceOf(PixManageResponse)
   })
 
-  it('should be able to return a received pix', async () => {
+  it.skip('should be able to return a received pix', async () => {
     const resp = await sut.return({
       e2eId: '',
       id: '',
@@ -67,7 +68,7 @@ describe.skip('Pix Manage', () => {
     expect(resp).toBeInstanceOf(PixManageReturnResponse)
   })
 
-  it('should be able to consult a returned pix', async () => {
+  it.skip('should be able to consult a returned pix', async () => {
     const resp = await sut.consultReturn({
       e2eId: '',
       id: '',

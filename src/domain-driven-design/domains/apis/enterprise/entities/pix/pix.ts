@@ -8,6 +8,7 @@ import { PixDueCharge } from './pix-modules/pix-due-charge'
 import { PixImediateCharge } from './pix-modules/pix-imediate-charge'
 import { PixManage } from './pix-modules/pix-manage'
 import { PixPayloadLocations } from './pix-modules/pix-payload-locations'
+import { PixPaymentSplit } from './pix-modules/pix-payment-split'
 import { PixSendAndPayment } from './pix-modules/pix-send-and-payment'
 import { PixWebhooks } from './pix-modules/pix-webhooks'
 
@@ -34,6 +35,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   #manage: PixManage<type>
   #payloadLocations: PixPayloadLocations<type>
   #batchCollections: PixBatchCollections<type>
+  #paymentSplit: PixPaymentSplit<type>
 
   constructor({ type, options }: PixRequestProps<type>) {
     super(type, 'PIX', options)
@@ -45,6 +47,7 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
     this.#manage = new PixManage(type, 'PIX', options)
     this.#payloadLocations = new PixPayloadLocations(type, 'PIX', options)
     this.#batchCollections = new PixBatchCollections(type, 'PIX', options)
+    this.#paymentSplit = new PixPaymentSplit(type, 'PIX', options)
   }
 
   /**
@@ -94,6 +97,45 @@ export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
    */
   get batchCollections() {
     return this.#batchCollections
+  }
+
+  /**
+   *
+   * ---
+   *
+   * Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   *
+   * ---
+   *
+   * ### Importante!
+   *
+   * O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+   *
+   * ---
+   *
+   * ### Informação
+   *
+   * Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+   *
+   * ---
+   *
+   * ### Configure Split de Pagamento em QR Code e copia e cola estático!
+   *
+   * Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+   *
+   * ---
+   *
+   * ### Instruções para testes em Homologação
+   *
+   * No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+   *
+   * É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+   *
+   * ---
+   *
+   */
+  get paymentSplit() {
+    return this.#paymentSplit
   }
 
   // eslint-disable-next-line

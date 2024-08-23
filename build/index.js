@@ -877,24 +877,30 @@ var pixEndpoints = {
       route: `/v2/gn/split/cob/${txid}`,
       method: `get`
     }),
-    pixSplitLinkCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+    pixSplitLinkCharge: ({
+      txid,
+      splitConfigId
+    }) => ({
+      route: `/v2/gn/split/cob/${txid}/vinculo/${splitConfigId}`,
       method: `put`
     }),
     pixSplitUnlinkCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+      route: `/v2/gn/split/cob/${txid}/vinculo`,
       method: `delete`
     }),
     pixSplitDetailDueCharge: ({ txid }) => ({
       route: `/v2/gn/split/cobv/${txid}`,
       method: `get`
     }),
-    pixSplitLinkDueCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+    pixSplitLinkDueCharge: ({
+      txid,
+      splitConfigId
+    }) => ({
+      route: `/v2/gn/split/cobv/${txid}/vinculo/${splitConfigId}`,
       method: `put`
     }),
     pixSplitUnlinkDueCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+      route: `/v2/gn/split/cobv/${txid}/vinculo`,
       method: `delete`
     }),
     pixSplitConfig: () => ({
@@ -2411,9 +2417,10 @@ var PixDueChargeValue = class extends PixDueChargeValueContract {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/pix-due-charge-response.ts
-var PixDueChargeResponse = class {
+var PixDueChargeResponse = class extends ApiResponse {
   #props;
   constructor(props) {
+    super();
     this.#props = {
       calendario: new CalendarDueCharge({
         criacao: props.calendario.criacao,
@@ -3338,6 +3345,477 @@ var PixPayloadLocations = class _PixPayloadLocations extends ApiRequest {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-attachment-response.ts
+var PixPaymentSplitAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    console.log("PixPaymentSplitAttachmentResponse constructor props:", props);
+    this.#props = {
+      success: props === ""
+    };
+  }
+  get success() {
+    return this.#props.success;
+  }
+  toObject() {
+    return {
+      success: this.success
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-due-charge-attachment-response.ts
+var PixPaymentSplitDueChargeAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor({
+    config,
+    ...dueChargeProps
+  }) {
+    super();
+    this.#props = {
+      dueChargeResponse: new PixDueChargeResponse(dueChargeProps),
+      config: {
+        id: new Id({ size: 35, value: config.id }),
+        descricao: config.descricao,
+        status: config.status
+      }
+    };
+  }
+  get calendario() {
+    return this.#props.dueChargeResponse.calendario;
+  }
+  get txid() {
+    return this.#props.dueChargeResponse.txid;
+  }
+  get revisao() {
+    return this.#props.dueChargeResponse.revisao;
+  }
+  get loc() {
+    return this.#props.dueChargeResponse.loc;
+  }
+  /**
+   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+   */
+  get location() {
+    return this.#props.dueChargeResponse.location;
+  }
+  get status() {
+    return this.#props.dueChargeResponse.status;
+  }
+  get devedor() {
+    return this.#props.dueChargeResponse.devedor;
+  }
+  get valor() {
+    return this.#props.dueChargeResponse.valor;
+  }
+  get chave() {
+    return this.#props.dueChargeResponse.chave;
+  }
+  get solicitacaoPagador() {
+    return this.#props.dueChargeResponse.solicitacaoPagador;
+  }
+  get pixCopiaECola() {
+    return this.#props.dueChargeResponse.pixCopiaECola;
+  }
+  get config() {
+    return this.#props.config;
+  }
+  toObject(props) {
+    return {
+      ...this.#props.dueChargeResponse.toObject(props),
+      config: {
+        id: this.config.id.value,
+        status: this.config.status,
+        descricao: this.config.descricao
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-imediate-charge-attachment-response.ts
+var PixPaymentSplitImediateChargeAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor({
+    config,
+    ...imediateChargeProps
+  }) {
+    super();
+    this.#props = {
+      imediateChargeResponse: new PixImediateChargeResponse(
+        imediateChargeProps
+      ),
+      config: {
+        id: new Id({ size: 35, value: config.id }),
+        descricao: config.descricao,
+        status: config.status
+      }
+    };
+  }
+  get calendario() {
+    return this.#props.imediateChargeResponse.calendario;
+  }
+  get txid() {
+    return this.#props.imediateChargeResponse.txid;
+  }
+  get revisao() {
+    return this.#props.imediateChargeResponse.revisao;
+  }
+  get loc() {
+    return this.#props.imediateChargeResponse.loc;
+  }
+  /**
+   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+   */
+  get location() {
+    return this.#props.imediateChargeResponse.location;
+  }
+  get status() {
+    return this.#props.imediateChargeResponse.status;
+  }
+  get devedor() {
+    return this.#props.imediateChargeResponse.devedor;
+  }
+  get valor() {
+    return this.#props.imediateChargeResponse.valor;
+  }
+  get chave() {
+    return this.#props.imediateChargeResponse.chave;
+  }
+  get solicitacaoPagador() {
+    return this.#props.imediateChargeResponse.solicitacaoPagador;
+  }
+  get pixCopiaECola() {
+    return this.#props.imediateChargeResponse.pixCopiaECola;
+  }
+  get config() {
+    return this.#props.config;
+  }
+  toObject(props) {
+    return {
+      ...this.#props.imediateChargeResponse.toObject(props),
+      config: {
+        id: this.config.id.value,
+        status: this.config.status,
+        descricao: this.config.descricao
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-response.ts
+var PixPaymentSplitResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      id: new Id({ size: 35, value: props.id }),
+      descricao: props.descricao,
+      txid: props.txid ? new TxId(props.txid) : void 0,
+      lancamento: props.lancamento,
+      split: {
+        divisaoTarifa: props.split.divisaoTarifa,
+        minhaParte: {
+          tipo: props.split.minhaParte.tipo,
+          valor: props.split.minhaParte.valor
+        },
+        repasses: props.split.repasses.map((item) => ({
+          tipo: item.tipo,
+          valor: item.valor,
+          favorecido: item.favorecido.cpf ? {
+            cpf: new Cpf(item.favorecido.cpf),
+            conta: item.favorecido.conta
+          } : {
+            cnpj: new Cnpj(item.favorecido.cnpj),
+            conta: item.favorecido.conta
+          }
+        }))
+      }
+    };
+  }
+  get id() {
+    return this.#props.id;
+  }
+  /**
+   *
+   * ---
+   *
+   * O campo descricao , opcional, determina um texto a ser apresentado na criação da configuração do Split em formato livre. Esse texto será preenchido pelo criador da configuração do Split. O tamanho do campo está limitado a 80 caracteres (string).
+   *
+   * ---
+   *
+   * `string`
+   */
+  get descricao() {
+    return this.#props.descricao;
+  }
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  get txid() {
+    return this.#props.txid;
+  }
+  /**
+   * `Object (Lancamento)`
+   */
+  get lancamento() {
+    return this.#props.lancamento;
+  }
+  /**
+   * `Object (Split)`
+   */
+  get split() {
+    return this.#props.split;
+  }
+  toObject() {
+    return {
+      id: this.id,
+      descricao: this.descricao,
+      txid: this.txid,
+      lancamento: this.lancamento,
+      split: {
+        divisaoTarifa: this.split.divisaoTarifa,
+        minhaParte: {
+          tipo: this.split.minhaParte.tipo,
+          valor: this.split.minhaParte.valor
+        },
+        repasses: this.split.repasses.map((item) => ({
+          tipo: item.tipo,
+          valor: item.valor,
+          favorecido: item.favorecido.cpf?.format() ? {
+            cpf: item.favorecido.cpf,
+            conta: item.favorecido.conta
+          } : {
+            cnpj: item.favorecido.cnpj.format(),
+            conta: item.favorecido.conta
+          }
+        }))
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/index.ts
+var PixPaymentSplit = class _PixPaymentSplit extends ApiRequest {
+  /**
+   *
+   * ---
+   *
+   * Cadastrar uma cobrança com um identificador de transação (`id`). O id é criado pela pessoa usuária recebedora e está sob sua responsabilidade. Caso o usuário informe um id que já exista, esse endpoint irá atualizar a configuração da cobrança.
+   *
+   * ---
+   *
+   * ### Caso `id` não seja informado
+   *
+   * Em geral, o `id` é criado pela pessoa recebedora e está sob sua responsabilidade. Porém, neste caso, o id será definido pela Efí, fazendo uma exceção à regra padrão.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitCreateProps
+   * @returns `PixPaymentSplitResponse | null`
+   *
+   */
+  async create({ body, id }) {
+    const { method, route } = id ? this.endpoints.ENDPOINTS.pixSplitConfigId({ id }) : this.endpoints.ENDPOINTS.pixSplitConfig();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixPaymentSplitResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar um Split de pagamento partir do id.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueProps
+   * @returns `PixPaymentSplitResponse | null`
+   */
+  async findUnique({ id, searchParams }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailConfig({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixPaymentSplitResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Vincula uma cobrança Pix a um Split de pagamento. Ele utiliza dois campos (`txid` da cobrança e splitConfigId do Split de pagamento) para fazer essa vinculação quando a cobrança Pix está ativa.
+   *
+   * ---
+   *
+   */
+  async attachImediateCharge({
+    txid,
+    splitConfigId
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitLinkCharge({
+      txid,
+      splitConfigId
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar uma cobrança com Split de pagamento a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+   */
+  async findUniqueImediateChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitImediateChargeAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Deletar o vinculo entre um split de pagamento e uma cobrança a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitAttachmentResponse | null`
+   */
+  async deleteImediateChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitUnlinkCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Vincula uma cobrança com vencimento (COBV) a um Split de pagamento.
+   *
+   * ---
+   *
+   */
+  async attachDueCharge({
+    txid,
+    splitConfigId
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitLinkDueCharge({
+      txid,
+      splitConfigId
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar  uma cobrança com vencimento e com a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+   */
+  async findUniqueDueChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailDueCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitDueChargeAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Deletar o vinculo entre um split de pagamento e uma cobrança com vencimento a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitAttachmentResponse | null`
+   */
+  async deleteDueChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitUnlinkDueCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixPaymentSplit(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/pix-send-and-payment-send-response.ts
 var PixSendAndPaymentSendResponse = class extends ApiResponse {
   #props;
@@ -3627,6 +4105,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
   #manage;
   #payloadLocations;
   #batchCollections;
+  #paymentSplit;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
@@ -3637,6 +4116,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
     this.#manage = new PixManage(type, "PIX", options);
     this.#payloadLocations = new PixPayloadLocations(type, "PIX", options);
     this.#batchCollections = new PixBatchCollections(type, "PIX", options);
+    this.#paymentSplit = new PixPaymentSplit(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -3679,6 +4159,44 @@ var PixRequest = class _PixRequest extends ApiRequest {
    */
   get batchCollections() {
     return this.#batchCollections;
+  }
+  /**
+   *
+   * ---
+   *
+   * Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   *
+   * ---
+   *
+   * ### Importante!
+   *
+   * O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+   *
+   * ---
+   *
+   * ### Informação
+   *
+   * Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+   *
+   * ---
+   *
+   * ### Configure Split de Pagamento em QR Code e copia e cola estático!
+   *
+   * Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+   *
+   * ---
+   *
+   * ### Instruções para testes em Homologação
+   *
+   * No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+   *
+   * É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+   *
+   * ---
+   *
+   */
+  get paymentSplit() {
+    return this.#paymentSplit;
   }
   // eslint-disable-next-line
   // @ts-ignore

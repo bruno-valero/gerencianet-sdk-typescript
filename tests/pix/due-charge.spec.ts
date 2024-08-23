@@ -7,7 +7,7 @@ import { PixDueChargeResponseArray } from '@/domain-driven-design/domains/apis/e
 import { TxId } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/tx-id'
 import { env } from '@/env'
 
-describe.skip('Pix due change', () => {
+describe('Pix due change', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixDueCharge<'SANDBOX'>
 
@@ -23,7 +23,7 @@ describe.skip('Pix due change', () => {
     sut = pix.dueCharge
   })
 
-  it('should be able to create a new pix due charge', async () => {
+  it.skip('should be able to create a new pix due charge', async () => {
     const resp = await sut.create({
       txid: new TxId().value,
       body: {
@@ -68,11 +68,12 @@ describe.skip('Pix due change', () => {
       },
     })
 
+    console.log('create resp:', resp?.toJson(null, 2))
     expect(resp).not.toBeNull()
     expect(resp).toBeInstanceOf(PixDueChargeResponse)
   })
 
-  it('should be able to update a pix due charge', async () => {
+  it.skip('should be able to update a pix due charge', async () => {
     const resp = await sut.update({
       txid: '363d1190f23b48698e0b39e5085c3474',
       body: {
@@ -87,7 +88,7 @@ describe.skip('Pix due change', () => {
     expect(resp?.valor.value.units).toEqual(23.15)
   })
 
-  it("should be able to find one pix due charge by it's Txid", async () => {
+  it.skip("should be able to find one pix due charge by it's Txid", async () => {
     const resp = await sut.findUnique({
       txid: '8016bb64775742d1bb122ee67393faa1',
     })
@@ -96,7 +97,7 @@ describe.skip('Pix due change', () => {
     expect(resp).toBeInstanceOf(PixDueChargeResponse)
   })
 
-  it('should be able to find many pix due charges, with two charges per page', async () => {
+  it.skip('should be able to find many pix due charges, with two charges per page', async () => {
     const resp = await sut.findMany({
       searchParams: {
         inicio: dayjs().subtract(3, 'day').toDate(),

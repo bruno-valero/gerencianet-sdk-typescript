@@ -23,7 +23,7 @@ describe.skip('Pix Imediate charge', () => {
     sut = pix.imediateCharge
   })
 
-  it('should be able to create a new pix imediate charge without Txid', async () => {
+  it.skip('should be able to create a new pix imediate charge without Txid', async () => {
     const resp = await sut.create({
       body: {
         calendario: { expiracao: 3600 },
@@ -38,7 +38,7 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp).toBeInstanceOf(PixImediateChargeResponse)
   })
 
-  it('should be able to create a new pix imediate charge with Txid', async () => {
+  it.skip('should be able to create a new pix imediate charge with Txid', async () => {
     const resp = await sut.create({
       body: {
         calendario: { expiracao: 3600 },
@@ -53,7 +53,7 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp).not.toBeNull()
     expect(resp).toBeInstanceOf(PixImediateChargeResponse)
   })
-  it('should be able to update a pix imediate charge', async () => {
+  it.skip('should be able to update a pix imediate charge', async () => {
     const resp = await sut.update({
       body: {
         valor: {
@@ -68,7 +68,7 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp?.valor.units).toEqual(32.6)
   })
 
-  it("should be able to find one pix imediate charge by it's Txid", async () => {
+  it.skip("should be able to find one pix imediate charge by it's Txid", async () => {
     const resp = await sut.findUnique({
       txid: 'f16aceb56bde436bb5d47d417f61c52d',
     })
@@ -77,7 +77,7 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp).toBeInstanceOf(PixImediateChargeResponse)
   })
 
-  it('should be able to find many pix imediate charges, with two charges per page', async () => {
+  it.skip('should be able to find many pix imediate charges, with two charges per page', async () => {
     const resp = await sut.findMany({
       searchParams: {
         inicio: dayjs().subtract(3, 'day').toDate(),
@@ -91,7 +91,7 @@ describe.skip('Pix Imediate charge', () => {
     expect(resp).toBeInstanceOf(PixImediateChargeResponseArray)
     expect(resp?.cobs).toHaveLength(2)
   })
-  it('should be able to find many pix imediate charges, with two charges per page where status is active', async () => {
+  it.skip('should be able to find many pix imediate charges, with two charges per page where status is active', async () => {
     const resp = await sut.findMany({
       searchParams: {
         inicio: dayjs().subtract(3, 'day').toDate(),

@@ -166,6 +166,12 @@ A API PIX da Efí Pay é destinada a realizar transações financeiras através 
 
 Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
 
+##### Informação
+
+É possível dividir o recebimento do pix em até 20 pessoas, um exemplo de contexto onde isto seria útil é em casos que uma comissão deve ser pagada para um dos contribuintes de um serviço.
+
+A divisão do recebimento pode ser feita após criar a cobrança imediata e antes do pagador realizar o envio. Para dividir, basta utilizar o [split de pagamento pix](#split-de-pagamento-pix---paymentsplit)
+
 ---
 
 - **Testes de Integração Realizados**
@@ -196,7 +202,14 @@ efi.pix.imediateCharge.findMany({
 ```
 
 #### Cobranças com vencimento - **dueCharge**
+
 Responsável pela gestão de cobranças com vencimento. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+
+##### Informação
+
+É possível dividir o recebimento do pix em até 20 pessoas, um exemplo de contexto onde isto seria útil é em casos que uma comissão deve ser pagada para um dos contribuintes de um serviço.
+
+A divisão do recebimento pode ser feita após criar a cobrança com vencimento e antes do pagador realizar o envio. Para dividir, basta utilizar o [split de pagamento pix](#split-de-pagamento-pix---paymentsplit)
 
 ---
 
@@ -397,6 +410,83 @@ efi.pix.batchCollections.findUniqueDueChargeBatch({
 })
 
 efi.pix.batchCollections.findManyDueChargeBatch({
+  // passe os parâmetros necessários
+})
+```
+
+#### Split de pagamento Pix - **paymentSplit**
+
+Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+
+##### Realizar o split de pagamento após criar uma cobrança
+
+É possível realizar a divisão do pagamento depois de criar uma [cobrança imediata](#cobranças-imediatas---imediatecharge) ou uma [cobrança com vencimento](#cobranças-com-vencimento---duecharge).
+
+---
+
+##### Importante!
+
+ O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+
+---
+
+##### Informação
+Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+
+---
+
+##### Configure Split de Pagamento em QR Code e copia e cola estático!
+Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+
+---
+
+##### Instruções para testes em Homologação
+No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+
+---
+
+- **Testes de Integração Realizados**
+---
+
+Para entender mais sobre as **Cobranças em Lote**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix)
+
+Para utilizar as **Cobranças em Lote** através do SDK acesse a propriedade `paymentSplit` da api PIX, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.pix.paymentSplit.create({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.findUnique({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.attachImediateCharge({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.findUniqueImediateChargeAttachment({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.deleteImediateChargeAttachment({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.attachDueCharge({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.findUniqueDueChargeAttachment({
+  // passe os parâmetros necessários
+})
+
+efi.pix.paymentSplit.deleteDueChargeAttachment({
   // passe os parâmetros necessários
 })
 ```

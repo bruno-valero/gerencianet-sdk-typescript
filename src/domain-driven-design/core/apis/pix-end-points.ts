@@ -199,14 +199,20 @@ export const pixEndpoints = {
         route: `/v2/gn/split/cob/${txid}`,
         method: `get`,
       }) as const,
-    pixSplitLinkCharge: ({ txid }: { txid: string }) =>
+    pixSplitLinkCharge: ({
+      txid,
+      splitConfigId,
+    }: {
+      txid: string
+      splitConfigId: string
+    }) =>
       ({
-        route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+        route: `/v2/gn/split/cob/${txid}/vinculo/${splitConfigId}`,
         method: `put`,
       }) as const,
     pixSplitUnlinkCharge: ({ txid }: { txid: string }) =>
       ({
-        route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+        route: `/v2/gn/split/cob/${txid}/vinculo`,
         method: `delete`,
       }) as const,
     pixSplitDetailDueCharge: ({ txid }: { txid: string }) =>
@@ -214,14 +220,20 @@ export const pixEndpoints = {
         route: `/v2/gn/split/cobv/${txid}`,
         method: `get`,
       }) as const,
-    pixSplitLinkDueCharge: ({ txid }: { txid: string }) =>
+    pixSplitLinkDueCharge: ({
+      txid,
+      splitConfigId,
+    }: {
+      txid: string
+      splitConfigId: string
+    }) =>
       ({
-        route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+        route: `/v2/gn/split/cobv/${txid}/vinculo/${splitConfigId}`,
         method: `put`,
       }) as const,
     pixSplitUnlinkDueCharge: ({ txid }: { txid: string }) =>
       ({
-        route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+        route: `/v2/gn/split/cobv/${txid}/vinculo`,
         method: `delete`,
       }) as const,
     pixSplitConfig: () =>

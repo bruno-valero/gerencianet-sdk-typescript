@@ -215,16 +215,17 @@ declare const constantsCallbacks: {
                     readonly route: `/v2/gn/split/cob/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkCharge: ({ txid }: {
+                readonly pixSplitLinkCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitDetailDueCharge: ({ txid }: {
@@ -233,16 +234,17 @@ declare const constantsCallbacks: {
                     readonly route: `/v2/gn/split/cobv/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkDueCharge: ({ txid }: {
+                readonly pixSplitLinkDueCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkDueCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitConfig: () => {
@@ -653,14 +655,17 @@ type AuthRoute<key extends OperationTypes | undefined = undefined> = key extends
 type UrlBase<type extends OperationTypes, operation extends EnvironmentTypes> = ConstantsCallbacks['APIS'][type]['URL'][operation];
 type BaseUrl<operation extends EnvironmentTypes, type extends OperationTypes | undefined = undefined> = type extends undefined ? UrlBase<'PIX', operation> | UrlBase<'DEFAULT', operation> | UrlBase<'OPENFINANCE', operation> | UrlBase<'PAGAMENTOS', operation> | UrlBase<'CONTAS', operation> : type extends OperationTypes ? UrlBase<type, operation> : void;
 
+type CertificateType = 'file' | 'base64' | 'buffer'
+
 interface EfiConfig<
   type extends EnvironmentTypes,
   operation extends OperationTypes | undefined = undefined,
 > {
   client_id: string
   client_secret: string
-  certificate?: PathLike | string
-  pemKey?: PathLike | string
+  certificateType: CertificateType
+  certificate?: PathLike | string | Buffer
+  pemKey?: PathLike | string | Buffer
   sandbox: boolean
   partnerToken?: string
   rawResponse?: unknown
@@ -752,7 +757,7 @@ type ConstructorSingleParameters<T extends abstract new (arg: unknown) => unknow
 type SearchParamsType = Record<string, string | number | Date | boolean>;
 declare abstract class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
     #private;
-    constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox'>);
+    constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox' | 'certificateType'>);
     protected get type(): type;
     protected get operation(): operation;
     protected get environment(): "PRODUCTION" | "SANDBOX";
@@ -967,16 +972,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly route: `/v2/gn/split/cob/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkCharge: ({ txid }: {
+                readonly pixSplitLinkCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitDetailDueCharge: ({ txid }: {
@@ -985,16 +991,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly route: `/v2/gn/split/cobv/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkDueCharge: ({ txid }: {
+                readonly pixSplitLinkDueCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkDueCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitConfig: () => {
@@ -1609,16 +1616,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly route: `/v2/gn/split/cob/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkCharge: ({ txid }: {
+                readonly pixSplitLinkCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cob/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitDetailDueCharge: ({ txid }: {
@@ -1627,16 +1635,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                     readonly route: `/v2/gn/split/cobv/${string}`;
                     readonly method: "get";
                 };
-                readonly pixSplitLinkDueCharge: ({ txid }: {
+                readonly pixSplitLinkDueCharge: ({ txid, splitConfigId, }: {
                     txid: string;
+                    splitConfigId: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/${string}`;
                     readonly method: "put";
                 };
                 readonly pixSplitUnlinkDueCharge: ({ txid }: {
                     txid: string;
                 }) => {
-                    readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                    readonly route: `/v2/gn/split/cobv/${string}/vinculo`;
                     readonly method: "delete";
                 };
                 readonly pixSplitConfig: () => {
@@ -2251,16 +2260,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly route: `/v2/gn/split/cob/${string}`;
                         readonly method: "get";
                     };
-                    readonly pixSplitLinkCharge: ({ txid }: {
+                    readonly pixSplitLinkCharge: ({ txid, splitConfigId, }: {
                         txid: string;
+                        splitConfigId: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/${string}`;
                         readonly method: "put";
                     };
                     readonly pixSplitUnlinkCharge: ({ txid }: {
                         txid: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo`;
                         readonly method: "delete";
                     };
                     readonly pixSplitDetailDueCharge: ({ txid }: {
@@ -2269,16 +2279,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly route: `/v2/gn/split/cobv/${string}`;
                         readonly method: "get";
                     };
-                    readonly pixSplitLinkDueCharge: ({ txid }: {
+                    readonly pixSplitLinkDueCharge: ({ txid, splitConfigId, }: {
                         txid: string;
+                        splitConfigId: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/${string}`;
                         readonly method: "put";
                     };
                     readonly pixSplitUnlinkDueCharge: ({ txid }: {
                         txid: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo`;
                         readonly method: "delete";
                     };
                     readonly pixSplitConfig: () => {
@@ -2893,16 +2904,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly route: `/v2/gn/split/cob/${string}`;
                         readonly method: "get";
                     };
-                    readonly pixSplitLinkCharge: ({ txid }: {
+                    readonly pixSplitLinkCharge: ({ txid, splitConfigId, }: {
                         txid: string;
+                        splitConfigId: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo/${string}`;
                         readonly method: "put";
                     };
                     readonly pixSplitUnlinkCharge: ({ txid }: {
                         txid: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cob/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cob/${string}/vinculo`;
                         readonly method: "delete";
                     };
                     readonly pixSplitDetailDueCharge: ({ txid }: {
@@ -2911,16 +2923,17 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
                         readonly route: `/v2/gn/split/cobv/${string}`;
                         readonly method: "get";
                     };
-                    readonly pixSplitLinkDueCharge: ({ txid }: {
+                    readonly pixSplitLinkDueCharge: ({ txid, splitConfigId, }: {
                         txid: string;
+                        splitConfigId: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/${string}`;
                         readonly method: "put";
                     };
                     readonly pixSplitUnlinkDueCharge: ({ txid }: {
                         txid: string;
                     }) => {
-                        readonly route: `/v2/gn/split/cobv/${string}/vinculo/:splitConfigId`;
+                        readonly route: `/v2/gn/split/cobv/${string}/vinculo`;
                         readonly method: "delete";
                     };
                     readonly pixSplitConfig: () => {
@@ -4959,7 +4972,7 @@ declare class PixDueChargeValue extends PixDueChargeValueContract {
     };
 }
 
-declare class PixDueChargeResponse {
+declare class PixDueChargeResponse extends ApiResponse {
     #private;
     constructor(props: PixDueChargeResponseType);
     get calendario(): CalendarDueCharge;
@@ -6113,6 +6126,806 @@ declare class PixPayloadLocations<type extends EnvironmentTypes> extends ApiRequ
 }
 
 /**
+ *
+ * ---
+ *
+ * O campo descricao , opcional, determina um texto a ser apresentado na criação da configuração do Split em formato livre. Esse texto será preenchido pelo criador da configuração do Split. O tamanho do campo está limitado a 80 caracteres (string).
+ *
+ * ---
+ *
+ * `string`
+ */
+type Descricao = string
+
+/**
+ *
+ * ---
+ *
+ * Define o tipo de repasse, se é porcentagem ou fixo.
+ *
+ * ---
+ *
+ * `(string)` Ex: `'porcentagem'` ou `'fixo'`
+ *
+ */
+type Tipo = 'porcentagem' | 'fixo'
+/**
+ *
+ * ---
+ *
+ * Define o valor que será repassado. Se o tipo for `"porcentagem"`,  representa a porcentagem, caso contrário representará o valor nominal
+ *
+ * ---
+ *
+ * `(string)`. Ex: `"60.00"` `(60%)`
+ */
+type valor = string
+
+type Split = {
+  /**
+   *
+   * ---
+   *
+   * Define o tipo de repasse, se é porcentagem ou fixo.
+   *
+   * ---
+   *
+   * `(string)` Ex: `'porcentagem'` ou `'fixo'`
+   *
+   */
+  tipo: Tipo
+  /**
+   *
+   * ---
+   *
+   * Define o valor que será repassado. Se o tipo for `"porcentagem"`,  representa a porcentagem, caso contrário representará o valor nominal
+   *
+   * ---
+   *
+   * `(string)`. Ex: `"60.00"` `(60%)`
+   */
+  valor: valor
+}
+
+/**
+ *
+ * ---
+ *
+ * Define os dados do favorecido.
+ *
+ * ---
+ *
+ * (object)
+ */
+type Favorecido$1 =
+  | {
+      /**
+       * CPF do favorecido.string `/^\d{11}$/`
+       */
+      cpf: string
+      /**
+       * CNPJ do favorecido.string `/^\d{14}$/`
+       */
+      cnpj?: undefined
+      /**
+       * Número da conta do favorecido (incluindo digito final, sem o hífen).
+       */
+      conta: string
+    }
+  | {
+      /**
+       * CNPJ do favorecido.string `/^\d{14}$/`
+       */
+      cnpj: string
+      /**
+       * CPF do favorecido.string `/^\d{11}$/`
+       */
+      cpf?: undefined
+      /**
+       * Número da conta do favorecido (incluindo digito final, sem o hífen).
+       */
+      conta: string
+    }
+
+interface PixPaymentSplitCreateProps {
+  /**
+   *
+   * ---
+   *
+   * O campo id determina o identificador do Split de pagamento.
+   *
+   * O `id` é criado pela pessoa recebedora e está sob sua responsabilidade. Porém, se não for informado, o `id` será definido pela Efí, fazendo uma exceção à regra padrão.
+   *
+   * ---
+   *
+   * `string` (Id do Split) `^[a-zA-Z0-9]{1,35}$`
+   */
+  id?: string
+  body: {
+    /**
+     *
+     * ---
+     *
+     * O campo descricao , opcional, determina um texto a ser apresentado na criação da configuração do Split em formato livre. Esse texto será preenchido pelo criador da configuração do Split. O tamanho do campo está limitado a 80 caracteres (string).
+     *
+     * ---
+     *
+     * `string`
+     */
+    descricao: Descricao
+    /**
+     * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+     *
+     * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+     *
+     * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+     * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+     *
+     * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+     */
+    txid?: TxId$2
+    /**
+     * `Object (Lancamento)`
+     */
+    lancamento: {
+      /**
+       * `(boolean)`
+       */
+      imediato: boolean
+    }
+    /**
+     * `Object (Split)`
+     */
+    split: {
+      /**
+       *
+       * ---
+       *
+       * Maneira a qual a tarifa será cobrada.
+       *
+       * ---
+       *
+       * `(string)` Ex: `"assumir_total"` ou `"proporcional"`
+       */
+      divisaoTarifa: 'assumir_total' | 'proporcional'
+      /**
+       *
+       * ---
+       *
+       * Define o repasse para a conta do cliente que está configurando o Split.
+       *
+       * ---
+       *
+       * `(string)`
+       */
+      minhaParte: Split
+      /**
+       * Define os repasses para as contas dos beneficiários que não o cliente configurador do Split
+       *
+       * ---
+       *
+       * `(array)`
+       */
+      repasses: (Split & {
+        /**
+         *
+         * ---
+         *
+         * Define os dados do favorecido.
+         *
+         * ---
+         *
+         * (object)
+         */
+        favorecido: Favorecido$1
+      })[]
+    }
+  }
+}
+
+interface PixPaymentSplitFindUniqueProps {
+  /**
+   *
+   * ---
+   *
+   * O campo id determina o identificador do Split de pagamento.
+   *
+   * ---
+   *
+   * `string` (Id do Split) `^[a-zA-Z0-9]{1,35}$`
+   */
+  id: string
+
+  searchParams?: {
+    /**
+     *
+     * ---
+     *
+     * Permite recuperar revisões anteriores da configuração de split. Na ausência desse parâmetro, sempre será retornada a cobrança conforme consta em sua última revisão.
+     *
+     * ---
+     *
+     * `Integer($int32)`
+     */
+    revisao?: number
+  }
+}
+
+interface PixPaymentSplitAttachImediateChargeProps {
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  txid: TxId$2
+  /**
+   * O campo `splitConfigId` determina o identificador do Split de pagamento.
+   */
+  splitConfigId
+}
+
+interface PixPaymentSplitAttachDueChargeProps
+  extends PixPaymentSplitAttachImediateChargeProps {}
+
+interface PixPaymentSplitFindUniqueImediateChargeAttachmentProps {
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  txid: TxId$2
+}
+
+interface PixPaymentSplitFindUniqueDueChargeAttachmentProps
+  extends PixPaymentSplitFindUniqueImediateChargeAttachmentProps {}
+
+interface PixPaymentSplitFindUniqueImediateChargeAttachmentResponseType
+  extends PixImediateChargeResponseCreationProps {
+  config: {
+    id: string
+    status: string
+    descricao: string
+  }
+}
+
+interface PixPaymentSplitFindUniqueDueChargeAttachmentResponseType
+  extends PixDueChargeResponseType {
+  config: {
+    id: string
+    status: string
+    descricao: string
+  }
+}
+
+interface PixPaymentSplitDeleteImediateChargeAttachmentProps
+  extends PixPaymentSplitFindUniqueImediateChargeAttachmentProps {}
+
+type PixPaymentSplitCreatePropsBody = PixPaymentSplitCreateProps['body']
+
+interface PixPaymentSplitResponseType
+  extends PixPaymentSplitCreatePropsBody {
+  status: string
+  id: string
+}
+
+declare class PixPaymentSplitAttachmentResponse extends ApiResponse {
+    #private;
+    constructor(props: '' | undefined);
+    get success(): boolean;
+    toObject(): {
+        success: boolean;
+    };
+}
+
+declare class PixPaymentSplitDueChargeAttachmentResponse extends ApiResponse {
+    #private;
+    constructor({ config, ...dueChargeProps }: PixPaymentSplitFindUniqueDueChargeAttachmentResponseType);
+    get calendario(): CalendarDueCharge;
+    get txid(): TxId$1;
+    get revisao(): number;
+    get loc(): PixLocation<"cobv">;
+    /**
+     * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+     */
+    get location(): string;
+    get status(): Status$2;
+    get devedor(): UserAccount;
+    get valor(): PixDueChargeValue;
+    get chave(): string;
+    get solicitacaoPagador(): string;
+    get pixCopiaECola(): string;
+    get config(): {
+        id: Id;
+        status: string;
+        descricao: string;
+    };
+    toObject(props?: {
+        valueFormat?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        config: {
+            id: string;
+            status: string;
+            descricao: string;
+        };
+        calendario: {
+            criacao: Date;
+            dataDeVencimento: Date;
+            validadeAposVencimento: number;
+        };
+        txid: string;
+        revisao: number;
+        loc: {
+            id: number;
+            location: string;
+            tipoCob: "cobv";
+            criacao: Date | undefined;
+        };
+        location: string;
+        status: Status$2;
+        devedor: {
+            clienteFinal: {
+                celular: string | undefined;
+                cpf: string | undefined;
+                dataNascimento: `${number}/${number}/${number}`;
+                email: string | undefined;
+                endereco: {
+                    bairro: string;
+                    cep: string;
+                    cidade: string;
+                    complemento: string;
+                    estado: "AM" | "PA" | "RR" | "AP" | "AC" | "RO" | "TO" | "MA" | "PI" | "CE" | "RN" | "PB" | "PE" | "AL" | "SE" | "BA" | "MG" | "ES" | "RJ" | "SP" | "PR" | "SC" | "RS" | "MS" | "MT" | "GO" | "DF";
+                    logradouro: string;
+                    numero: string;
+                } | undefined;
+                nomeCompleto: string;
+                nomeMae: string | undefined;
+                cnpj: string | undefined;
+                razaoSocial: string | undefined;
+            };
+            escoposIntegrados: ("cob.write" | "cob.read" | "pix.write" | "pix.read" | "webhook.write" | "webhook.read" | "payloadlocation.write" | "payloadlocation.read" | "gn.pix.evp.write" | "gn.pix.evp.read" | "gn.balance.read" | "gn.settings.write" | "gn.settings.read" | "gn.opb.participants.read" | "gn.opb.payment.pix.send" | "gn.opb.payment.pix.read" | "gn.opb.payment.pix.refund" | "gn.opb.payment.pix.cancel" | "gn.opb.config.write" | "gn.opb.config.rea")[] | undefined;
+            meioDeNotificacao: ("whatsapp" | "sms")[] | undefined;
+        };
+        valor: {
+            details: {
+                multa: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    };
+                    details: {
+                        cents: number;
+                        units: number;
+                        originalValue: string;
+                        format: string;
+                    };
+                };
+                juros: {
+                    data: {
+                        modalidade: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                        valorPerc: string;
+                    };
+                    details: {
+                        modalidade: {
+                            type: "dias corridos" | "dias úteis";
+                            interest: "Percentual" | "Valor";
+                            periodicity: "dia" | "mês" | "ano";
+                            format: `${string} ao dia (dias corridos)` | `${string} ao dia (dias \u00FAteis)` | `${string} ao m\u00EAs (dias corridos)` | `${string} ao m\u00EAs (dias \u00FAteis)` | `${string} ao ano (dias corridos)` | `${string} ao ano (dias \u00FAteis)`;
+                        };
+                        value: string;
+                    };
+                };
+                abatimento: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    } | undefined;
+                    details: {
+                        modalidade: {
+                            type: "Valor Fixo" | "Valor Percentual";
+                        } | undefined;
+                        value: string | undefined;
+                    };
+                };
+                desconto: {
+                    data: {
+                        modalidade: 1 | 2;
+                        valorPerc: string;
+                    } | undefined;
+                    details: {
+                        modalidade: {
+                            type: "por antecipação dias corridos" | "por antecipação dias úteis" | "fixo";
+                            interest: "Percentual" | "Valor";
+                        };
+                        value: {
+                            data: `${string}-${string}-${string}`;
+                            value: string;
+                        }[];
+                    };
+                };
+            };
+            value: string;
+        };
+        chave: string;
+        solicitacaoPagador: string;
+        pixCopiaECola: string;
+    };
+}
+
+declare class PixPaymentSplitImediateChargeAttachmentResponse extends ApiResponse {
+    #private;
+    constructor({ config, ...imediateChargeProps }: PixPaymentSplitFindUniqueImediateChargeAttachmentResponseType);
+    get calendario(): CalendarImediateCharge;
+    get txid(): TxId$1;
+    get revisao(): number;
+    get loc(): PixLocation<"cob">;
+    /**
+     * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+     */
+    get location(): string;
+    get status(): Status$2;
+    get devedor(): UserAccount;
+    get valor(): MonetaryValue;
+    get chave(): string;
+    get solicitacaoPagador(): string;
+    get pixCopiaECola(): string;
+    get config(): {
+        id: Id;
+        status: string;
+        descricao: string;
+    };
+    toObject(props?: {
+        valueFormat?: MonetaryValueToObjectProps['formatProps'];
+    }): {
+        config: {
+            id: string;
+            status: string;
+            descricao: string;
+        };
+        calendario: {
+            criacao: Date;
+            expiracao: number;
+        };
+        txid: string;
+        revisao: number;
+        loc: {
+            id: number;
+            location: string;
+            tipoCob: "cob";
+            criacao: Date | undefined;
+        };
+        location: string;
+        status: Status$2;
+        devedor: {
+            clienteFinal: {
+                celular: string | undefined;
+                cpf: string | undefined;
+                dataNascimento: `${number}/${number}/${number}`;
+                email: string | undefined;
+                endereco: {
+                    bairro: string;
+                    cep: string;
+                    cidade: string;
+                    complemento: string;
+                    estado: "AM" | "PA" | "RR" | "AP" | "AC" | "RO" | "TO" | "MA" | "PI" | "CE" | "RN" | "PB" | "PE" | "AL" | "SE" | "BA" | "MG" | "ES" | "RJ" | "SP" | "PR" | "SC" | "RS" | "MS" | "MT" | "GO" | "DF";
+                    logradouro: string;
+                    numero: string;
+                } | undefined;
+                nomeCompleto: string;
+                nomeMae: string | undefined;
+                cnpj: string | undefined;
+                razaoSocial: string | undefined;
+            };
+            escoposIntegrados: ("cob.write" | "cob.read" | "pix.write" | "pix.read" | "webhook.write" | "webhook.read" | "payloadlocation.write" | "payloadlocation.read" | "gn.pix.evp.write" | "gn.pix.evp.read" | "gn.balance.read" | "gn.settings.write" | "gn.settings.read" | "gn.opb.participants.read" | "gn.opb.payment.pix.send" | "gn.opb.payment.pix.read" | "gn.opb.payment.pix.refund" | "gn.opb.payment.pix.cancel" | "gn.opb.config.write" | "gn.opb.config.rea")[] | undefined;
+            meioDeNotificacao: ("whatsapp" | "sms")[] | undefined;
+        };
+        valor: {
+            cents: number;
+            units: number;
+            originalValue: string;
+            format: string;
+        };
+        chave: string;
+        solicitacaoPagador: string;
+        pixCopiaECola: string;
+    };
+}
+
+type ResponseSplit = {
+    /**
+     *
+     * ---
+     *
+     * Define o tipo de repasse, se é porcentagem ou fixo.
+     *
+     * ---
+     *
+     * `(string)` Ex: `'porcentagem'` ou `'fixo'`
+     *
+     */
+    tipo: Tipo;
+    /**
+     *
+     * ---
+     *
+     * Define o valor que será repassado. Se o tipo for `"porcentagem"`,  representa a porcentagem, caso contrário representará o valor nominal
+     *
+     * ---
+     *
+     * `(string)`. Ex: `"60.00"` `(60%)`
+     */
+    valor: string;
+};
+type ResponseFavorecido = {
+    /**
+     * CPF do favorecido.string `/^\d{11}$/`
+     */
+    cpf: Cpf;
+    /**
+     * CNPJ do favorecido.string `/^\d{14}$/`
+     */
+    cnpj?: undefined;
+    /**
+     * Número da conta do favorecido (incluindo digito final, sem o hífen).
+     */
+    conta: string;
+} | {
+    /**
+     * CNPJ do favorecido.string `/^\d{14}$/`
+     */
+    cnpj: Cnpj;
+    /**
+     * CPF do favorecido.string `/^\d{11}$/`
+     */
+    cpf?: undefined;
+    /**
+     * Número da conta do favorecido (incluindo digito final, sem o hífen).
+     */
+    conta: string;
+};
+declare class PixPaymentSplitResponse extends ApiResponse {
+    #private;
+    constructor(props: PixPaymentSplitResponseType);
+    get id(): Id;
+    /**
+     *
+     * ---
+     *
+     * O campo descricao , opcional, determina um texto a ser apresentado na criação da configuração do Split em formato livre. Esse texto será preenchido pelo criador da configuração do Split. O tamanho do campo está limitado a 80 caracteres (string).
+     *
+     * ---
+     *
+     * `string`
+     */
+    get descricao(): string;
+    /**
+     * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+     *
+     * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+     *
+     * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+     * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+     *
+     * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+     */
+    get txid(): TxId$1 | undefined;
+    /**
+     * `Object (Lancamento)`
+     */
+    get lancamento(): {
+        imediato: boolean;
+    };
+    /**
+     * `Object (Split)`
+     */
+    get split(): {
+        /**
+         *
+         * ---
+         *
+         * Maneira a qual a tarifa será cobrada.
+         *
+         * ---
+         *
+         * `(string)` Ex: `"assumir_total"` ou `"proporcional"`
+         */
+        divisaoTarifa: "assumir_total" | "proporcional";
+        /**
+         *
+         * ---
+         *
+         * Define o repasse para a conta do cliente que está configurando o Split.
+         *
+         * ---
+         *
+         * `(string)`
+         */
+        minhaParte: ResponseSplit;
+        repasses: (ResponseSplit & {
+            favorecido: ResponseFavorecido;
+        })[];
+    };
+    toObject(): {
+        id: Id;
+        descricao: string;
+        txid: TxId$1 | undefined;
+        lancamento: {
+            imediato: boolean;
+        };
+        split: {
+            divisaoTarifa: "assumir_total" | "proporcional";
+            minhaParte: {
+                tipo: Tipo;
+                valor: string;
+            };
+            repasses: {
+                tipo: Tipo;
+                valor: string;
+                favorecido: {
+                    cpf: Cpf;
+                    conta: string;
+                    cnpj?: undefined;
+                } | {
+                    cnpj: string;
+                    conta: string;
+                    cpf?: undefined;
+                };
+            }[];
+        };
+    };
+}
+
+/**
+ *
+ * ---
+ *
+ * Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+ *
+ * ---
+ *
+ * ### Importante!
+ *
+ * O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+ *
+ * ---
+ *
+ * ### Informação
+ *
+ * Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+ *
+ * ---
+ *
+ * ### Configure Split de Pagamento em QR Code e copia e cola estático!
+ *
+ * Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+ *
+ * ---
+ *
+ * ### Instruções para testes em Homologação
+ *
+ * No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+ *
+ * É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+ *
+ * ---
+ *
+ */
+declare class PixPaymentSplit<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
+    /**
+     *
+     * ---
+     *
+     * Cadastrar uma cobrança com um identificador de transação (`id`). O id é criado pela pessoa usuária recebedora e está sob sua responsabilidade. Caso o usuário informe um id que já exista, esse endpoint irá atualizar a configuração da cobrança.
+     *
+     * ---
+     *
+     * ### Caso `id` não seja informado
+     *
+     * Em geral, o `id` é criado pela pessoa recebedora e está sob sua responsabilidade. Porém, neste caso, o id será definido pela Efí, fazendo uma exceção à regra padrão.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitCreateProps
+     * @returns `PixPaymentSplitResponse | null`
+     *
+     */
+    create({ body, id }: PixPaymentSplitCreateProps): Promise<PixPaymentSplitResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar um Split de pagamento partir do id.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitFindUniqueProps
+     * @returns `PixPaymentSplitResponse | null`
+     */
+    findUnique({ id, searchParams }: PixPaymentSplitFindUniqueProps): Promise<PixPaymentSplitResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Vincula uma cobrança Pix a um Split de pagamento. Ele utiliza dois campos (`txid` da cobrança e splitConfigId do Split de pagamento) para fazer essa vinculação quando a cobrança Pix está ativa.
+     *
+     * ---
+     *
+     */
+    attachImediateCharge({ txid, splitConfigId, }: PixPaymentSplitAttachImediateChargeProps): Promise<PixPaymentSplitAttachmentResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar uma cobrança com Split de pagamento a partir do `txid`.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+     * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+     */
+    findUniqueImediateChargeAttachment({ txid, }: PixPaymentSplitFindUniqueImediateChargeAttachmentProps): Promise<PixPaymentSplitImediateChargeAttachmentResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Deletar o vinculo entre um split de pagamento e uma cobrança a partir do `txid`.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+     * @returns `PixPaymentSplitAttachmentResponse | null`
+     */
+    deleteImediateChargeAttachment({ txid, }: PixPaymentSplitDeleteImediateChargeAttachmentProps): Promise<PixPaymentSplitAttachmentResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Vincula uma cobrança com vencimento (COBV) a um Split de pagamento.
+     *
+     * ---
+     *
+     */
+    attachDueCharge({ txid, splitConfigId, }: PixPaymentSplitAttachDueChargeProps): Promise<PixPaymentSplitAttachmentResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Consultar  uma cobrança com vencimento e com a partir do `txid`.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+     * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+     */
+    findUniqueDueChargeAttachment({ txid, }: PixPaymentSplitFindUniqueDueChargeAttachmentProps): Promise<PixPaymentSplitDueChargeAttachmentResponse | null>;
+    /**
+     *
+     * ---
+     *
+     * Deletar o vinculo entre um split de pagamento e uma cobrança com vencimento a partir do `txid`.
+     *
+     * ---
+     *
+     * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+     * @returns `PixPaymentSplitAttachmentResponse | null`
+     */
+    deleteDueChargeAttachment({ txid, }: PixPaymentSplitDeleteImediateChargeAttachmentProps): Promise<PixPaymentSplitAttachmentResponse | null>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): PixPaymentSplit<type>;
+}
+
+/**
  * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
  */
 type IdEnvio = string
@@ -6519,7 +7332,7 @@ declare class PixWebhooks<type extends EnvironmentTypes> extends ApiRequest<type
 
 interface PixRequestProps<type extends EnvironmentTypes> {
     type: type;
-    options: Optional<EfiConfig<type, 'PIX'>, 'sandbox'>;
+    options: Optional<EfiConfig<type, 'PIX'>, 'sandbox' | 'certificateType'>;
 }
 /**
  * A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. Com nossa API é possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
@@ -6559,6 +7372,42 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
      * Responsável pela gestão de cobranças em lote. As cobranças, no contexto da API Pix, representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
      */
     get batchCollections(): PixBatchCollections<type>;
+    /**
+     *
+     * ---
+     *
+     * Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+     *
+     * ---
+     *
+     * ### Importante!
+     *
+     * O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+     *
+     * ---
+     *
+     * ### Informação
+     *
+     * Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+     *
+     * ---
+     *
+     * ### Configure Split de Pagamento em QR Code e copia e cola estático!
+     *
+     * Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+     *
+     * ---
+     *
+     * ### Instruções para testes em Homologação
+     *
+     * No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+     *
+     * É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+     *
+     * ---
+     *
+     */
+    get paymentSplit(): PixPaymentSplit<type>;
     useCredentials({ clientId, clientSecret, }: {
         clientId: string;
         clientSecret: string;
@@ -6569,6 +7418,48 @@ type OptionsCredentials = {
     client_id?: string;
     client_secret?: string;
     certificate?: PathLike;
+    certificateType?: CertificateType;
+};
+type GenerateDotEnvProps = {
+    variables?: {
+        CERTIFICADO_HOMOLOGACAO_PATH?: string;
+        CERTIFICADO_PRODUCAO_PATH?: string;
+        CERTIFICADO_HOMOLOGACAO_BASE64?: string;
+        CERTIFICADO_PRODUCAO_BASE64?: string;
+        CLIENT_ID_HOMOLOGACAO?: string;
+        CLIENT_SECRET_HOMOLOGACAO?: string;
+        CLIENT_ID_PRODUCAO?: string;
+        CLIENT_SECRET_PRODUCAO?: string;
+        PIX_KEY?: string;
+        WEBHOOK_PIX?: string;
+    };
+    mode?: 'append' | 'overwrite';
+};
+type GenerateBase64FromCertificateProps = {
+    /**
+     *
+     * ---
+     *
+     *  Caminho onde o arquivo de Homologação está salvo.
+     *
+     * Passe o caminho para realizar a conversão para `base64`.
+     *
+     * ---
+     *
+     */
+    certificadoHomologacaoPath?: string;
+    /**
+     *
+     * ---
+     *
+     *  Caminho onde o arquivo de Produção está salvo.
+     *
+     * Passe o caminho para realizar a conversão para `base64`.
+     *
+     * ---
+     *
+     */
+    certificadoProducaoPath?: string;
 };
 declare class EfiPay<type extends EnvironmentTypes> {
     #private;
@@ -6578,9 +7469,59 @@ declare class EfiPay<type extends EnvironmentTypes> {
      *
      * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
      *
-     * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+     * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
      */
     get pix(): PixRequest<type>;
+    /**
+     *
+     * ---
+     *
+     * Gera o arquivo `.env` na raiz do seu projeto com todas as variáveis de ambiente necessárias.
+     *
+     * Caso o `.env` já exista, escreve as variáveis de ambiente **depois do conteúdo existente**. Para sobrescrever o conteúdo existente, utilize a chame `mode` e passe o valor `overwrite`. Exemplo:
+     *
+     * ```ts
+     * EfiPay.generateDotEnv({
+     *  mode: 'overwrite'
+     * })
+     * ```
+     *
+     * ---
+     *
+     * ### Escrever as Variáveis de Ambiente
+     *
+     * Você pode passar os valores das variáveis de ambiente variáveis de ambiente através da chave `variables`. Exemplo:
+     *
+     * ```ts
+     * EfiPay.generateDotEnv({
+     *  variables: {
+     *    CERTIFICADO_HOMOLOGACAO_PATH: './path/to/homologacao-certificate.(p12|pem)'
+     *  }
+     * })
+     * ```
+     *
+     * ---
+     *
+     * As Variáveis de ambiente não informadas serão escritas com valores dummy padrão
+     *
+     * ---
+     *
+     * @param GenerateDotEnvProps
+     */
+    static generateDotEnv(props?: GenerateDotEnvProps): void;
+    /**
+     *
+     * ---
+     *
+     * Converte os certificados em  string `base64`
+     *
+     * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+     *
+     * ---
+     *
+     * @param GenerateBase64FromCertificateProps
+     */
+    static generateBase64FromCertificate({ certificadoHomologacaoPath, certificadoProducaoPath, }: GenerateBase64FromCertificateProps): void;
 }
 
 export { EfiPay as default };

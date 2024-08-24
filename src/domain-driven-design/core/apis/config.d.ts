@@ -8,14 +8,17 @@ import {
   OperationTypes,
 } from './constants-callbacks'
 
+export type CertificateType = 'file' | 'base64' | 'buffer'
+
 export interface EfiConfig<
   type extends EnvironmentTypes,
   operation extends OperationTypes | undefined = undefined,
 > {
   client_id: string
   client_secret: string
-  certificate?: PathLike | string
-  pemKey?: PathLike | string
+  certificateType: CertificateType
+  certificate?: PathLike | string | Buffer
+  pemKey?: PathLike | string | Buffer
   sandbox: boolean
   partnerToken?: string
   rawResponse?: unknown

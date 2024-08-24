@@ -32,7 +32,10 @@ export abstract class ApiRequest<
   constructor(
     type: type,
     operation: operation,
-    options: Optional<EfiConfig<type, operation>, 'sandbox'>,
+    options: Optional<
+      EfiConfig<type, operation>,
+      'sandbox' | 'certificateType'
+    >,
   ) {
     this.#constants = constantsCallbacks
     this.#endpoints = this.#constants.APIS[operation]

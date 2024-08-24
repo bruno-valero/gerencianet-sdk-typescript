@@ -18,8 +18,8 @@ describe.skip('Pix Webhooks', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })
@@ -35,7 +35,7 @@ describe.skip('Pix Webhooks', () => {
     }
 
     const resp = await sut.add({
-      chave: env.PIX_KEY,
+      chave: env.PIX_KEY ?? '',
       body: {
         webhookUrl,
       },
@@ -48,7 +48,7 @@ describe.skip('Pix Webhooks', () => {
 
   it('should be able find a webhook added by its pix key', async () => {
     const resp = await sut.findUnique({
-      chave: env.PIX_KEY,
+      chave: env.PIX_KEY ?? '',
     })
 
     expect(resp).not.toBeNull()
@@ -72,7 +72,7 @@ describe.skip('Pix Webhooks', () => {
 
   it('should be able to delete a webhook added by its pix key', async () => {
     const resp = await sut.delete({
-      chave: env.PIX_KEY,
+      chave: env.PIX_KEY ?? '',
     })
 
     console.log('resp:', resp?.toJson(null, 2))

@@ -389,6 +389,9 @@ var require_cli_options = __commonJS({
   }
 });
 
+// src/index.ts
+import { existsSync, readFileSync, writeFileSync } from "fs";
+
 // src/domain-driven-design/core/apis/api-request.ts
 import axios2, { AxiosError as AxiosError2 } from "axios";
 
@@ -849,24 +852,30 @@ var pixEndpoints = {
       route: `/v2/gn/split/cob/${txid}`,
       method: `get`
     }),
-    pixSplitLinkCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+    pixSplitLinkCharge: ({
+      txid,
+      splitConfigId
+    }) => ({
+      route: `/v2/gn/split/cob/${txid}/vinculo/${splitConfigId}`,
       method: `put`
     }),
     pixSplitUnlinkCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cob/${txid}/vinculo/:splitConfigId`,
+      route: `/v2/gn/split/cob/${txid}/vinculo`,
       method: `delete`
     }),
     pixSplitDetailDueCharge: ({ txid }) => ({
       route: `/v2/gn/split/cobv/${txid}`,
       method: `get`
     }),
-    pixSplitLinkDueCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+    pixSplitLinkDueCharge: ({
+      txid,
+      splitConfigId
+    }) => ({
+      route: `/v2/gn/split/cobv/${txid}/vinculo/${splitConfigId}`,
       method: `put`
     }),
     pixSplitUnlinkDueCharge: ({ txid }) => ({
-      route: `/v2/gn/split/cobv/${txid}/vinculo/:splitConfigId`,
+      route: `/v2/gn/split/cobv/${txid}/vinculo`,
       method: `delete`
     }),
     pixSplitConfig: () => ({
@@ -983,11 +992,41 @@ var Auth = class {
     try {
       if (this.options.certificate) {
         if (this.options.pemKey) {
-          this.#options.agent = new https.Agent({
-            cert: fs.readFileSync(this.options.certificate),
-            key: fs.readFileSync(this.options.pemKey),
-            passphrase: ""
-          });
+          switch (this.options.certificateType) {
+            case "file":
+              this.#options.agent = new https.Agent({
+                cert: fs.readFileSync(this.options.certificate),
+                key: fs.readFileSync(this.options.pemKey),
+                passphrase: ""
+              });
+              break;
+            case "buffer":
+              if (!(this.options.certificate instanceof Buffer))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`
+                );
+              if (!(this.options.pemKey instanceof Buffer))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`);
+              this.#options.agent = new https.Agent({
+                cert: this.options.certificate,
+                key: this.options.pemKey,
+                passphrase: ""
+              });
+              break;
+            case "base64":
+              if (!(this.options.certificate instanceof String))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`
+                );
+              if (!(this.options.pemKey instanceof String))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`);
+              this.#options.agent = new https.Agent({
+                cert: Buffer.from(this.options.certificate, "base64"),
+                key: Buffer.from(this.options.pemKey, "base64"),
+                passphrase: ""
+              });
+              break;
+          }
         } else {
           this.#options.agent = new https.Agent({
             pfx: fs.readFileSync(this.options.certificate),
@@ -2383,9 +2422,10 @@ var PixDueChargeValue = class extends PixDueChargeValueContract {
 };
 
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-due-charge/pix-due-charge-response.ts
-var PixDueChargeResponse = class {
+var PixDueChargeResponse = class extends ApiResponse {
   #props;
   constructor(props) {
+    super();
     this.#props = {
       calendario: new CalendarDueCharge({
         criacao: props.calendario.criacao,
@@ -3310,6 +3350,477 @@ var PixPayloadLocations = class _PixPayloadLocations extends ApiRequest {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-attachment-response.ts
+var PixPaymentSplitAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    console.log("PixPaymentSplitAttachmentResponse constructor props:", props);
+    this.#props = {
+      success: props === ""
+    };
+  }
+  get success() {
+    return this.#props.success;
+  }
+  toObject() {
+    return {
+      success: this.success
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-due-charge-attachment-response.ts
+var PixPaymentSplitDueChargeAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor({
+    config,
+    ...dueChargeProps
+  }) {
+    super();
+    this.#props = {
+      dueChargeResponse: new PixDueChargeResponse(dueChargeProps),
+      config: {
+        id: new Id({ size: 35, value: config.id }),
+        descricao: config.descricao,
+        status: config.status
+      }
+    };
+  }
+  get calendario() {
+    return this.#props.dueChargeResponse.calendario;
+  }
+  get txid() {
+    return this.#props.dueChargeResponse.txid;
+  }
+  get revisao() {
+    return this.#props.dueChargeResponse.revisao;
+  }
+  get loc() {
+    return this.#props.dueChargeResponse.loc;
+  }
+  /**
+   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+   */
+  get location() {
+    return this.#props.dueChargeResponse.location;
+  }
+  get status() {
+    return this.#props.dueChargeResponse.status;
+  }
+  get devedor() {
+    return this.#props.dueChargeResponse.devedor;
+  }
+  get valor() {
+    return this.#props.dueChargeResponse.valor;
+  }
+  get chave() {
+    return this.#props.dueChargeResponse.chave;
+  }
+  get solicitacaoPagador() {
+    return this.#props.dueChargeResponse.solicitacaoPagador;
+  }
+  get pixCopiaECola() {
+    return this.#props.dueChargeResponse.pixCopiaECola;
+  }
+  get config() {
+    return this.#props.config;
+  }
+  toObject(props) {
+    return {
+      ...this.#props.dueChargeResponse.toObject(props),
+      config: {
+        id: this.config.id.value,
+        status: this.config.status,
+        descricao: this.config.descricao
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-imediate-charge-attachment-response.ts
+var PixPaymentSplitImediateChargeAttachmentResponse = class extends ApiResponse {
+  #props;
+  constructor({
+    config,
+    ...imediateChargeProps
+  }) {
+    super();
+    this.#props = {
+      imediateChargeResponse: new PixImediateChargeResponse(
+        imediateChargeProps
+      ),
+      config: {
+        id: new Id({ size: 35, value: config.id }),
+        descricao: config.descricao,
+        status: config.status
+      }
+    };
+  }
+  get calendario() {
+    return this.#props.imediateChargeResponse.calendario;
+  }
+  get txid() {
+    return this.#props.imediateChargeResponse.txid;
+  }
+  get revisao() {
+    return this.#props.imediateChargeResponse.revisao;
+  }
+  get loc() {
+    return this.#props.imediateChargeResponse.loc;
+  }
+  /**
+   * Um location é a URL do tipo [URL de capacidade](https://www.w3.org/TR/capability-urls/) que serve de **endereço para uma cobrança**. Em outras palavras, é através de um location que se torna possível resgatar as informações relacionadas a uma cobrança e, assim, realizar as movimentações.
+   */
+  get location() {
+    return this.#props.imediateChargeResponse.location;
+  }
+  get status() {
+    return this.#props.imediateChargeResponse.status;
+  }
+  get devedor() {
+    return this.#props.imediateChargeResponse.devedor;
+  }
+  get valor() {
+    return this.#props.imediateChargeResponse.valor;
+  }
+  get chave() {
+    return this.#props.imediateChargeResponse.chave;
+  }
+  get solicitacaoPagador() {
+    return this.#props.imediateChargeResponse.solicitacaoPagador;
+  }
+  get pixCopiaECola() {
+    return this.#props.imediateChargeResponse.pixCopiaECola;
+  }
+  get config() {
+    return this.#props.config;
+  }
+  toObject(props) {
+    return {
+      ...this.#props.imediateChargeResponse.toObject(props),
+      config: {
+        id: this.config.id.value,
+        status: this.config.status,
+        descricao: this.config.descricao
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/pix-payment-split-response.ts
+var PixPaymentSplitResponse = class extends ApiResponse {
+  #props;
+  constructor(props) {
+    super();
+    this.#props = {
+      id: new Id({ size: 35, value: props.id }),
+      descricao: props.descricao,
+      txid: props.txid ? new TxId(props.txid) : void 0,
+      lancamento: props.lancamento,
+      split: {
+        divisaoTarifa: props.split.divisaoTarifa,
+        minhaParte: {
+          tipo: props.split.minhaParte.tipo,
+          valor: props.split.minhaParte.valor
+        },
+        repasses: props.split.repasses.map((item) => ({
+          tipo: item.tipo,
+          valor: item.valor,
+          favorecido: item.favorecido.cpf ? {
+            cpf: new Cpf(item.favorecido.cpf),
+            conta: item.favorecido.conta
+          } : {
+            cnpj: new Cnpj(item.favorecido.cnpj),
+            conta: item.favorecido.conta
+          }
+        }))
+      }
+    };
+  }
+  get id() {
+    return this.#props.id;
+  }
+  /**
+   *
+   * ---
+   *
+   * O campo descricao , opcional, determina um texto a ser apresentado na criação da configuração do Split em formato livre. Esse texto será preenchido pelo criador da configuração do Split. O tamanho do campo está limitado a 80 caracteres (string).
+   *
+   * ---
+   *
+   * `string`
+   */
+  get descricao() {
+    return this.#props.descricao;
+  }
+  /**
+   * O campo txid determina o identificador da transação. Para mais detalhes [clique aqui](https://dev.efipay.com.br/docs/api-pix/glossario).
+   *
+   * Cada transação Pix possui um **Identificador da Transação**, chamado `txid`, que no contexto de representação de uma cobrança, é único por CPF/CNPJ da pessoa usuária recebedora.
+   *
+   * Um `txid` é uma string alfanumérica com comprimentos mínimo de 26 e máximo de 35 caracteres. Um txid válido, portanto, deve obedecer à seguinte expressão regular (regex): `^[a-zA-Z0-9]{26,35}$`.
+   * Você pode validar strings txid sob a regex [aqui](https://regex101.com/r/iZ08y4/1).
+   *
+   * - string (Id da Transação) `^[a-zA-Z0-9]{26,35}$`
+   */
+  get txid() {
+    return this.#props.txid;
+  }
+  /**
+   * `Object (Lancamento)`
+   */
+  get lancamento() {
+    return this.#props.lancamento;
+  }
+  /**
+   * `Object (Split)`
+   */
+  get split() {
+    return this.#props.split;
+  }
+  toObject() {
+    return {
+      id: this.id,
+      descricao: this.descricao,
+      txid: this.txid,
+      lancamento: this.lancamento,
+      split: {
+        divisaoTarifa: this.split.divisaoTarifa,
+        minhaParte: {
+          tipo: this.split.minhaParte.tipo,
+          valor: this.split.minhaParte.valor
+        },
+        repasses: this.split.repasses.map((item) => ({
+          tipo: item.tipo,
+          valor: item.valor,
+          favorecido: item.favorecido.cpf?.format() ? {
+            cpf: item.favorecido.cpf,
+            conta: item.favorecido.conta
+          } : {
+            cnpj: item.favorecido.cnpj.format(),
+            conta: item.favorecido.conta
+          }
+        }))
+      }
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-payment-split/index.ts
+var PixPaymentSplit = class _PixPaymentSplit extends ApiRequest {
+  /**
+   *
+   * ---
+   *
+   * Cadastrar uma cobrança com um identificador de transação (`id`). O id é criado pela pessoa usuária recebedora e está sob sua responsabilidade. Caso o usuário informe um id que já exista, esse endpoint irá atualizar a configuração da cobrança.
+   *
+   * ---
+   *
+   * ### Caso `id` não seja informado
+   *
+   * Em geral, o `id` é criado pela pessoa recebedora e está sob sua responsabilidade. Porém, neste caso, o id será definido pela Efí, fazendo uma exceção à regra padrão.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitCreateProps
+   * @returns `PixPaymentSplitResponse | null`
+   *
+   */
+  async create({ body, id }) {
+    const { method, route } = id ? this.endpoints.ENDPOINTS.pixSplitConfigId({ id }) : this.endpoints.ENDPOINTS.pixSplitConfig();
+    const resp = await this.sendRequest({
+      method,
+      route,
+      body,
+      ResponseClass: PixPaymentSplitResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar um Split de pagamento partir do id.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueProps
+   * @returns `PixPaymentSplitResponse | null`
+   */
+  async findUnique({ id, searchParams }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailConfig({
+      id
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      searchParams,
+      ResponseClass: PixPaymentSplitResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Vincula uma cobrança Pix a um Split de pagamento. Ele utiliza dois campos (`txid` da cobrança e splitConfigId do Split de pagamento) para fazer essa vinculação quando a cobrança Pix está ativa.
+   *
+   * ---
+   *
+   */
+  async attachImediateCharge({
+    txid,
+    splitConfigId
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitLinkCharge({
+      txid,
+      splitConfigId
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar uma cobrança com Split de pagamento a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+   */
+  async findUniqueImediateChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitImediateChargeAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Deletar o vinculo entre um split de pagamento e uma cobrança a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitAttachmentResponse | null`
+   */
+  async deleteImediateChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitUnlinkCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Vincula uma cobrança com vencimento (COBV) a um Split de pagamento.
+   *
+   * ---
+   *
+   */
+  async attachDueCharge({
+    txid,
+    splitConfigId
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitLinkDueCharge({
+      txid,
+      splitConfigId
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Consultar  uma cobrança com vencimento e com a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitFindUniqueImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitImediateChargeAttachmentResponse | null`
+   */
+  async findUniqueDueChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitDetailDueCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitDueChargeAttachmentResponse
+    });
+    return resp;
+  }
+  /**
+   *
+   * ---
+   *
+   * Deletar o vinculo entre um split de pagamento e uma cobrança com vencimento a partir do `txid`.
+   *
+   * ---
+   *
+   * @param PixPaymentSplitDeleteImediateChargeAttachmentProps
+   * @returns `PixPaymentSplitAttachmentResponse | null`
+   */
+  async deleteDueChargeAttachment({
+    txid
+  }) {
+    const { method, route } = this.endpoints.ENDPOINTS.pixSplitUnlinkDueCharge({
+      txid
+    });
+    const resp = await this.sendRequest({
+      method,
+      route,
+      ResponseClass: PixPaymentSplitAttachmentResponse
+    });
+    return resp;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _PixPaymentSplit(type, "PIX", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
 // src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-send-and-payment/pix-send-and-payment-send-response.ts
 var PixSendAndPaymentSendResponse = class extends ApiResponse {
   #props;
@@ -3599,6 +4110,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
   #manage;
   #payloadLocations;
   #batchCollections;
+  #paymentSplit;
   constructor({ type, options }) {
     super(type, "PIX", options);
     options.authRoute = this.endpoints.ENDPOINTS.authorize();
@@ -3609,6 +4121,7 @@ var PixRequest = class _PixRequest extends ApiRequest {
     this.#manage = new PixManage(type, "PIX", options);
     this.#payloadLocations = new PixPayloadLocations(type, "PIX", options);
     this.#batchCollections = new PixBatchCollections(type, "PIX", options);
+    this.#paymentSplit = new PixPaymentSplit(type, "PIX", options);
   }
   /**
    * Responsável pela gestão de cobranças imediatas. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
@@ -3652,6 +4165,44 @@ var PixRequest = class _PixRequest extends ApiRequest {
   get batchCollections() {
     return this.#batchCollections;
   }
+  /**
+   *
+   * ---
+   *
+   * Realização do Split de pagamento na API Pix Efí. Responsável pela configuração dos Splits de pagamento na API Pix. As cobranças, no contexto da API Pix representam uma transação financeira entre um pagador e um recebedor, cuja forma de pagamento é o Pix.
+   *
+   * ---
+   *
+   * ### Importante!
+   *
+   * O **Split de pagamento Pix** só pode ser realizado entre contas Efí, com limite máximo de 20 contas para o repasse.
+   *
+   * ---
+   *
+   * ### Informação
+   *
+   * Uma mesma configuração de Split pode ser utilizada em várias cobranças. Isso significa que você pode definir uma divisão de valores para um parceiro e aplicá-la em todas as cobranças relacionadas.
+   *
+   * ---
+   *
+   * ### Configure Split de Pagamento em QR Code e copia e cola estático!
+   *
+   * Você tem a flexibilidade de dividir o pagamento dos QR Codes e copia e cola estático entre diferentes contas Efí. Isso significa que, ao gerar um QR Code ou um código copia e cola estáticos para pagamento, você pode especificar como o valor recebido será distribuído, facilitando a gestão financeira e assegurando que os fundos sejam alocados corretamente desde o início.
+   *
+   * ---
+   *
+   * ### Instruções para testes em Homologação
+   *
+   * No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ válida.
+   *
+   * É importante destacar que não é possível realizar o split para a própria conta. Portanto, se estiver realizando testes em ambiente de homologação e não possuir uma conta válida para os repasses, será necessário criar uma subconta. Veja como fazer isso [aqui](https://sejaefi.com.br/central-de-ajuda/efi-bank/ter-mais-de-uma-conta-efi#conteudo).
+   *
+   * ---
+   *
+   */
+  get paymentSplit() {
+    return this.#paymentSplit;
+  }
   // eslint-disable-next-line
   // @ts-ignore
   useCredentials({
@@ -3687,14 +4238,16 @@ var PixRequest = class _PixRequest extends ApiRequest {
 import z4 from "zod";
 var envSchema = z4.object({
   // CERTIFICATES
-  CERTIFICADO_HOMOLOGACAO_PATH: z4.string().min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_PATH" is missing'),
-  CERTIFICADO_PRODUCAO_PATH: z4.string().min(1, 'environment variable "CERTIFICADO_PRODUCAO_PATH" is missing'),
+  CERTIFICADO_HOMOLOGACAO_PATH: z4.string().optional(),
+  CERTIFICADO_PRODUCAO_PATH: z4.string().optional(),
+  CERTIFICADO_HOMOLOGACAO_BASE64: z4.string().optional(),
+  CERTIFICADO_PRODUCAO_BASE64: z4.string().optional(),
   // CREDENTIALS
-  CLIENT_ID_HOMOLOGACAO: z4.string().min(1, 'environment variable "CLIENT_ID_HOMOLOGACAO" is missing'),
-  CLIENT_SECRET_HOMOLOGACAO: z4.string().min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing'),
-  CLIENT_ID_PRODUCAO: z4.string().min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing'),
+  CLIENT_ID_HOMOLOGACAO: z4.string().optional(),
+  CLIENT_SECRET_HOMOLOGACAO: z4.string().optional(),
+  CLIENT_ID_PRODUCAO: z4.string().optional(),
   CLIENT_SECRET_PRODUCAO: z4.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_KEY: z4.string().min(1, 'environment variable "PIX_KEY" is missing')
+  PIX_KEY: z4.string().optional()
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)
@@ -3724,25 +4277,37 @@ function makeOptions({ type, operation, data }) {
     throw new Error(
       'operation must be one of those: "PIX" | "DEFAULT" | "OPENFINANCE" | "PAGAMENTOS" | "CONTAS" | undefined = undefined'
     );
+  const certificateHomologacao = env.CERTIFICADO_HOMOLOGACAO_PATH || env.CERTIFICADO_HOMOLOGACAO_BASE64;
+  const certificateProducao = env.CERTIFICADO_PRODUCAO_PATH || env.CERTIFICADO_PRODUCAO_BASE64;
   const opt = {
     client_id: data?.client_id || env.CLIENT_ID_HOMOLOGACAO,
     client_secret: data?.client_secret || env.CLIENT_SECRET_HOMOLOGACAO,
-    certificate: data?.certificate || env.CERTIFICADO_HOMOLOGACAO_PATH
+    certificate: data?.certificate || type === "SANDBOX" ? certificateHomologacao : certificateProducao,
+    certificateType: data?.certificateType || "file"
   };
+  if (!opt.client_id) throw new Error('property "client_id" is empty');
+  if (!opt.client_secret) throw new Error('property "client_secret" is empty');
+  if (!opt.certificate) throw new Error('property "certificate" is empty');
+  if (!opt.certificateType)
+    throw new Error('property "certificateType" is empty');
   return opt;
 }
-var EfiPay = class {
+var EfiPay = class _EfiPay {
   #pix;
   constructor(type, options) {
+    const certificate = options?.certificate;
+    const clientId = options?.client_id;
+    const clientSecret = options?.client_secret;
+    const certificateType = options?.certificateType;
     this.#pix = new PixRequest({
       type,
       options: makeOptions({
         type,
-        operation: "PIX",
         data: {
-          certificate: options?.certificate,
-          client_id: options?.client_id,
-          client_secret: options?.client_secret
+          certificate,
+          client_id: clientId,
+          client_secret: clientSecret,
+          certificateType
         }
       })
     });
@@ -3752,10 +4317,126 @@ var EfiPay = class {
    *
    * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
    *
-   * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+   * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
    */
   get pix() {
     return this.#pix;
+  }
+  /**
+   *
+   * ---
+   *
+   * Gera o arquivo `.env` na raiz do seu projeto com todas as variáveis de ambiente necessárias.
+   *
+   * Caso o `.env` já exista, escreve as variáveis de ambiente **depois do conteúdo existente**. Para sobrescrever o conteúdo existente, utilize a chame `mode` e passe o valor `overwrite`. Exemplo:
+   *
+   * ```ts
+   * EfiPay.generateDotEnv({
+   *  mode: 'overwrite'
+   * })
+   * ```
+   *
+   * ---
+   *
+   * ### Escrever as Variáveis de Ambiente
+   *
+   * Você pode passar os valores das variáveis de ambiente variáveis de ambiente através da chave `variables`. Exemplo:
+   *
+   * ```ts
+   * EfiPay.generateDotEnv({
+   *  variables: {
+   *    CERTIFICADO_HOMOLOGACAO_PATH: './path/to/homologacao-certificate.(p12|pem)'
+   *  }
+   * })
+   * ```
+   *
+   * ---
+   *
+   * As Variáveis de ambiente não informadas serão escritas com valores dummy padrão
+   *
+   * ---
+   *
+   * @param GenerateDotEnvProps
+   */
+  static generateDotEnv(props) {
+    const dotEnvData = `
+    # CERTIFICATES ********************************************
+    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH ?? "./path/to/homologacao-certificate.(p12|pem)"}"
+    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH ?? "./path/to/producao-certificate.(p12|pem)"}"
+
+    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 ?? "base64_string_of_homologacao"}"
+    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 ?? "base64_string_of_producao"}"
+
+    # CREDENTIALS ********************************************
+    # HOMOLOGACAO
+    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO ?? "Your_Client_Id_for_Homologacao"}"
+    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO ?? "Your_Client_Secret_for_Homologacao"}"
+    # PRODUCAO
+    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO ?? "Your_Client_Id_for_Producao"}"
+    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? "Your_Client_Secret_for_Producao"}"
+    
+    
+    # SUPPORT VARIABLES? ********************************************
+
+    # PIX
+    PIX_KEY="${props?.variables?.PIX_KEY ?? "you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"}"
+
+    # WEBHOOKS
+    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX ?? "https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"}"
+    `.trim().replaceAll(/  +/gi, "");
+    const mode = props?.mode ?? "append";
+    const fileName = ".env";
+    const rootPath = "./";
+    const path = `${rootPath}${fileName}`;
+    const fileExists = existsSync(path);
+    if (fileExists && mode === "append") {
+      const separator = `
+      
+
+      # *******************************************************************************************
+
+
+      `.replaceAll(/  +/gi, "");
+      writeFileSync(path, `${separator}${dotEnvData}`, { flag: "a" });
+    } else {
+      writeFileSync(path, dotEnvData);
+    }
+    const creationMessage = `Arquivo "${path}" criado com sucesso!`;
+    const overwriteMessage = `Arquivo "${path}" sobrescrito com sucesso!`;
+    const appendMessage = `Dados adicionados no caminho "${path}" com sucesso!`;
+    const message = !fileExists ? creationMessage : mode === "overwrite" ? overwriteMessage : appendMessage;
+    console.log(message);
+  }
+  /**
+   *
+   * ---
+   *
+   * Converte os certificados em  string `base64`
+   *
+   * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+   *
+   * ---
+   *
+   * @param GenerateBase64FromCertificateProps
+   */
+  static generateBase64FromCertificate({
+    certificadoHomologacaoPath,
+    certificadoProducaoPath
+  }) {
+    if (!certificadoHomologacaoPath && !certificadoProducaoPath) {
+      console.warn(
+        `Aten\xE7\xE3o! Nenhum caminho de certificado foi informado, passe pelo menos um caminho de certificado para realizar a convers\xE3o`
+      );
+      return;
+    }
+    const homologacaoBase64 = certificadoHomologacaoPath ? readFileSync(certificadoHomologacaoPath).toString("base64") : void 0;
+    const producaoBase64 = certificadoProducaoPath ? readFileSync(certificadoProducaoPath).toString("base64") : void 0;
+    _EfiPay.generateDotEnv({
+      variables: {
+        CERTIFICADO_HOMOLOGACAO_BASE64: homologacaoBase64,
+        CERTIFICADO_PRODUCAO_BASE64: producaoBase64
+      }
+    });
   }
 };
 var src_default = EfiPay;

@@ -1,3 +1,5 @@
+import { ApiResponse } from '@/domain-driven-design/core/apis/api-response'
+
 import { UserAccount } from '../../../user-account'
 import { MonetaryValueToObjectProps } from '../../../value-objects/monetary-value'
 import { CalendarDueCharge } from '../../value-objects/calendar-due-charge-response'
@@ -7,7 +9,7 @@ import { Status } from '../@types-common'
 import { PixDueChargeResponseType } from './@interfaces-pix-due-charge'
 import { PixDueChargeValue } from './value-objects/pix-due-charge-value'
 
-export class PixDueChargeResponse {
+export class PixDueChargeResponse extends ApiResponse {
   #props: {
     calendario: CalendarDueCharge
     /**
@@ -33,6 +35,7 @@ export class PixDueChargeResponse {
   }
 
   constructor(props: PixDueChargeResponseType) {
+    super()
     this.#props = {
       calendario: new CalendarDueCharge({
         criacao: props.calendario.criacao,

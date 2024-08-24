@@ -416,6 +416,7 @@ __export(src_exports, {
   default: () => src_default
 });
 module.exports = __toCommonJS(src_exports);
+var import_node_fs2 = require("fs");
 
 // src/domain-driven-design/core/apis/api-request.ts
 var import_axios2 = __toESM(require("axios"));
@@ -1017,11 +1018,41 @@ var Auth = class {
     try {
       if (this.options.certificate) {
         if (this.options.pemKey) {
-          this.#options.agent = new import_node_https.default.Agent({
-            cert: import_node_fs.default.readFileSync(this.options.certificate),
-            key: import_node_fs.default.readFileSync(this.options.pemKey),
-            passphrase: ""
-          });
+          switch (this.options.certificateType) {
+            case "file":
+              this.#options.agent = new import_node_https.default.Agent({
+                cert: import_node_fs.default.readFileSync(this.options.certificate),
+                key: import_node_fs.default.readFileSync(this.options.pemKey),
+                passphrase: ""
+              });
+              break;
+            case "buffer":
+              if (!(this.options.certificate instanceof Buffer))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`
+                );
+              if (!(this.options.pemKey instanceof Buffer))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`);
+              this.#options.agent = new import_node_https.default.Agent({
+                cert: this.options.certificate,
+                key: this.options.pemKey,
+                passphrase: ""
+              });
+              break;
+            case "base64":
+              if (!(this.options.certificate instanceof String))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`
+                );
+              if (!(this.options.pemKey instanceof String))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`);
+              this.#options.agent = new import_node_https.default.Agent({
+                cert: Buffer.from(this.options.certificate, "base64"),
+                key: Buffer.from(this.options.pemKey, "base64"),
+                passphrase: ""
+              });
+              break;
+          }
         } else {
           this.#options.agent = new import_node_https.default.Agent({
             pfx: import_node_fs.default.readFileSync(this.options.certificate),
@@ -4233,14 +4264,16 @@ var PixRequest = class _PixRequest extends ApiRequest {
 var import_zod4 = __toESM(require("zod"));
 var envSchema = import_zod4.default.object({
   // CERTIFICATES
-  CERTIFICADO_HOMOLOGACAO_PATH: import_zod4.default.string().min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_PATH" is missing'),
-  CERTIFICADO_PRODUCAO_PATH: import_zod4.default.string().min(1, 'environment variable "CERTIFICADO_PRODUCAO_PATH" is missing'),
+  CERTIFICADO_HOMOLOGACAO_PATH: import_zod4.default.string().optional(),
+  CERTIFICADO_PRODUCAO_PATH: import_zod4.default.string().optional(),
+  CERTIFICADO_HOMOLOGACAO_BASE64: import_zod4.default.string().optional(),
+  CERTIFICADO_PRODUCAO_BASE64: import_zod4.default.string().optional(),
   // CREDENTIALS
-  CLIENT_ID_HOMOLOGACAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_ID_HOMOLOGACAO" is missing'),
-  CLIENT_SECRET_HOMOLOGACAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing'),
-  CLIENT_ID_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing'),
+  CLIENT_ID_HOMOLOGACAO: import_zod4.default.string().optional(),
+  CLIENT_SECRET_HOMOLOGACAO: import_zod4.default.string().optional(),
+  CLIENT_ID_PRODUCAO: import_zod4.default.string().optional(),
   CLIENT_SECRET_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_KEY: import_zod4.default.string().min(1, 'environment variable "PIX_KEY" is missing')
+  PIX_KEY: import_zod4.default.string().optional()
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)
@@ -4270,25 +4303,37 @@ function makeOptions({ type, operation, data }) {
     throw new Error(
       'operation must be one of those: "PIX" | "DEFAULT" | "OPENFINANCE" | "PAGAMENTOS" | "CONTAS" | undefined = undefined'
     );
+  const certificateHomologacao = env.CERTIFICADO_HOMOLOGACAO_PATH || env.CERTIFICADO_HOMOLOGACAO_BASE64;
+  const certificateProducao = env.CERTIFICADO_PRODUCAO_PATH || env.CERTIFICADO_PRODUCAO_BASE64;
   const opt = {
     client_id: data?.client_id || env.CLIENT_ID_HOMOLOGACAO,
     client_secret: data?.client_secret || env.CLIENT_SECRET_HOMOLOGACAO,
-    certificate: data?.certificate || env.CERTIFICADO_HOMOLOGACAO_PATH
+    certificate: data?.certificate || type === "SANDBOX" ? certificateHomologacao : certificateProducao,
+    certificateType: data?.certificateType || "file"
   };
+  if (!opt.client_id) throw new Error('property "client_id" is empty');
+  if (!opt.client_secret) throw new Error('property "client_secret" is empty');
+  if (!opt.certificate) throw new Error('property "certificate" is empty');
+  if (!opt.certificateType)
+    throw new Error('property "certificateType" is empty');
   return opt;
 }
-var EfiPay = class {
+var EfiPay = class _EfiPay {
   #pix;
   constructor(type, options) {
+    const certificate = options?.certificate;
+    const clientId = options?.client_id;
+    const clientSecret = options?.client_secret;
+    const certificateType = options?.certificateType;
     this.#pix = new PixRequest({
       type,
       options: makeOptions({
         type,
-        operation: "PIX",
         data: {
-          certificate: options?.certificate,
-          client_id: options?.client_id,
-          client_secret: options?.client_secret
+          certificate,
+          client_id: clientId,
+          client_secret: clientSecret,
+          certificateType
         }
       })
     });
@@ -4298,10 +4343,126 @@ var EfiPay = class {
    *
    * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
    *
-   * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+   * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
    */
   get pix() {
     return this.#pix;
+  }
+  /**
+   *
+   * ---
+   *
+   * Gera o arquivo `.env` na raiz do seu projeto com todas as variáveis de ambiente necessárias.
+   *
+   * Caso o `.env` já exista, escreve as variáveis de ambiente **depois do conteúdo existente**. Para sobrescrever o conteúdo existente, utilize a chame `mode` e passe o valor `overwrite`. Exemplo:
+   *
+   * ```ts
+   * EfiPay.generateDotEnv({
+   *  mode: 'overwrite'
+   * })
+   * ```
+   *
+   * ---
+   *
+   * ### Escrever as Variáveis de Ambiente
+   *
+   * Você pode passar os valores das variáveis de ambiente variáveis de ambiente através da chave `variables`. Exemplo:
+   *
+   * ```ts
+   * EfiPay.generateDotEnv({
+   *  variables: {
+   *    CERTIFICADO_HOMOLOGACAO_PATH: './path/to/homologacao-certificate.(p12|pem)'
+   *  }
+   * })
+   * ```
+   *
+   * ---
+   *
+   * As Variáveis de ambiente não informadas serão escritas com valores dummy padrão
+   *
+   * ---
+   *
+   * @param GenerateDotEnvProps
+   */
+  static generateDotEnv(props) {
+    const dotEnvData = `
+    # CERTIFICATES ********************************************
+    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH ?? "./path/to/homologacao-certificate.(p12|pem)"}"
+    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH ?? "./path/to/producao-certificate.(p12|pem)"}"
+
+    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 ?? "base64_string_of_homologacao"}"
+    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 ?? "base64_string_of_producao"}"
+
+    # CREDENTIALS ********************************************
+    # HOMOLOGACAO
+    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO ?? "Your_Client_Id_for_Homologacao"}"
+    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO ?? "Your_Client_Secret_for_Homologacao"}"
+    # PRODUCAO
+    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO ?? "Your_Client_Id_for_Producao"}"
+    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? "Your_Client_Secret_for_Producao"}"
+    
+    
+    # SUPPORT VARIABLES? ********************************************
+
+    # PIX
+    PIX_KEY="${props?.variables?.PIX_KEY ?? "you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"}"
+
+    # WEBHOOKS
+    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX ?? "https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"}"
+    `.trim().replaceAll(/  +/gi, "");
+    const mode = props?.mode ?? "append";
+    const fileName = ".env";
+    const rootPath = "./";
+    const path = `${rootPath}${fileName}`;
+    const fileExists = (0, import_node_fs2.existsSync)(path);
+    if (fileExists && mode === "append") {
+      const separator = `
+      
+
+      # *******************************************************************************************
+
+
+      `.replaceAll(/  +/gi, "");
+      (0, import_node_fs2.writeFileSync)(path, `${separator}${dotEnvData}`, { flag: "a" });
+    } else {
+      (0, import_node_fs2.writeFileSync)(path, dotEnvData);
+    }
+    const creationMessage = `Arquivo "${path}" criado com sucesso!`;
+    const overwriteMessage = `Arquivo "${path}" sobrescrito com sucesso!`;
+    const appendMessage = `Dados adicionados no caminho "${path}" com sucesso!`;
+    const message = !fileExists ? creationMessage : mode === "overwrite" ? overwriteMessage : appendMessage;
+    console.log(message);
+  }
+  /**
+   *
+   * ---
+   *
+   * Converte os certificados em  string `base64`
+   *
+   * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+   *
+   * ---
+   *
+   * @param GenerateBase64FromCertificateProps
+   */
+  static generateBase64FromCertificate({
+    certificadoHomologacaoPath,
+    certificadoProducaoPath
+  }) {
+    if (!certificadoHomologacaoPath && !certificadoProducaoPath) {
+      console.warn(
+        `Aten\xE7\xE3o! Nenhum caminho de certificado foi informado, passe pelo menos um caminho de certificado para realizar a convers\xE3o`
+      );
+      return;
+    }
+    const homologacaoBase64 = certificadoHomologacaoPath ? (0, import_node_fs2.readFileSync)(certificadoHomologacaoPath).toString("base64") : void 0;
+    const producaoBase64 = certificadoProducaoPath ? (0, import_node_fs2.readFileSync)(certificadoProducaoPath).toString("base64") : void 0;
+    _EfiPay.generateDotEnv({
+      variables: {
+        CERTIFICADO_HOMOLOGACAO_BASE64: homologacaoBase64,
+        CERTIFICADO_PRODUCAO_BASE64: producaoBase64
+      }
+    });
   }
 };
 var src_default = EfiPay;

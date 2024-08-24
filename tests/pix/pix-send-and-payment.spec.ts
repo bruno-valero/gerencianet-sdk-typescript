@@ -11,8 +11,8 @@ describe.skip('Pix Send and Payment', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })
@@ -29,7 +29,7 @@ describe.skip('Pix Send and Payment', () => {
       idEnvio: new IdEnvio().value,
       body: {
         valor: '15.00',
-        pagador: { chave: env.PIX_KEY },
+        pagador: { chave: env.PIX_KEY ?? '' },
         favorecido: { chave: secondKey },
       },
     })

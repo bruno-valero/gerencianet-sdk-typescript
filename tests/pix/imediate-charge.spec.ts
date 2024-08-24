@@ -15,8 +15,8 @@ describe.skip('Pix Imediate charge', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })
@@ -29,7 +29,7 @@ describe.skip('Pix Imediate charge', () => {
         calendario: { expiracao: 3600 },
         devedor: { cpf: '45618642883', nome: 'teste' },
         valor: { original: '15.00' },
-        chave: env.PIX_KEY,
+        chave: env.PIX_KEY ?? '',
         solicitacaoPagador: 'teste',
       },
     })
@@ -44,7 +44,7 @@ describe.skip('Pix Imediate charge', () => {
         calendario: { expiracao: 3600 },
         devedor: { cpf: '45618642883', nome: 'teste' },
         valor: { original: '10.00' },
-        chave: env.PIX_KEY,
+        chave: env.PIX_KEY ?? '',
         solicitacaoPagador: 'teste',
       },
       txid: new TxId().value,

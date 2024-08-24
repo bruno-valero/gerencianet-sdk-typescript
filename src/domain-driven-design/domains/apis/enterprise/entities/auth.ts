@@ -126,11 +126,44 @@ class Auth<type extends EnvironmentTypes, operation extends OperationTypes> {
     try {
       if (this.options.certificate) {
         if (this.options.pemKey) {
-          this.#options.agent = new https.Agent({
-            cert: fs.readFileSync(this.options.certificate),
-            key: fs.readFileSync(this.options.pemKey),
-            passphrase: '',
-          })
+          switch (this.options.certificateType) {
+            case 'file':
+              this.#options.agent = new https.Agent({
+                cert: fs.readFileSync(this.options.certificate),
+                key: fs.readFileSync(this.options.pemKey),
+                passphrase: '',
+              })
+              break
+
+            case 'buffer':
+              if (!(this.options.certificate instanceof Buffer))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`,
+                )
+              if (!(this.options.pemKey instanceof Buffer))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`)
+
+              this.#options.agent = new https.Agent({
+                cert: this.options.certificate,
+                key: this.options.pemKey,
+                passphrase: '',
+              })
+              break
+            case 'base64':
+              if (!(this.options.certificate instanceof String))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`,
+                )
+              if (!(this.options.pemKey instanceof String))
+                throw new Error(`"options.pemKey" is not instance of "Buffer"`)
+
+              this.#options.agent = new https.Agent({
+                cert: Buffer.from(this.options.certificate, 'base64'),
+                key: Buffer.from(this.options.pemKey, 'base64'),
+                passphrase: '',
+              })
+              break
+          }
         } else {
           this.#options.agent = new https.Agent({
             pfx: fs.readFileSync(this.options.certificate),

@@ -14,7 +14,7 @@ import { PixWebhooks } from './pix-modules/pix-webhooks'
 
 interface PixRequestProps<type extends EnvironmentTypes> {
   type: type
-  options: Optional<EfiConfig<type, 'PIX'>, 'sandbox'>
+  options: Optional<EfiConfig<type, 'PIX'>, 'sandbox' | 'certificateType'>
 }
 
 /**

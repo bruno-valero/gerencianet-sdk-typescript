@@ -16,8 +16,8 @@ describe('Pix Manage', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })

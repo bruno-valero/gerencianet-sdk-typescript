@@ -17,8 +17,8 @@ describe.skip('Pix Batch Collections', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })
@@ -38,7 +38,7 @@ describe.skip('Pix Batch Collections', () => {
                 .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
               validadeAposVencimento: 30,
             },
-            chave: env.PIX_KEY,
+            chave: env.PIX_KEY ?? '',
             devedor: {
               cpf: '45618677830',
               nome: 'bruno',
@@ -79,7 +79,7 @@ describe.skip('Pix Batch Collections', () => {
                 .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
               validadeAposVencimento: 16,
             },
-            chave: env.PIX_KEY,
+            chave: env.PIX_KEY ?? '',
             devedor: {
               cpf: '45618677830',
               nome: 'bruno',
@@ -134,7 +134,7 @@ describe.skip('Pix Batch Collections', () => {
                 .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
               validadeAposVencimento: 30,
             },
-            chave: env.PIX_KEY,
+            chave: env.PIX_KEY ?? '',
             devedor: {
               cpf: '45618677830',
               nome: 'bruno',
@@ -175,7 +175,7 @@ describe.skip('Pix Batch Collections', () => {
                 .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
               validadeAposVencimento: 16,
             },
-            chave: env.PIX_KEY,
+            chave: env.PIX_KEY ?? '',
             devedor: {
               cpf: '45618677830',
               nome: 'bruno',

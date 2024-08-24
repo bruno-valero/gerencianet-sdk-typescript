@@ -6,24 +6,40 @@ const envSchema = z.object({
   // CERTIFICATES
   CERTIFICADO_HOMOLOGACAO_PATH: z
     .string()
-    .min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_PATH" is missing'),
+    // .min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_PATH" is missing')
+    .optional(),
   CERTIFICADO_PRODUCAO_PATH: z
     .string()
-    .min(1, 'environment variable "CERTIFICADO_PRODUCAO_PATH" is missing'),
+    // .min(1, 'environment variable "CERTIFICADO_PRODUCAO_PATH" is missing')
+    .optional(),
+  CERTIFICADO_HOMOLOGACAO_BASE64: z
+    .string()
+    // .min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_BASE64" is missing')
+    .optional(),
+  CERTIFICADO_PRODUCAO_BASE64: z
+    .string()
+    // .min(1, 'environment variable "CERTIFICADO_PRODUCAO_BASE64" is missing')
+    .optional(),
   // CREDENTIALS
   CLIENT_ID_HOMOLOGACAO: z
     .string()
-    .min(1, 'environment variable "CLIENT_ID_HOMOLOGACAO" is missing'),
+    // .min(1, 'environment variable "CLIENT_ID_HOMOLOGACAO" is missing')
+    .optional(),
   CLIENT_SECRET_HOMOLOGACAO: z
     .string()
-    .min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing'),
+    // .min(1, 'environment variable "CLIENT_SECRET_HOMOLOGACAO" is missing')
+    .optional(),
   CLIENT_ID_PRODUCAO: z
     .string()
-    .min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing'),
+    // .min(1, 'environment variable "CLIENT_ID_PRODUCAO" is missing')
+    .optional(),
   CLIENT_SECRET_PRODUCAO: z
     .string()
     .min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_KEY: z.string().min(1, 'environment variable "PIX_KEY" is missing'),
+  PIX_KEY: z
+    .string()
+    // .min(1, 'environment variable "PIX_KEY" is missing')
+    .optional(),
 })
 
 const _env = envSchema.safeParse(process.env)

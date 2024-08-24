@@ -51,7 +51,7 @@ Para obter maior segurança de tipagem é recomendado criar um arquivo para vali
 npm i zod
 ```
 
-**Crie um arquivo com nome `env` e valide as variáveis da seguinte forma:**
+**Crie um arquivo com nome `env.ts` e valide as variáveis da seguinte forma:**
 
 ```ts
 import 'dotenv/config'
@@ -449,9 +449,9 @@ No processo de split de pagamento, é essencial fornecer uma conta digital EFÍ 
 - **Testes de Integração Realizados**
 ---
 
-Para entender mais sobre as **Cobranças em Lote**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix)
+Para entender mais sobre as **Split de pagamento Pix**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-pix/split-de-pagamento-pix)
 
-Para utilizar as **Cobranças em Lote** através do SDK acesse a propriedade `paymentSplit` da api PIX, dessa forma:
+Para utilizar as **Split de pagamento Pix** através do SDK acesse a propriedade `paymentSplit` da api PIX, dessa forma:
 
 ```ts
 import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'

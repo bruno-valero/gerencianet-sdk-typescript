@@ -15,8 +15,8 @@ describe('Pix due change', () => {
     pix = new PixRequest({
       type: 'SANDBOX',
       options: {
-        client_id: env.CLIENT_ID_HOMOLOGACAO,
-        client_secret: env.CLIENT_SECRET_HOMOLOGACAO,
+        client_id: env.CLIENT_ID_HOMOLOGACAO ?? '',
+        client_secret: env.CLIENT_SECRET_HOMOLOGACAO ?? '',
         certificate: env.CERTIFICADO_HOMOLOGACAO_PATH,
       },
     })
@@ -33,7 +33,7 @@ describe('Pix due change', () => {
             .format('YYYY-MM-DD') as `${string}-${string}-${string}`,
           validadeAposVencimento: 20,
         },
-        chave: env.PIX_KEY,
+        chave: env.PIX_KEY ?? '',
         devedor: {
           cpf: '45618677830',
           nome: 'bruno',

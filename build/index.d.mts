@@ -655,14 +655,17 @@ type AuthRoute<key extends OperationTypes | undefined = undefined> = key extends
 type UrlBase<type extends OperationTypes, operation extends EnvironmentTypes> = ConstantsCallbacks['APIS'][type]['URL'][operation];
 type BaseUrl<operation extends EnvironmentTypes, type extends OperationTypes | undefined = undefined> = type extends undefined ? UrlBase<'PIX', operation> | UrlBase<'DEFAULT', operation> | UrlBase<'OPENFINANCE', operation> | UrlBase<'PAGAMENTOS', operation> | UrlBase<'CONTAS', operation> : type extends OperationTypes ? UrlBase<type, operation> : void;
 
+type CertificateType = 'file' | 'base64' | 'buffer'
+
 interface EfiConfig<
   type extends EnvironmentTypes,
   operation extends OperationTypes | undefined = undefined,
 > {
   client_id: string
   client_secret: string
-  certificate?: PathLike | string
-  pemKey?: PathLike | string
+  certificateType: CertificateType
+  certificate?: PathLike | string | Buffer
+  pemKey?: PathLike | string | Buffer
   sandbox: boolean
   partnerToken?: string
   rawResponse?: unknown
@@ -754,7 +757,7 @@ type ConstructorSingleParameters<T extends abstract new (arg: unknown) => unknow
 type SearchParamsType = Record<string, string | number | Date | boolean>;
 declare abstract class ApiRequest<type extends EnvironmentTypes, operation extends OperationTypes> {
     #private;
-    constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox'>);
+    constructor(type: type, operation: operation, options: Optional<EfiConfig<type, operation>, 'sandbox' | 'certificateType'>);
     protected get type(): type;
     protected get operation(): operation;
     protected get environment(): "PRODUCTION" | "SANDBOX";
@@ -7329,7 +7332,7 @@ declare class PixWebhooks<type extends EnvironmentTypes> extends ApiRequest<type
 
 interface PixRequestProps<type extends EnvironmentTypes> {
     type: type;
-    options: Optional<EfiConfig<type, 'PIX'>, 'sandbox'>;
+    options: Optional<EfiConfig<type, 'PIX'>, 'sandbox' | 'certificateType'>;
 }
 /**
  * A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. Com nossa API é possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
@@ -7415,6 +7418,48 @@ type OptionsCredentials = {
     client_id?: string;
     client_secret?: string;
     certificate?: PathLike;
+    certificateType?: CertificateType;
+};
+type GenerateDotEnvProps = {
+    variables?: {
+        CERTIFICADO_HOMOLOGACAO_PATH?: string;
+        CERTIFICADO_PRODUCAO_PATH?: string;
+        CERTIFICADO_HOMOLOGACAO_BASE64?: string;
+        CERTIFICADO_PRODUCAO_BASE64?: string;
+        CLIENT_ID_HOMOLOGACAO?: string;
+        CLIENT_SECRET_HOMOLOGACAO?: string;
+        CLIENT_ID_PRODUCAO?: string;
+        CLIENT_SECRET_PRODUCAO?: string;
+        PIX_KEY?: string;
+        WEBHOOK_PIX?: string;
+    };
+    mode?: 'append' | 'overwrite';
+};
+type GenerateBase64FromCertificateProps = {
+    /**
+     *
+     * ---
+     *
+     *  Caminho onde o arquivo de Homologação está salvo.
+     *
+     * Passe o caminho para realizar a conversão para `base64`.
+     *
+     * ---
+     *
+     */
+    certificadoHomologacaoPath?: string;
+    /**
+     *
+     * ---
+     *
+     *  Caminho onde o arquivo de Produção está salvo.
+     *
+     * Passe o caminho para realizar a conversão para `base64`.
+     *
+     * ---
+     *
+     */
+    certificadoProducaoPath?: string;
 };
 declare class EfiPay<type extends EnvironmentTypes> {
     #private;
@@ -7424,9 +7469,59 @@ declare class EfiPay<type extends EnvironmentTypes> {
      *
      * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
      *
-     * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+     * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
      */
     get pix(): PixRequest<type>;
+    /**
+     *
+     * ---
+     *
+     * Gera o arquivo `.env` na raiz do seu projeto com todas as variáveis de ambiente necessárias.
+     *
+     * Caso o `.env` já exista, escreve as variáveis de ambiente **depois do conteúdo existente**. Para sobrescrever o conteúdo existente, utilize a chame `mode` e passe o valor `overwrite`. Exemplo:
+     *
+     * ```ts
+     * EfiPay.generateDotEnv({
+     *  mode: 'overwrite'
+     * })
+     * ```
+     *
+     * ---
+     *
+     * ### Escrever as Variáveis de Ambiente
+     *
+     * Você pode passar os valores das variáveis de ambiente variáveis de ambiente através da chave `variables`. Exemplo:
+     *
+     * ```ts
+     * EfiPay.generateDotEnv({
+     *  variables: {
+     *    CERTIFICADO_HOMOLOGACAO_PATH: './path/to/homologacao-certificate.(p12|pem)'
+     *  }
+     * })
+     * ```
+     *
+     * ---
+     *
+     * As Variáveis de ambiente não informadas serão escritas com valores dummy padrão
+     *
+     * ---
+     *
+     * @param GenerateDotEnvProps
+     */
+    static generateDotEnv(props?: GenerateDotEnvProps): void;
+    /**
+     *
+     * ---
+     *
+     * Converte os certificados em  string `base64`
+     *
+     * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+     *
+     * ---
+     *
+     * @param GenerateBase64FromCertificateProps
+     */
+    static generateBase64FromCertificate({ certificadoHomologacaoPath, certificadoProducaoPath, }: GenerateBase64FromCertificateProps): void;
 }
 
 export { EfiPay as default };

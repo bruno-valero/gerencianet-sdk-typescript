@@ -6,7 +6,7 @@ import { TxId } from '../../value-objects/tx-id'
 import { PixBatchCollectionsBatchResponseType } from './@interfaces-pix-batch-collections'
 import { Status } from './@types-pix-batch-collections'
 
-export class PixBatchCollectionsCobv extends ApiResponse {
+class PixBatchCollectionsCobv extends ApiResponse {
   #props: {
     criacao?: Date
     txid: TxId

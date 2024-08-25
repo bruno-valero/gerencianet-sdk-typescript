@@ -40,6 +40,10 @@ const envSchema = z.object({
     .string()
     // .min(1, 'environment variable "PIX_KEY" is missing')
     .optional(),
+  WEBHOOK_PIX: z
+    .string()
+    // .min(1, 'environment variable "WEBHOOK_PIX" is missing')
+    .optional(),
 })
 
 const _env = envSchema.safeParse(process.env)

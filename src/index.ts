@@ -12,6 +12,9 @@ import { Optional } from './domain-driven-design/core/types/optional'
 import { PixRequest } from './domain-driven-design/domains/apis/enterprise/entities/pix/pix'
 import { env } from './env'
 
+export * from './exports.classes'
+export type * from './exports.interfaces'
+
 type Options<
   type extends EnvironmentTypes,
   operation extends OperationTypes | undefined = undefined,
@@ -22,6 +25,7 @@ type OptionsCredentials = {
   client_secret?: string
   certificate?: PathLike
   certificateType?: CertificateType
+  validateMtls?: boolean
 }
 
 interface MakeOptionsProps<
@@ -47,6 +51,29 @@ type GenerateDotEnvProps = {
     WEBHOOK_PIX?: string
   }
   mode?: 'append' | 'overwrite'
+}
+
+type CertificateFromBufferProps = {
+  /**
+   *
+   * ---
+   *
+   * Certificado de Homologação em formato `Buffer`.
+   *
+   * ---
+   *
+   */
+  certificadoHomologacaoBuffer?: Buffer
+  /**
+   *
+   * ---
+   *
+   * Certificado de Produção em formato `Buffer`.
+   *
+   * ---
+   *
+   */
+  certificadoProducaoBuffer?: Buffer
 }
 
 type GenerateBase64FromCertificateProps = {
@@ -127,6 +154,7 @@ class EfiPay<type extends EnvironmentTypes> {
     const clientId = options?.client_id
     const clientSecret = options?.client_secret
     const certificateType = options?.certificateType
+    const validateMtls = options?.validateMtls
 
     this.#pix = new PixRequest({
       type,
@@ -137,6 +165,7 @@ class EfiPay<type extends EnvironmentTypes> {
           client_id: clientId,
           client_secret: clientSecret,
           certificateType,
+          validateMtls,
         },
       }),
     })
@@ -207,7 +236,7 @@ class EfiPay<type extends EnvironmentTypes> {
     CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? 'Your_Client_Secret_for_Producao'}"
     
     
-    # SUPPORT VARIABLES? ********************************************
+    # SUPPORT VARIABLES ********************************************
 
     # PIX
     PIX_KEY="${props?.variables?.PIX_KEY ?? 'you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank'}"
@@ -275,17 +304,65 @@ class EfiPay<type extends EnvironmentTypes> {
       )
       return
     }
-    const homologacaoBase64 = certificadoHomologacaoPath
-      ? readFileSync(certificadoHomologacaoPath).toString('base64')
+    const homologacaoBuffer = certificadoHomologacaoPath
+      ? readFileSync(certificadoHomologacaoPath)
       : undefined
-    const producaoBase64 = certificadoProducaoPath
-      ? readFileSync(certificadoProducaoPath).toString('base64')
+    const producaoBuffer = certificadoProducaoPath
+      ? readFileSync(certificadoProducaoPath)
+      : undefined
+
+    EfiPay.generateBase64FromBufferCertificate({
+      certificadoHomologacaoBuffer: homologacaoBuffer,
+      certificadoProducaoBuffer: producaoBuffer,
+    })
+  }
+
+  /**
+   *
+   * ---
+   *
+   * Converte os certificados em formato `Buffer` para string `base64`
+   *
+   * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+   *
+   * ---
+   *
+   * @param CertificateFromBufferProps
+   */
+  static generateBase64FromBufferCertificate({
+    certificadoHomologacaoBuffer,
+    certificadoProducaoBuffer,
+  }: CertificateFromBufferProps) {
+    const homologacaoBase64 = certificadoHomologacaoBuffer
+      ? certificadoHomologacaoBuffer.toString('base64')
+      : undefined
+    const producaoBase64 = certificadoProducaoBuffer
+      ? certificadoProducaoBuffer.toString('base64')
       : undefined
 
     EfiPay.generateDotEnv({
       variables: {
+        // CERTIFICATES ********************************************
+        // FILE PATH
+        CERTIFICADO_HOMOLOGACAO_PATH: env.CERTIFICADO_HOMOLOGACAO_PATH,
+        CERTIFICADO_PRODUCAO_PATH: env.CERTIFICADO_PRODUCAO_PATH,
+        // BASE64
         CERTIFICADO_HOMOLOGACAO_BASE64: homologacaoBase64,
         CERTIFICADO_PRODUCAO_BASE64: producaoBase64,
+
+        // CREDENTIALS ********************************************
+        // HOMOLOGACAO
+        CLIENT_ID_HOMOLOGACAO: env.CLIENT_ID_HOMOLOGACAO,
+        CLIENT_SECRET_HOMOLOGACAO: env.CLIENT_SECRET_HOMOLOGACAO,
+        // PRODUCAO
+        CLIENT_ID_PRODUCAO: env.CLIENT_ID_PRODUCAO,
+        CLIENT_SECRET_PRODUCAO: env.CLIENT_SECRET_PRODUCAO,
+
+        // SUPPORT VARIABLES ********************************************
+        // PIX
+        PIX_KEY: env.PIX_KEY,
+        // WEBHOOKS
+        WEBHOOK_PIX: env.WEBHOOK_PIX,
       },
     })
   }

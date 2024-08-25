@@ -150,10 +150,8 @@ class Auth<type extends EnvironmentTypes, operation extends OperationTypes> {
               })
               break
             case 'base64':
-              if (!(this.options.certificate instanceof String))
-                throw new Error(
-                  `"options.certificate" is not instance of "Buffer"`,
-                )
+              if (!(typeof this.options.certificate === 'string'))
+                throw new Error(`"options.certificate" is not type of "string"`)
               if (!(this.options.pemKey instanceof String))
                 throw new Error(`"options.pemKey" is not instance of "Buffer"`)
 
@@ -165,10 +163,39 @@ class Auth<type extends EnvironmentTypes, operation extends OperationTypes> {
               break
           }
         } else {
-          this.#options.agent = new https.Agent({
-            pfx: fs.readFileSync(this.options.certificate),
-            passphrase: '',
-          })
+          switch (this.options.certificateType) {
+            case 'file':
+              this.#options.agent = new https.Agent({
+                pfx: fs.readFileSync(this.options.certificate),
+                passphrase: '',
+              })
+              break
+
+            case 'buffer':
+              if (!(this.options.certificate instanceof Buffer))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`,
+                )
+
+              this.#options.agent = new https.Agent({
+                pfx: this.options.certificate,
+                passphrase: '',
+              })
+              break
+            case 'base64':
+              if (!(typeof this.options.certificate === 'string'))
+                throw new Error(`"options.certificate" is not type of "string"`)
+
+              this.#options.agent = new https.Agent({
+                pfx: Buffer.from(this.options.certificate, 'base64'),
+                passphrase: '',
+              })
+              break
+          }
+          // this.#options.agent = new https.Agent({
+          //   pfx: fs.readFileSync(this.options.certificate),
+          //   passphrase: '',
+          // })
         }
       }
       return this.#options.agent

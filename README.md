@@ -14,7 +14,77 @@ npm i @bruno-valero/gerencianet-sdk-typescript
 
 ## Variáveis de Ambiente (Environment Variables)
 
-As variáveis de ambiente **são obrigatórias** para que o sdk funcione como o esperado. Elas são usadas para informar as **[Credenciais](#credenciais)** necessárias para utilizar as APIs da Efí Pay, para configurá-las siga os passos abaixo:
+As variáveis de ambiente **[Não são mais obrigatórias para que o sdk funcione](#utilizar-o-sdk-sem-as-variáveis-de-ambiente)**, porém é recomendável utilizá-las. Elas são usadas para informar as **[Credenciais](#credenciais)** necessárias para utilizar as APIs da Efí Pay, para configurá-las siga os passos abaixo:
+
+### Gerar automaticamente as Variáveis Ambientes
+
+Agora é possível utilizar o SDK para **gerar automaticamente todas as variáveis ambientes necessárias**. Por padrão elas serão geradas com valores dummy padrão, porém você pode inserir o valor de cada uma delas durante a criação se desejar. 
+
+Para criar as variáveis de ambiente, importe a classe `EfiPay` de `@bruno-valero/gerencianet-sdk-typescript` e use seu método estático `generateDotEnv` passando os valores das variáveis que você deseja. **Não é obrigatório preencher todas as variáveis**, as que não forem preenchidas por você serão substituídas por valores dummy padrão.
+
+
+Observe o exemplo:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+EfiPay.generateDotEnv({
+  variables: {
+    CLIENT_ID_HOMOLOGACAO: 'meu client id de Homologação',
+    CLIENT_ID_PRODUCAO: 'meu client id de Produção',
+    CLIENT_SECRET_HOMOLOGACAO: 'meu client secret de Homologação',
+    CLIENT_SECRET_PRODUCAO: 'meu client secret de Produção',
+    PIX_KEY: 'minha chave pix',
+    WEBHOOK_PIX: 'minha url de webhook pix',
+  },
+})
+
+```
+
+**Lembrando que para que as variáveis sejam efetivamente geradas, será necessário [executar o script criado](#executar-a-geração-automática-das-variáveis-de-ambiente).**
+
+### Criar `.env` através do SDK
+
+Se você ainda não criou um arquivo `.env` na raiz do seu projeto, o método `EfiPay.generateDotEnv()` irá criar este arquivo e escrever nele todas as variáveis de ambiente necessárias. 
+
+**Lembrando que para que as variáveis sejam efetivamente geradas, será necessário [executar o script criado](#executar-a-geração-automática-das-variáveis-de-ambiente).**
+
+### Escrever as Variáveis de Ambiente em um `.env` já existente
+
+Caso já haja um arquivo `.env` na raiz do seu projeto, ao usar o método `EfiPay.generateDotEnv()` ele irá escrever todas as variáveis de ambiente necessárias abaixo do conteúdo já existente no seu arquivo `.env`, portanto nenhuma das variáveis que você escreveu previamente serão substituídas ou sobrescritas. 
+
+**Lembrando que para que as variáveis sejam efetivamente geradas, será necessário [executar o script criado](#executar-a-geração-automática-das-variáveis-de-ambiente).**
+
+### Sobrescrever `.env` com as novas Variáveis de Ambiente
+
+Caso já haja um arquivo `.env` na raiz do seu projeto e você queira sobrescrever completamente seu com as variáveis geradas automaticamente, basta passar a propriedade `mode: "overwite"`, da seguinte forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+EfiPay.generateDotEnv({
+  variables: {
+    CLIENT_ID_HOMOLOGACAO: 'meu client id de Homologação',
+    CLIENT_SECRET_HOMOLOGACAO: 'meu client secret de Homologação',
+  },
+  // esta opção irá fazer com que o conteúdo do arquivo ".env" existente seja completamente sobrescrito
+  mode: 'overwrite',
+})
+```
+
+**Lembrando que para que as variáveis sejam efetivamente geradas, será necessário [executar o script criado](#executar-a-geração-automática-das-variáveis-de-ambiente).**
+
+### Executar a geração automática das Variáveis de Ambiente
+
+Após criar o script que irá gerar as variáveis de ambiente conforme os exemplos de código acima, será necessário executá-lo para que as variáveis de ambiente sejam efetivamente geradas. 
+
+Então para facilitar o trabalho, escreva o script em um arquivo na raiz do seu projeto chamado `generate-dot-env.js`, agora basta abrir o terminal no diretório raiz do projeto e digitar o comando `node ./generate-dot-env.js`
+
+---
+
+### Gerar manualmente as Variáveis de Ambiente
+
+Caso você queira escrever manualmente o conteúdo de suas variáveis de ambiente, siga os passos abaixo:
 
 - Crie um arquivo na raiz do projeto com nome de `.env`.
 - Abra o arquivo num editor de texto e armazene as seguintes variáveis de ambiente.
@@ -24,6 +94,9 @@ As variáveis de ambiente **são obrigatórias** para que o sdk funcione como o 
 CERTIFICADO_HOMOLOGACAO_PATH="./path/to/homologacao-certificate.(p12|pem)"
 CERTIFICADO_PRODUCAO_PATH="./path/to/producao-certificate.(p12|pem)"
 
+CERTIFICADO_HOMOLOGACAO_BASE64="base64_string_of_homologacao"
+CERTIFICADO_PRODUCAO_BASE64="base64_string_of_producao"
+
 # CREDENTIALS ********************************************
 # HOMOLOGACAO
 CLIENT_ID_HOMOLOGACAO="Your_Client_Id_for_Homologacao"
@@ -31,8 +104,12 @@ CLIENT_SECRET_HOMOLOGACAO="Your_Client_Secret_for_Homologacao"
 # PRODUCAO
 CLIENT_ID_PRODUCAO="Your_Client_Id_for_Producao"
 CLIENT_SECRET_PRODUCAO="Your_Client_Secret_for_Producao"
+
+# SUPPORT VARIABLES ********************************************
 # PIX
-PIX_KEY="you-pix-key-might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
+PIX_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
+#WEBHOOKS
+WEBHOOK_PIX="https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"
 ```
 
 - Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o caso, execute:
@@ -66,6 +143,13 @@ const envSchema = z.object({
   CERTIFICADO_PRODUCAO_PATH: z
     .string()
     .min(1, 'environment variable "CERTIFICADO_PRODUCAO_PATH" is missing'),
+  CERTIFICADO_HOMOLOGACAO_BASE64: z
+    .string()
+    .min(1, 'environment variable "CERTIFICADO_HOMOLOGACAO_BASE64" is missing'),
+  CERTIFICADO_PRODUCAO_BASE64: z
+    .string()
+    .min(1, 'environment variable "CERTIFICADO_PRODUCAO_BASE64" is missing'),
+
   // CREDENTIALS
   CLIENT_ID_HOMOLOGACAO: z
     .string()
@@ -79,9 +163,14 @@ const envSchema = z.object({
   CLIENT_SECRET_PRODUCAO: z
     .string()
     .min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
+
+  // SUPPORT VARIABLES
   PIX_KEY: z
     .string()
     .min(1, 'environment variable "PIX_KEY" is missing'),
+  WEBHOOK_PIX: z
+    .string()
+    .min(1, 'environment variable "WEBHOOK_PIX" is missing'),
 })
 
 const _env = envSchema.safeParse(process.env)
@@ -121,7 +210,7 @@ Para ter acesso às suas credenciais é necessário criar um aplicativo. Ele rep
 
 Depois de criada, acesse a aba **Aplicações** de suas APIs. Ela listará todas as suas aplicações criadas. Escolha a aplicação que você acabou de criar e então terá acesso às suas credenciais **Client ID** e **Client Secret** de Produção e de Homologação.
 
-Com essas credenciais, alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CLIENT_ID_HOMOLOGACAO`, `CLIENT_SECRET_HOMOLOGACAO` e `CLIENT_ID_PRODUCAO`, `CLIENT_SECRET_PRODUCAO`
+Com essas credenciais, alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CLIENT_ID_HOMOLOGACAO`, `CLIENT_SECRET_HOMOLOGACAO` e `CLIENT_ID_PRODUCAO`, `CLIENT_SECRET_PRODUCAO`. **Lembrando que agora é possível [gerá-las automaticamente](#gerar-automaticamente-as-variáveis-ambientes) através do SDK.**
 
 ### Terceiro Passo - Criação dos Certificados
 
@@ -129,8 +218,38 @@ Acesse a aba **Meus Certificados** abaixo da aba **Aplicações** e então crie 
 
 Ao criar um certificado, você receberá um arquivo que deve ser baixado no seu computador, **certifique-se de não perder este arquivo**, pois ele só pode ser baixado no momento da criação do certificado e **não estará disponível para download posteriormente**.
 
-Salve o arquivo am algum lugar dentro do seu projeto e após fazer isso alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CERTIFICADO_HOMOLOGACAO_PATH` e `CERTIFICADO_PRODUCAO_PATH` com o caminho do arquivo onde você salvou os certificados, exemplo: `"./src/certificados/homologacao.p12"`.
+Salve o arquivo em algum lugar dentro do seu projeto e após fazer isso alimente as **[Variáveis de Ambiente](#variáveis-de-ambiente-environment-variables)** `CERTIFICADO_HOMOLOGACAO_PATH` e `CERTIFICADO_PRODUCAO_PATH` com o caminho do arquivo onde você salvou os certificados, exemplo: `"./src/certificados/homologacao.p12"`. **Lembrando que agora é possível [gerá-las automaticamente](#gerar-automaticamente-as-variáveis-ambientes) através do SDK.**
 
+#### Certificados em formato `base64`
+
+Agora o SDK oferece uma forma de converter seus cerificados em formato `base64`. 
+
+Para realizar a conversão certifique-se de ter salvo os certificados em algum lugar em seu computador, então importe a classe `EfiPay` de `@bruno-valero/gerencianet-sdk-typescript` e use seu método estático `generateBase64FromCertificate` passando os caminhos onde os certificados estão salvos. **Não é obrigatório passar os caminhos de todos os certificados**, os que não forem preenchidos por você serão substituídas por valores dummy padrão.
+
+Observe o exemplo:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+EfiPay.generateBase64FromCertificate({
+  certificadoHomologacaoPath: 'caminho/ate/o-certificado/de/homologacao.p12',
+  certificadoProducaoPath: 'caminho/ate/o-certificado/de/producao.p12',
+})
+```
+
+#### Criação do arquivo `.env`
+
+Caso o arquivo `.env` não exista na raiz do seu projeto, o SDK irá criá-lo após a [execução do script de conversão](#executar-a-conversão-dos-certificados-em-em-formato-base64), preenchendo todas as variáveis de ambiente com valores dummy padrão, exceto as variáveis que irão conter o conteúdo dos seus certificados convertidos em `base64`.
+
+#### Arquivo `.env` já existente
+
+Caso o arquivo `.env` já exista na raiz do seu projeto, ao [executar o script de conversão](#executar-a-conversão-dos-certificados-em-em-formato-base64), o SDK irá preencher todas as variáveis de ambiente com valores já existentes **(as variáveis de ambiente que não existirem no `.env`, serão preenchidas com valores dummy padrão)**, exceto as variáveis que irão conter o conteúdo dos seus certificados convertidos em `base64`.
+
+#### Executar a conversão dos certificados em em formato `base64`
+
+Após criar o script que irá converter os certificados em em formato `base64` conforme o exemplo de código acima, será necessário executá-lo para que os certificados sejam efetivamente convertidos. 
+
+Então para facilitar o trabalho, escreva o script em um arquivo na raiz do seu projeto chamado `certificates-to-base64.js`, agora basta abrir o terminal no diretório raiz do projeto e digitar o comando `node ./certificates-to-base64.js`
 
 ### Quarto Passo - Criação da Chave Pix
 
@@ -155,6 +274,90 @@ const efi = new EfiPay('SANDBOX')
 
 - Tipo "PRODUCTION": É a conexão com as APIs de Produção, ou seja, destinado a transações financeiras reais
 - Tipo "SANDBOX": É a conexão com as APIs de Homologação, ou seja, destinado a transações financeiras fictícias
+
+
+### Utilizar certificados em formato `base64`
+
+Agora é possível instanciar a classe `EfiPay` configurada para aceitar certificados em formato `base64`. 
+
+Caso você não tenha os certificados, [veja como obtê-los](#terceiro-passo---criação-dos-certificados) e como [convertê-los em formato `base64`](#certificados-em-formato-base64).
+
+Para utilizar o SDK com certificados em formato `base64`, basta ter feito o [processo de conversão](#certificados-em-formato-base64) e instanciar a classe `EfiPay` passando a propriedade `certificateType: "base64"` da seguinte forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX', { certificateType: 'base64' })
+```
+
+### Utilizar certificados em formato `Buffer`
+
+Agora é possível instanciar a classe `EfiPay` configurada para aceitar certificados em formato `Buffer`.
+
+Esta opção é útil, caso você não queira deixar o certificado salvo em sua aplicação, deixando-o hospedado num [Amazon S3](https://aws.amazon.com/pt/s3/), [Google Cloud Storage](https://cloud.google.com/storage?hl=pt_br), entre outros.
+
+Há duas formas de utilizar os certificados em formato `Buffer`:
+
+- 1. Instanciar a classe `EfiPay` passando diretamente o certificado em formato buffer, sem a utilização das variáveis de ambiente. Execute o código abaixo para obter o `Buffer` de seu certificado através do `console.log`.
+
+
+  ```ts
+  import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+  const efi = new EfiPay('SANDBOX', {
+      client_id: 'meu_client_id',
+      client_secret: 'meu_client_secret',
+      // passe o Buffer aqui
+      certificate: bufferDoCertificado,
+      // indique que os certificados serão passados em formato Buffer
+      certificateType: 'buffer',
+    })
+  ```
+
+- 2. Salvar o Buffer em formato `base64` através do método estático `EfiPay.generateBase64FromBufferCertificate`. Esse método irá gerar um arquivo `.env` da mesma forma que é explicado [aqui](#utilizar-certificados-em-formato-base64). Abaixo há um exemplo de como obter os dados a partir da url de download, transformar a resposta em `Buffer` e com isso utilizar o método `EfiPay.generateBase64FromBufferCertificate`.
+
+
+  ```ts
+  async function generateBase64FromBuffer() {
+    const downloadUrlHomologacao = `your-certificate-download-url`
+    const downloadUrlProducao = `your-certificate-download-url`
+
+    const { data: dataHomologacao } = await axios.get(downloadUrlHomologacao, {
+      responseType: 'blob',
+    })
+
+    const { data: dataProducao } = await axios.get(downloadUrlProducao, {
+      responseType: 'blob',
+    })
+
+    const certificates = {
+      homologacaoBuffer: Buffer.from(await dataHomologacao.arrayBuffer()),
+      producaoBuffer: Buffer.from(await dataProducao.arrayBuffer()),
+    }
+
+    EfiPay.generateBase64FromBufferCertificate({
+      certificadoHomologacaoBuffer: certificates.homologacaoBuffer,
+      certificadoProducaoBuffer: certificates.producaoBuffer,
+    })
+  }
+
+  generateBase64FromBuffer()
+  ```
+
+### Utilizar o SDK sem as Variáveis de Ambiente
+
+Agora é possível utilizar o SDK sem as variáveis de ambiente. Basta passar as credenciais manualmente, da seguinte forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX', {
+  client_id: 'meu_client_id',
+  client_secret: 'meu_client_secret',
+  certificate: 'certificado de Homologacao em formato "base64"',
+  certificateType: 'base64',
+})
+```
 
 ---
 

@@ -413,6 +413,52 @@ var require_cli_options = __commonJS({
 // src/index.ts
 var src_exports = {};
 __export(src_exports, {
+  Address: () => Address,
+  CalendarDueCharge: () => CalendarDueCharge,
+  CalendarImediateCharge: () => CalendarImediateCharge,
+  Cep: () => Cep,
+  Cnpj: () => Cnpj,
+  Cpf: () => Cpf,
+  E2eId: () => E2eId,
+  Email: () => Email,
+  Id: () => Id,
+  IdEnvio: () => IdEnvio,
+  MonetaryValue: () => MonetaryValue,
+  PixBatchCollections: () => PixBatchCollections,
+  PixBatchCollectionsCreateOrUpdateDueChargeResponse: () => PixBatchCollectionsCreateOrUpdateDueChargeResponse,
+  PixBatchCollectionsResponse: () => PixBatchCollectionsResponse,
+  PixBatchCollectionsResponseArray: () => PixBatchCollectionsResponseArray,
+  PixDueCharge: () => PixDueCharge,
+  PixDueChargeResponse: () => PixDueChargeResponse,
+  PixDueChargeResponseArray: () => PixDueChargeResponseArray,
+  PixImediateCharge: () => PixImediateCharge,
+  PixImediateChargeResponse: () => PixImediateChargeResponse,
+  PixImediateChargeResponseArray: () => PixImediateChargeResponseArray,
+  PixLocation: () => PixLocation,
+  PixManage: () => PixManage,
+  PixManageResponse: () => PixManageResponse,
+  PixManageResponseArray: () => PixManageResponseArray,
+  PixManageReturnResponse: () => PixManageReturnResponse,
+  PixPayloadLocations: () => PixPayloadLocations,
+  PixPayloadLocationsQRCodeResponse: () => PixPayloadLocationsQRCodeResponse,
+  PixPayloadLocationsResponse: () => PixPayloadLocationsResponse,
+  PixPayloadLocationsResponseArray: () => PixPayloadLocationsResponseArray,
+  PixPaymentSplit: () => PixPaymentSplit,
+  PixPaymentSplitAttachmentResponse: () => PixPaymentSplitAttachmentResponse,
+  PixPaymentSplitDueChargeAttachmentResponse: () => PixPaymentSplitDueChargeAttachmentResponse,
+  PixPaymentSplitImediateChargeAttachmentResponse: () => PixPaymentSplitImediateChargeAttachmentResponse,
+  PixPaymentSplitResponse: () => PixPaymentSplitResponse,
+  PixRequest: () => PixRequest,
+  PixSendAndPayment: () => PixSendAndPayment,
+  PixSendAndPaymentSendResponse: () => PixSendAndPaymentSendResponse,
+  PixWebhooks: () => PixWebhooks,
+  PixWebhooksAddResponse: () => PixWebhooksAddResponse,
+  PixWebhooksDeleteResponse: () => PixWebhooksDeleteResponse,
+  PixWebhooksResponse: () => PixWebhooksResponse,
+  PixWebhooksResponseArray: () => PixWebhooksResponseArray,
+  State: () => State,
+  TxId: () => TxId,
+  UserAccount: () => UserAccount,
   default: () => src_default
 });
 module.exports = __toCommonJS(src_exports);
@@ -1040,10 +1086,8 @@ var Auth = class {
               });
               break;
             case "base64":
-              if (!(this.options.certificate instanceof String))
-                throw new Error(
-                  `"options.certificate" is not instance of "Buffer"`
-                );
+              if (!(typeof this.options.certificate === "string"))
+                throw new Error(`"options.certificate" is not type of "string"`);
               if (!(this.options.pemKey instanceof String))
                 throw new Error(`"options.pemKey" is not instance of "Buffer"`);
               this.#options.agent = new import_node_https.default.Agent({
@@ -1054,10 +1098,32 @@ var Auth = class {
               break;
           }
         } else {
-          this.#options.agent = new import_node_https.default.Agent({
-            pfx: import_node_fs.default.readFileSync(this.options.certificate),
-            passphrase: ""
-          });
+          switch (this.options.certificateType) {
+            case "file":
+              this.#options.agent = new import_node_https.default.Agent({
+                pfx: import_node_fs.default.readFileSync(this.options.certificate),
+                passphrase: ""
+              });
+              break;
+            case "buffer":
+              if (!(this.options.certificate instanceof Buffer))
+                throw new Error(
+                  `"options.certificate" is not instance of "Buffer"`
+                );
+              this.#options.agent = new import_node_https.default.Agent({
+                pfx: this.options.certificate,
+                passphrase: ""
+              });
+              break;
+            case "base64":
+              if (!(typeof this.options.certificate === "string"))
+                throw new Error(`"options.certificate" is not type of "string"`);
+              this.#options.agent = new import_node_https.default.Agent({
+                pfx: Buffer.from(this.options.certificate, "base64"),
+                passphrase: ""
+              });
+              break;
+          }
         }
       }
       return this.#options.agent;
@@ -4273,7 +4339,8 @@ var envSchema = import_zod4.default.object({
   CLIENT_SECRET_HOMOLOGACAO: import_zod4.default.string().optional(),
   CLIENT_ID_PRODUCAO: import_zod4.default.string().optional(),
   CLIENT_SECRET_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
-  PIX_KEY: import_zod4.default.string().optional()
+  PIX_KEY: import_zod4.default.string().optional(),
+  WEBHOOK_PIX: import_zod4.default.string().optional()
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)
@@ -4288,6 +4355,43 @@ if (!_env.success)
     `
   );
 var env = _env.data;
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-manage/pix-manage-response-array.ts
+var PixManageResponseArray = class extends ApiArrayResponse {
+  constructor(props) {
+    const data = {
+      arrayData: props.pix,
+      parametros: props.parametros
+    };
+    super(data, PixManageResponse);
+  }
+  get pix() {
+    return this.arrayData;
+  }
+  toObject() {
+    return {
+      parametros: {
+        inicio: this.inicio.toDate(),
+        fim: this.fim.toDate(),
+        paginaAtual: this.paginaAtual,
+        itensPorPagina: this.itensPorPagina,
+        quantidadeDePaginas: this.quantidadeDePaginas,
+        quantidadeTotalDeItens: this.quantidadeTotalDeItens
+      },
+      pix: this.pix.map((item) => item.toObject())
+    };
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/pix/value-objects/id-envio.ts
+var IdEnvio = class extends Id {
+  constructor(id) {
+    super({ size: 35, value: id });
+  }
+  generate() {
+    return this.generateNew();
+  }
+};
 
 // src/index.ts
 function makeOptions({ type, operation, data }) {
@@ -4325,6 +4429,7 @@ var EfiPay = class _EfiPay {
     const clientId = options?.client_id;
     const clientSecret = options?.client_secret;
     const certificateType = options?.certificateType;
+    const validateMtls = options?.validateMtls;
     this.#pix = new PixRequest({
       type,
       options: makeOptions({
@@ -4333,7 +4438,8 @@ var EfiPay = class _EfiPay {
           certificate,
           client_id: clientId,
           client_secret: clientSecret,
-          certificateType
+          certificateType,
+          validateMtls
         }
       })
     });
@@ -4402,7 +4508,7 @@ var EfiPay = class _EfiPay {
     CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? "Your_Client_Secret_for_Producao"}"
     
     
-    # SUPPORT VARIABLES? ********************************************
+    # SUPPORT VARIABLES ********************************************
 
     # PIX
     PIX_KEY="${props?.variables?.PIX_KEY ?? "you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"}"
@@ -4455,14 +4561,103 @@ var EfiPay = class _EfiPay {
       );
       return;
     }
-    const homologacaoBase64 = certificadoHomologacaoPath ? (0, import_node_fs2.readFileSync)(certificadoHomologacaoPath).toString("base64") : void 0;
-    const producaoBase64 = certificadoProducaoPath ? (0, import_node_fs2.readFileSync)(certificadoProducaoPath).toString("base64") : void 0;
+    const homologacaoBuffer = certificadoHomologacaoPath ? (0, import_node_fs2.readFileSync)(certificadoHomologacaoPath) : void 0;
+    const producaoBuffer = certificadoProducaoPath ? (0, import_node_fs2.readFileSync)(certificadoProducaoPath) : void 0;
+    _EfiPay.generateBase64FromBufferCertificate({
+      certificadoHomologacaoBuffer: homologacaoBuffer,
+      certificadoProducaoBuffer: producaoBuffer
+    });
+  }
+  /**
+   *
+   * ---
+   *
+   * Converte os certificados em formato `Buffer` para string `base64`
+   *
+   * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+   *
+   * ---
+   *
+   * @param CertificateFromBufferProps
+   */
+  static generateBase64FromBufferCertificate({
+    certificadoHomologacaoBuffer,
+    certificadoProducaoBuffer
+  }) {
+    const homologacaoBase64 = certificadoHomologacaoBuffer ? certificadoHomologacaoBuffer.toString("base64") : void 0;
+    const producaoBase64 = certificadoProducaoBuffer ? certificadoProducaoBuffer.toString("base64") : void 0;
     _EfiPay.generateDotEnv({
       variables: {
+        // CERTIFICATES ********************************************
+        // FILE PATH
+        CERTIFICADO_HOMOLOGACAO_PATH: env.CERTIFICADO_HOMOLOGACAO_PATH,
+        CERTIFICADO_PRODUCAO_PATH: env.CERTIFICADO_PRODUCAO_PATH,
+        // BASE64
         CERTIFICADO_HOMOLOGACAO_BASE64: homologacaoBase64,
-        CERTIFICADO_PRODUCAO_BASE64: producaoBase64
+        CERTIFICADO_PRODUCAO_BASE64: producaoBase64,
+        // CREDENTIALS ********************************************
+        // HOMOLOGACAO
+        CLIENT_ID_HOMOLOGACAO: env.CLIENT_ID_HOMOLOGACAO,
+        CLIENT_SECRET_HOMOLOGACAO: env.CLIENT_SECRET_HOMOLOGACAO,
+        // PRODUCAO
+        CLIENT_ID_PRODUCAO: env.CLIENT_ID_PRODUCAO,
+        CLIENT_SECRET_PRODUCAO: env.CLIENT_SECRET_PRODUCAO,
+        // SUPPORT VARIABLES ********************************************
+        // PIX
+        PIX_KEY: env.PIX_KEY,
+        // WEBHOOKS
+        WEBHOOK_PIX: env.WEBHOOK_PIX
       }
     });
   }
 };
 var src_default = EfiPay;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  Address,
+  CalendarDueCharge,
+  CalendarImediateCharge,
+  Cep,
+  Cnpj,
+  Cpf,
+  E2eId,
+  Email,
+  Id,
+  IdEnvio,
+  MonetaryValue,
+  PixBatchCollections,
+  PixBatchCollectionsCreateOrUpdateDueChargeResponse,
+  PixBatchCollectionsResponse,
+  PixBatchCollectionsResponseArray,
+  PixDueCharge,
+  PixDueChargeResponse,
+  PixDueChargeResponseArray,
+  PixImediateCharge,
+  PixImediateChargeResponse,
+  PixImediateChargeResponseArray,
+  PixLocation,
+  PixManage,
+  PixManageResponse,
+  PixManageResponseArray,
+  PixManageReturnResponse,
+  PixPayloadLocations,
+  PixPayloadLocationsQRCodeResponse,
+  PixPayloadLocationsResponse,
+  PixPayloadLocationsResponseArray,
+  PixPaymentSplit,
+  PixPaymentSplitAttachmentResponse,
+  PixPaymentSplitDueChargeAttachmentResponse,
+  PixPaymentSplitImediateChargeAttachmentResponse,
+  PixPaymentSplitResponse,
+  PixRequest,
+  PixSendAndPayment,
+  PixSendAndPaymentSendResponse,
+  PixWebhooks,
+  PixWebhooksAddResponse,
+  PixWebhooksDeleteResponse,
+  PixWebhooksResponse,
+  PixWebhooksResponseArray,
+  State,
+  TxId,
+  UserAccount
+});

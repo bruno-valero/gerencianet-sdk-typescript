@@ -3722,6 +3722,9 @@ interface PixFilterSearchParamsProps
 interface PixFilterSearchProps {
   searchParams: PixFilterSearchParamsProps
 }
+interface PixFilterSearchRawProps {
+  searchParams: PixFilterSearchRawParamsProps
+}
 
 declare const statesShortSchema: z.ZodEnum<["AM", "PA", "RR", "AP", "AC", "RO", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO", "DF"]>;
 type StatesShort = z.infer<typeof statesShortSchema>;
@@ -6928,7 +6931,7 @@ declare class PixPaymentSplit<type extends EnvironmentTypes> extends ApiRequest<
 /**
  * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
  */
-type IdEnvio = string
+type IdEnvio$1 = string
 
 /**
  * Valores monetários referentes à cobrança.
@@ -7029,7 +7032,7 @@ interface PixSendAndPaymentSendProps {
   /**
    * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
    */
-  idEnvio: IdEnvio
+  idEnvio: IdEnvio$1
   body: {
     /**
      * Valores monetários referentes à cobrança.
@@ -7052,7 +7055,7 @@ interface PixSendAndPaymentSendResponseType {
   /**
    * O campo idEnvio determina o identificador da transação. `string \d{1,10}\.\d{2}`
    */
-  idEnvio: IdEnvio
+  idEnvio: IdEnvio$1
   /**
    * EndToEndIdentification que transita na PACS002, PACS004 e PACS008. `32 characters` `^[a-zA-Z0-9]{32}`
    */
@@ -7414,11 +7417,63 @@ declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type,
     }): PixRequest<type>;
 }
 
+declare class PixManageResponseArray extends ApiArrayResponse<typeof PixManageResponse> {
+    constructor(props: PixChargeResponseTypeArray<PixManageResponseType, 'pix'>);
+    get pix(): PixManageResponse[];
+    toObject(): {
+        parametros: {
+            inicio: Date;
+            fim: Date;
+            paginaAtual: number;
+            itensPorPagina: number;
+            quantidadeDePaginas: number;
+            quantidadeTotalDeItens: number;
+        };
+        pix: {
+            endToEndId: string;
+            txid: string;
+            valor: {
+                cents: number;
+                units: number;
+                originalValue: string;
+                format: string;
+            };
+            horario: Date;
+            infoPagador: string;
+            devolucoes: {
+                id: string;
+                rtrId: string;
+                valor: {
+                    cents: number;
+                    units: number;
+                    originalValue: string;
+                    format: string;
+                };
+                horario: {
+                    solicitacao: Date;
+                };
+                status: PixStatus;
+            }[] | undefined;
+        }[];
+    };
+}
+
+/**
+ * Determina o identificador da transação.
+ *
+ * - string (Id da Transação) `^[a-zA-Z0-9]{1,35}$`
+ */
+declare class IdEnvio extends Id {
+    constructor(id?: string);
+    generate(): string;
+}
+
 type OptionsCredentials = {
     client_id?: string;
     client_secret?: string;
     certificate?: PathLike;
     certificateType?: CertificateType;
+    validateMtls?: boolean;
 };
 type GenerateDotEnvProps = {
     variables?: {
@@ -7434,6 +7489,28 @@ type GenerateDotEnvProps = {
         WEBHOOK_PIX?: string;
     };
     mode?: 'append' | 'overwrite';
+};
+type CertificateFromBufferProps = {
+    /**
+     *
+     * ---
+     *
+     * Certificado de Homologação em formato `Buffer`.
+     *
+     * ---
+     *
+     */
+    certificadoHomologacaoBuffer?: Buffer;
+    /**
+     *
+     * ---
+     *
+     * Certificado de Produção em formato `Buffer`.
+     *
+     * ---
+     *
+     */
+    certificadoProducaoBuffer?: Buffer;
 };
 type GenerateBase64FromCertificateProps = {
     /**
@@ -7522,6 +7599,19 @@ declare class EfiPay<type extends EnvironmentTypes> {
      * @param GenerateBase64FromCertificateProps
      */
     static generateBase64FromCertificate({ certificadoHomologacaoPath, certificadoProducaoPath, }: GenerateBase64FromCertificateProps): void;
+    /**
+     *
+     * ---
+     *
+     * Converte os certificados em formato `Buffer` para string `base64`
+     *
+     * Após a encodificação, salva os valores em **variáveis de ambiente** no arquivo `.env` na raiz do seu projeto. Caso o `.env` já exista, escreve **novas variáveis de ambiente** abaixo das existentes.
+     *
+     * ---
+     *
+     * @param CertificateFromBufferProps
+     */
+    static generateBase64FromBufferCertificate({ certificadoHomologacaoBuffer, certificadoProducaoBuffer, }: CertificateFromBufferProps): void;
 }
 
-export { EfiPay as default };
+export { Address, CalendarDueCharge, CalendarImediateCharge, Cep, Cnpj, Cpf, E2eId, Email, Id, IdEnvio, MonetaryValue, PixBatchCollections, type PixBatchCollectionsBatchResponseType, type PixBatchCollectionsCreateOrUpdateDueChargeBatchProps, PixBatchCollectionsCreateOrUpdateDueChargeResponse, type PixBatchCollectionsFindManyDueChargeBatchProps, type PixBatchCollectionsFindUniqueDueChargeBatchProps, PixBatchCollectionsResponse, PixBatchCollectionsResponseArray, type PixBatchCollectionsUpdateDueChargeBatchProps, PixDueCharge, type PixDueChargeCreateProps, type PixDueChargeFindManyProps, type PixDueChargeFindUniqueProps, PixDueChargeResponse, PixDueChargeResponseArray, type PixDueChargeUpdateProps, type PixFilterSearchParamsProps, type PixFilterSearchProps, type PixFilterSearchRawParamsProps, type PixFilterSearchRawProps, PixImediateCharge, type PixImediateChargeCreateProps, type PixImediateChargeFindManyProps, type PixImediateChargeFindUniqueProps, PixImediateChargeResponse, PixImediateChargeResponseArray, type PixImediateChargeResponseType, type PixImediateChargeUpdateProps, PixLocation, PixManage, PixManageResponse, PixManageResponseArray, type PixManageResponseType, PixManageReturnResponse, type PixManageReturnResponseType, PixPayloadLocations, type PixPayloadLocationsCreateProps, type PixPayloadLocationsDetachTxIdProps, type PixPayloadLocationsFindManyProps, type PixPayloadLocationsFindUniqueProps, type PixPayloadLocationsGenerateQrCodeProps, type PixPayloadLocationsGenerateQrCodeResponseType, PixPayloadLocationsQRCodeResponse, PixPayloadLocationsResponse, PixPayloadLocationsResponseArray, type PixPayloadLocationsResponseType, PixPaymentSplit, type PixPaymentSplitAttachDueChargeProps, type PixPaymentSplitAttachImediateChargeProps, PixPaymentSplitAttachmentResponse, type PixPaymentSplitCreateProps, type PixPaymentSplitDeleteImediateChargeAttachmentProps, PixPaymentSplitDueChargeAttachmentResponse, type PixPaymentSplitFindUniqueDueChargeAttachmentProps, type PixPaymentSplitFindUniqueDueChargeAttachmentResponseType, type PixPaymentSplitFindUniqueImediateChargeAttachmentResponseType, type PixPaymentSplitFindUniqueProps, PixPaymentSplitImediateChargeAttachmentResponse, PixPaymentSplitResponse, type PixPaymentSplitResponseType, PixRequest, PixSendAndPayment, type PixSendAndPaymentSendProps, PixSendAndPaymentSendResponse, type PixSendAndPaymentSendResponseType, PixWebhooks, type PixWebhooksAddProps, PixWebhooksAddResponse, type PixWebhooksConsultManyProps, type PixWebhooksConsultReturnProps, type PixWebhooksDeleteProps, PixWebhooksDeleteResponse, type PixWebhooksFindManyProps, type PixWebhooksFindUniqueProps, PixWebhooksResponse, PixWebhooksResponseArray, type PixWebhooksResponseType, type PixWebhooksReturnProps, State, TxId$1 as TxId, UserAccount, EfiPay as default };

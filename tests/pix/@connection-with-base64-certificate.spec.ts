@@ -32,6 +32,7 @@ describe('Pix Imediate charge', () => {
       },
     })
 
+    console.log('create resp:', resp?.toObject())
     expect(resp).not.toBeNull()
     expect(resp).toBeInstanceOf(PixImediateChargeResponse)
   })

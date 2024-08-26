@@ -123,17 +123,25 @@ function makeOptions<
     )
 
   const certificateHomologacao =
-    env.CERTIFICADO_HOMOLOGACAO_PATH || env.CERTIFICADO_HOMOLOGACAO_BASE64
+    data?.certificate ||
+    (data?.certificateType === 'file'
+      ? env.CERTIFICADO_HOMOLOGACAO_PATH
+      : data?.certificateType === 'base64'
+        ? env.CERTIFICADO_HOMOLOGACAO_BASE64
+        : undefined)
   const certificateProducao =
-    env.CERTIFICADO_PRODUCAO_PATH || env.CERTIFICADO_PRODUCAO_BASE64
+    data?.certificate ||
+    (data?.certificateType === 'file'
+      ? env.CERTIFICADO_PRODUCAO_PATH
+      : data?.certificateType === 'base64'
+        ? env.CERTIFICADO_PRODUCAO_BASE64
+        : undefined)
 
   const opt: Partial<Options<type, operation>> = {
     client_id: data?.client_id || env.CLIENT_ID_HOMOLOGACAO,
     client_secret: data?.client_secret || env.CLIENT_SECRET_HOMOLOGACAO,
     certificate:
-      data?.certificate || type === 'SANDBOX'
-        ? certificateHomologacao
-        : certificateProducao,
+      type === 'SANDBOX' ? certificateHomologacao : certificateProducao,
     certificateType: data?.certificateType || 'file',
   }
 

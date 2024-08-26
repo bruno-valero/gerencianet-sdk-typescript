@@ -4407,12 +4407,12 @@ function makeOptions({ type, operation, data }) {
     throw new Error(
       'operation must be one of those: "PIX" | "DEFAULT" | "OPENFINANCE" | "PAGAMENTOS" | "CONTAS" | undefined = undefined'
     );
-  const certificateHomologacao = env.CERTIFICADO_HOMOLOGACAO_PATH || env.CERTIFICADO_HOMOLOGACAO_BASE64;
-  const certificateProducao = env.CERTIFICADO_PRODUCAO_PATH || env.CERTIFICADO_PRODUCAO_BASE64;
+  const certificateHomologacao = data?.certificate || (data?.certificateType === "file" ? env.CERTIFICADO_HOMOLOGACAO_PATH : data?.certificateType === "base64" ? env.CERTIFICADO_HOMOLOGACAO_BASE64 : void 0);
+  const certificateProducao = data?.certificate || (data?.certificateType === "file" ? env.CERTIFICADO_PRODUCAO_PATH : data?.certificateType === "base64" ? env.CERTIFICADO_PRODUCAO_BASE64 : void 0);
   const opt = {
     client_id: data?.client_id || env.CLIENT_ID_HOMOLOGACAO,
     client_secret: data?.client_secret || env.CLIENT_SECRET_HOMOLOGACAO,
-    certificate: data?.certificate || type === "SANDBOX" ? certificateHomologacao : certificateProducao,
+    certificate: type === "SANDBOX" ? certificateHomologacao : certificateProducao,
     certificateType: data?.certificateType || "file"
   };
   if (!opt.client_id) throw new Error('property "client_id" is empty');

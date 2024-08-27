@@ -22,7 +22,7 @@ interface PixRequestProps<type extends EnvironmentTypes> {
  *
  * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
  *
- * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+ * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
  */
 export class PixRequest<type extends EnvironmentTypes> extends ApiRequest<
   type,

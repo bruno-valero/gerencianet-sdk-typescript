@@ -1,6 +1,6 @@
 {
   "name": "@bruno-valero/gerencianet-sdk-typescript",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "main": "./build/index.js",
   "module": "./build/index.mjs",
   "types": "./build/index.d.ts",
@@ -13,7 +13,8 @@
     "minor": "npm version minor && git push origin --tags && git push origin dev && npm publish",
     "major": "npm version major && git push origin --tags && git push origin dev && npm publish",
     "git-add": "git add .",
-    "add": "run-s types lint build git-add",
+    "check": "run-s types lint",
+    "add": "run-s check build git-add",
     "test": "vitest ./tests"
   },
   "publishConfig": {

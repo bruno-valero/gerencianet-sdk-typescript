@@ -1275,8 +1275,118 @@ var ApiRequest = class {
   }
 };
 
+// src/domain-driven-design/domains/apis/enterprise/entities/cobranca/cobranca-modules/card/index.ts
+var Card = class _Card extends ApiRequest {
+  // get paymentSupport() {
+  //   return new CardPaymentSupport<type>({
+  //     environmentType: this.environment as type,
+  //   })
+  // }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const pix = new _Card(type, "DEFAULT", {
+      ...options,
+      client_id: clientId,
+      client_secret: clientSecret
+    });
+    return pix;
+  }
+};
+
+// src/domain-driven-design/domains/apis/enterprise/entities/cobranca/cobranca.ts
+var CobrancaRequest = class _CobrancaRequest extends ApiRequest {
+  #card;
+  constructor({ type, options }) {
+    super(type, "DEFAULT", options);
+    this.#card = new Card(type, "DEFAULT", options);
+  }
+  /**
+   *
+   * ---
+   *
+   * As transações online via cartão de crédito exigem apenas a numeração de face e o código no verso do cartão, o que pode resultar em transações suspeitas. Por isso, é importante adotar procedimentos de segurança para evitar prejuízos financeiros, como o Chargeback.
+   *
+   * Quando uma transação com cartão de crédito é realizada, ela passa por três etapas: autorização da operadora, análise de segurança e captura. Cada transação é analisada para identificar possíveis riscos. Se for aprovada, o valor é debitado na fatura do cliente. Caso contrário, o valor fica reservado até que a comunicação reversa seja concluída e o limite do cartão seja reestabelecido.
+   *
+   * ---
+   *
+   * ### Lista de Cartões aceitos pela Efí Pay
+   *
+   * - Visa
+   * - Master
+   * - AmericanExpress
+   * - Elo
+   * - Hipercard
+   *
+   * ---
+   *
+   * ### Atenção!
+   *
+   * Para fazer o pagamento com cartão de crédito,***é necessário obter o payment_token*** da transação. Portanto, é imprescindível seguir os procedimentos para [obter o payment_token](https://dev.efipay.com.br/docs/api-cobrancas/cartao#obten%C3%A7%C3%A3o-do-payment_token) conforme descrito no documento antes de criar a cobrança com cartão de crédito.
+   *
+   * Outra informação importante é você precisa cadastrar o ramo de atividade em sua conta. Confira mais detalhes [aqui](https://sejaefi.com.br/artigo/inserir-ramo-de-atividade/#versao-7).
+   *
+   * ---
+   *
+   * ### Tokenização de cartão
+   *
+   * Se você precisa reutilizar o payment_token para fins de recorrência, utilize o atributo `reuse` com o valor booleano `true`. Dessa forma, o payment_token pode ser usado em mais de uma transação de forma segura, sem a necessidade de salvar os dados do cartão
+   *
+   * ---
+   *
+   * ### Simulação em Ambiente de Homologação
+   *
+   * A simulação de cobranças de cartão em ambiente de Homologação funciona com base na análise imediata de acordo com o último dígito do número do cartão de crédito utilizado:
+   *
+   * - Cartão com final 1 retorna: `"reason":"Dados do cartão inválidos."`
+   * - Cartão com final 2 retorna: `"reason":"Transação não autorizada por motivos de segurança."`
+   * - Cartão com final 3 retorna: `"reason":"Transação não autorizada, tente novamente mais tarde."`
+   * - Demais finais têm transação aprovada.
+   *
+   */
+  get card() {
+    return this.#card;
+  }
+  // eslint-disable-next-line
+  // @ts-ignore
+  useCredentials({
+    clientId,
+    clientSecret
+  }) {
+    const type = this.type;
+    const options = this.options;
+    const request = new _CobrancaRequest({
+      type,
+      options: {
+        ...options,
+        client_id: clientId,
+        client_secret: clientSecret
+      }
+    });
+    return request;
+  }
+};
+
 // src/domain-driven-design/core/apis/api-response.ts
 var ApiResponse = class {
+  /**
+   *
+   * ---
+   *
+   * Transforma a Classe um formato Json
+   *
+   * ---
+   *
+   * @param replacer Um array de strings e números que atua como uma lista aprovada para selecionar as propriedades do objeto que serão convertidas em string.
+   * @param space Adiciona indentação, espaços em branco e caracteres de quebra de linha ao texto JSON retornado para torná-lo mais fácil de ler.
+   * @returns `string`
+   */
   toJson(replacer, space) {
     return JSON.stringify(this.toObject(), replacer, space);
   }
@@ -1878,6 +1988,15 @@ var Address = class {
   get state() {
     return new State(this.#props.state.short);
   }
+  /**
+   *
+   * ---
+   *
+   * Transforma a classe em um objeto Literal que pode ser serializado
+   *
+   * ---
+   *
+   */
   toObject() {
     return {
       cep: this.cep.format(),
@@ -2220,9 +2339,33 @@ var MonetaryValue = class {
     const numberInCents = getNumberInCents(onlyNumberAttributes, symbols);
     this.#valueInCents = numberInCents;
   }
+  /**
+   *
+   * ---
+   *
+   * Retorna o valor monetário em centavos.
+   *
+   * Exemplo: `2.00 --> 200`
+   *
+   * ---
+   *
+   *
+   */
   get cents() {
     return this.#valueInCents;
   }
+  /**
+   *
+   * ---
+   *
+   * Retorna o valor monetário em unidades com duas casas decimais.
+   *
+   * Exemplo: `2.4184315841 --> 2.42`
+   *
+   * ---
+   *
+   *
+   */
   get units() {
     return this.cents / 100;
   }
@@ -2237,6 +2380,23 @@ var MonetaryValue = class {
     const currency = props?.currency ?? "BRL";
     return { locale, currency };
   }
+  /**
+   *
+   * ---
+   *
+   * Formata o valor monetário para a moeda e localização escolhida.
+   *
+   * ---
+   *
+   * ### Atenção!
+   *
+   * **Não realiza conversão de moedas**, apenas formata o valor.
+   *
+   * ---
+   *
+   * @param MonetaryValueFormatProps
+   * @returns `string`
+   */
   format(props) {
     const { currency, locale } = this.getFormatParameters(props);
     return Intl.NumberFormat(locale, {
@@ -2244,6 +2404,15 @@ var MonetaryValue = class {
       currency
     }).format(this.units);
   }
+  /**
+   *
+   * ---
+   *
+   * Transforma a classe em um objeto Literal que pode ser serializado
+   *
+   * ---
+   *
+   */
   toObject(props) {
     const formatProps = props?.formatProps;
     const format = this.format(formatProps);
@@ -4340,7 +4509,8 @@ var envSchema = import_zod4.default.object({
   CLIENT_ID_PRODUCAO: import_zod4.default.string().optional(),
   CLIENT_SECRET_PRODUCAO: import_zod4.default.string().min(1, 'environment variable "CLIENT_SECRET_PRODUCAO" is missing'),
   PIX_KEY: import_zod4.default.string().optional(),
-  WEBHOOK_PIX: import_zod4.default.string().optional()
+  WEBHOOK_PIX: import_zod4.default.string().optional(),
+  ACCOUNT_IDENTIFIER: import_zod4.default.string().optional()
 });
 var _env = envSchema.safeParse(process.env);
 if (!_env.success)
@@ -4424,6 +4594,7 @@ function makeOptions({ type, operation, data }) {
 }
 var EfiPay = class _EfiPay {
   #pix;
+  #cobranca;
   constructor(type, options) {
     const certificate = options?.certificate;
     const clientId = options?.client_id;
@@ -4431,6 +4602,19 @@ var EfiPay = class _EfiPay {
     const certificateType = options?.certificateType;
     const validateMtls = options?.validateMtls;
     this.#pix = new PixRequest({
+      type,
+      options: makeOptions({
+        type,
+        data: {
+          certificate,
+          client_id: clientId,
+          client_secret: clientSecret,
+          certificateType,
+          validateMtls
+        }
+      })
+    });
+    this.#cobranca = new CobrancaRequest({
       type,
       options: makeOptions({
         type,
@@ -4453,6 +4637,24 @@ var EfiPay = class _EfiPay {
    */
   get pix() {
     return this.#pix;
+  }
+  /**
+   *
+   * ---
+   *
+   * A API Cobranças Efí oferece recursos avançados que permitem emitir diferentes tipos de cobranças, tais como **Boleto**, **Cartão de crédito**, **Carnê**, **Links de pagamento**, **Assinaturas (Recorrência)** e **Marketplace (Split de pagamento)**.
+   *
+   * Para integrar a API Cobranças Efí ao seu sistema ou sua plataforma, **é necessário ter uma Conta Digital Efí**. Após obter o acesso à conta, você poderá adquirir as credenciais necessárias para estabelecer a comunicação com a API Cobranças Efí.
+   *
+   * ---
+   *
+   * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-cobrancas/credenciais)
+   *
+   * ---
+   *
+   */
+  get cobranca() {
+    return this.#cobranca;
   }
   /**
    *
@@ -4493,30 +4695,32 @@ var EfiPay = class _EfiPay {
   static generateDotEnv(props) {
     const dotEnvData = `
     # CERTIFICATES ********************************************
-    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH ?? "./path/to/homologacao-certificate.(p12|pem)"}"
-    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH ?? "./path/to/producao-certificate.(p12|pem)"}"
+    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH || "./path/to/homologacao-certificate.(p12|pem)"}"
+    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH || "./path/to/producao-certificate.(p12|pem)"}"
 
-    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 ?? "base64_string_of_homologacao"}"
-    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 ?? "base64_string_of_producao"}"
+    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 || "base64_string_of_homologacao"}"
+    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 || "base64_string_of_producao"}"
 
     # CREDENTIALS ********************************************
     # HOMOLOGACAO
-    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO ?? "Your_Client_Id_for_Homologacao"}"
-    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO ?? "Your_Client_Secret_for_Homologacao"}"
+    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO || "Your_Client_Id_for_Homologacao"}"
+    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO || "Your_Client_Secret_for_Homologacao"}"
     # PRODUCAO
-    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO ?? "Your_Client_Id_for_Producao"}"
-    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? "Your_Client_Secret_for_Producao"}"
+    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO || "Your_Client_Id_for_Producao"}"
+    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO || "Your_Client_Secret_for_Producao"}"
     
     
     # SUPPORT VARIABLES ********************************************
 
     # PIX
-    PIX_KEY="${props?.variables?.PIX_KEY ?? "you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"}"
+    PIX_KEY="${props?.variables?.PIX_KEY || "you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"}"
 
     # WEBHOOKS
-    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX ?? "https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"}"
+    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX || "https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"}"
+    # ACCOUNT IDENTIFIER
+    ACCOUNT_IDENTIFIER="${props?.variables?.ACCOUNT_IDENTIFIER || "your_account_identifier"}"
     `.trim().replaceAll(/  +/gi, "");
-    const mode = props?.mode ?? "append";
+    const mode = props?.mode || "append";
     const fileName = ".env";
     const rootPath = "./";
     const path = `${rootPath}${fileName}`;

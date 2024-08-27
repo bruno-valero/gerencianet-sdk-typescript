@@ -3,8 +3,59 @@
 Este pacote oferece uma SDK moderna para integrar a API da Gerencianet com TypeScript. Diferente da SDK oficial, esta versão foi desenvolvida com foco total no TypeScript, proporcionando segurança de tipos e melhor reportagem de erros durante o desenvolvimento.
 
 
-**Atenção**: O pacote está em desenvolvimento ativo. Atualmente, apenas a API de PIX para cobranças imediatas e cobranças com data limite está com a integração completa. Outras funcionalidades serão implementadas em futuras atualizações.
+**Atenção**: O pacote está em desenvolvimento ativo. Atualmente, a API de PIX já está completamente integrada, exceto os Endpoints exclusivos da Efí Pay. Outras funcionalidades serão implementadas em futuras atualizações.
 
+---
+
+### Ir para:
+
+
+
+- [Instalação](#instalação)
+
+  ---
+- [Variáveis de Ambiente (Environment Variables)](#variáveis-de-ambiente-environment-variables)
+  - [Gerar automaticamente as Variáveis Ambientes](#gerar-automaticamente-as-variáveis-ambientes)
+    - [Criar `.env` através do SDK](#criar-env-através-do-sdk)
+    - [Escrever as Variáveis de Ambiente em um `.env` já existente](#escrever-as-variáveis-de-ambiente-em-um-env-já-existente)
+    - [Sobrescrever `.env` com as novas Variáveis de Ambiente](#sobrescrever-env-com-as-novas-variáveis-de-ambiente)
+    - [Gerar manualmente as Variáveis de Ambiente](#gerar-manualmente-as-variáveis-de-ambiente)
+
+    - [Validação e Segurança de Tipagem](#validação-e-segurança-de-tipagem)
+
+  ---
+- [Credenciais](#credenciais)
+  - [Primeiro Passo -  Criação da Conta](#primeiro-passo----criação-da-conta)
+  - [Segundo Passo - Criação de um Aplicativo](#segundo-passo---criação-de-um-aplicativo)
+  - [Terceiro Passo - Criação dos Certificados](#terceiro-passo---criação-dos-certificados)
+    - [Certificados em formato `base64`](#certificados-em-formato-base64)
+    - [Criação do arquivo `.env`](#criação-do-arquivo-env)
+    - [Arquivo `.env` já existente](#arquivo-env-já-existente)
+
+  - [Quarto Passo - Criação da Chave Pix](#quarto-passo---criação-da-chave-pix)  
+
+  ---
+- [Utilização do SDK](#utilização-do-sdk)
+  - [Utilizar certificados em formato `base64`](#utilizar-certificados-em-formato-base64)
+  - [Utilizar certificados em formato `Buffer`](#utilizar-certificados-em-formato-buffer)
+  - [Utilizar o SDK sem as Variáveis de Ambiente](#utilizar-o-sdk-sem-as-variáveis-de-ambiente)
+
+    ---
+  - [API PIX](#api-pix)
+    - [Cobranças imediatas - **imediateCharge**](#cobranças-imediatas---imediatecharge)
+    - [Cobranças com vencimento - **dueCharge**](#cobranças-com-vencimento---duecharge)
+    - [Envio e Pagamento Pix - **sendAndPayment**](#envio-e-pagamento-pix---sendandpayment)
+    - [Webhooks - **webhooks**](#webhooks---webhooks)
+    - [Gestão de Pix - **manage**](#gestão-de-pix---manage)
+    - [Payload Locations - **payloadLocations**](#payload-locations---payloadlocations)
+    - [Cobranças em Lote - **batchCollections**](#cobranças-em-lote---batchcollections)
+    - [Split de pagamento Pix - **paymentSplit**](#split-de-pagamento-pix---paymentsplit)
+
+      ---
+  - [API Cobranças](#api-cobranças)
+    - [Cartão - **card**](#cartão---card)
+
+---
 
 ## Instalação
 
@@ -110,6 +161,8 @@ CLIENT_SECRET_PRODUCAO="Your_Client_Secret_for_Producao"
 PIX_KEY="you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank"
 #WEBHOOKS
 WEBHOOK_PIX="https://your-url/webhook/pix?ignorar=&hmac=your-custom-key"
+# ACCOUNT IDENTIFIER
+ACCOUNT_IDENTIFIER="your_account_identifier"
 ```
 
 - Se não estiver usando um framework, será necessário instalar o `dotenv` para ter acesso às variáveis de ambiente. Se for o caso, execute:
@@ -171,6 +224,9 @@ const envSchema = z.object({
   WEBHOOK_PIX: z
     .string()
     .min(1, 'environment variable "WEBHOOK_PIX" is missing'),
+  ACCOUNT_IDENTIFIER: z
+    .string()
+    .min(1, 'environment variable "ACCOUNT_IDENTIFIER" is missing'),
 })
 
 const _env = envSchema.safeParse(process.env)
@@ -363,7 +419,7 @@ const efi = new EfiPay('SANDBOX', {
 
 ### API PIX
 
-A API PIX da Efí Pay é destinada a realizar transações financeiras através de PIX, ela tem duas modalidades integradas até então, que são, **Cobranças imediatas** e **Cobranças com vencimento** que possuem quatro métodos, `create`, `update`, `findUnique` e `findMany`. 
+A API Pix Efí oferece recursos avançados para integração com sua aplicação, permitindo que você crie soluções personalizadas e ofereça opções de pagamento inovadoras aos seus clientes. É possível criar cobranças, verificar os Pix recebidos, devolver e enviar Pix.
 
 #### Cobranças imediatas - **imediateCharge**
 
@@ -690,6 +746,68 @@ efi.pix.paymentSplit.findUniqueDueChargeAttachment({
 })
 
 efi.pix.paymentSplit.deleteDueChargeAttachment({
+  // passe os parâmetros necessários
+})
+```
+
+### API Cobranças
+
+A API Cobranças Efí oferece recursos avançados que permitem emitir diferentes tipos de cobranças, tais como **Boleto**, **Cartão de crédito**, **Carnê**, **Links de pagamento**, **Assinaturas (Recorrência)** e **Marketplace (Split de pagamento)**.
+
+#### Cartão - **card**
+
+As transações online via cartão de crédito exigem apenas a numeração de face e o código no verso do cartão, o que pode resultar em transações suspeitas. Por isso, é importante adotar procedimentos de segurança para evitar prejuízos financeiros, como o Chargeback.
+
+Quando uma transação com cartão de crédito é realizada, ela passa por três etapas: autorização da operadora, análise de segurança e captura. Cada transação é analisada para identificar possíveis riscos. Se for aprovada, o valor é debitado na fatura do cliente. Caso contrário, o valor fica reservado até que a comunicação reversa seja concluída e o limite do cartão seja reestabelecido.
+
+**As funcionalidades estão em desenvolvimento**
+
+---
+
+### Lista de Cartões aceitos pela Efí Pay
+- Visa
+- Master
+- AmericanExpress
+- Elo
+- Hipercard
+
+---
+
+### Atenção!
+
+Para fazer o pagamento com cartão de crédito, ***é necessário obter o payment_token*** da transação. Portanto, é imprescindível seguir os procedimentos para [obter o payment_token](https://dev.efipay.com.br/docs/api-cobrancas/cartao#obten%C3%A7%C3%A3o-do-payment_token) conforme descrito no documento antes de criar a cobrança com cartão de crédito.
+Outra informação importante é você precisa cadastrar o ramo de atividade em sua conta. Confira mais detalhes [aqui](https://sejaefi.com.br/artigo/inserir-ramo-de-atividade/#versao-7).
+
+---
+
+### Tokenização de cartão
+Se você precisa reutilizar o payment_token para fins de recorrência, utilize o atributo `reuse` com o valor booleano `true`. Dessa forma, o payment_token pode ser usado em mais de uma transação de forma segura, sem a necessidade de salvar os dados do cartão
+
+---
+
+### Simulação em Ambiente de Homologação
+A simulação de cobranças de cartão em ambiente de Homologação funciona com base na análise imediata de acordo com o último dígito do número do cartão de crédito utilizado:
+- Cartão com final 1 retorna: `"reason":"Dados do cartão inválidos."`
+- Cartão com final 2 retorna: `"reason":"Transação não autorizada por motivos de segurança."`
+- Cartão com final 3 retorna: `"reason":"Transação não autorizada, tente novamente mais tarde."`
+- Demais finais têm transação aprovada.
+
+---
+
+- **Testes de Integração *Não Realizados***
+
+---
+
+Para entender mais sobre o **Cartão**, leia as anotações typescript do SDK ou [visite a documentação oficial](https://dev.efipay.com.br/docs/api-cobrancas/cartao)
+
+Para utilizar o **Cartão** através do SDK acesse a propriedade `card` da api Cobranca, dessa forma:
+
+```ts
+import EfiPay from '@bruno-valero/gerencianet-sdk-typescript'
+
+const efi = new EfiPay('SANDBOX')
+
+efi.cobranca.card.['in development']({
   // passe os parâmetros necessários
 })
 ```

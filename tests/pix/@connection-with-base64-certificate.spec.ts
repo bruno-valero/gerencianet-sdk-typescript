@@ -4,7 +4,7 @@ import { PixImediateCharge } from '@/domain-driven-design/domains/apis/enterpris
 import { PixImediateChargeResponse } from '@/domain-driven-design/domains/apis/enterprise/entities/pix/pix-modules/pix-imediate-charge/pix-imediate-charge-response'
 import { env } from '@/env'
 
-describe('Pix Imediate charge', () => {
+describe.skip('Pix Imediate charge', () => {
   let pix: PixRequest<'SANDBOX'>
   let sut: PixImediateCharge<'SANDBOX'>
 

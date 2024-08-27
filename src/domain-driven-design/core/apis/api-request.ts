@@ -218,6 +218,21 @@ export abstract class ApiRequest<
     }
   }
 
+  /**
+   *
+   * ---
+   *
+   * Permite usar outras credenciais para realizar a conexão com as APIs da Efí Pay
+   *
+   * ---
+   *
+   * ### Atenção!
+   *
+   * Esta funcionalidade ainda não foi testada. Para ver seu funcionamento procure testar apenas em Homologação.
+   *
+   * ---
+   *
+   */
   abstract useCredentials<T>(props: {
     clientId: string
     clientSecret: string

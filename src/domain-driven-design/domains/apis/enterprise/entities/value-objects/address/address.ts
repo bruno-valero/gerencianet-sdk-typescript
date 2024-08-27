@@ -80,6 +80,15 @@ export class Address {
     return new State(this.#props.state.short)
   }
 
+  /**
+   *
+   * ---
+   *
+   * Transforma a classe em um objeto Literal que pode ser serializado
+   *
+   * ---
+   *
+   */
   toObject() {
     return <AddressRaw>{
       cep: this.cep.format(),

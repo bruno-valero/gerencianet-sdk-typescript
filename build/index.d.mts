@@ -3374,6 +3374,21 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
         searchParams?: SearchParams;
         ResponseClass: ResponseClassType;
     }): Promise<InstanceType<ResponseClassType> | null>;
+    /**
+     *
+     * ---
+     *
+     * Permite usar outras credenciais para realizar a conexão com as APIs da Efí Pay
+     *
+     * ---
+     *
+     * ### Atenção!
+     *
+     * Esta funcionalidade ainda não foi testada. Para ver seu funcionamento procure testar apenas em Homologação.
+     *
+     * ---
+     *
+     */
     abstract useCredentials<T>(props: {
         clientId: string;
         clientSecret: string;
@@ -3381,8 +3396,153 @@ declare abstract class ApiRequest<type extends EnvironmentTypes, operation exten
     }): T;
 }
 
+/**
+ *
+ * ---
+ *
+ * As transações online via cartão de crédito exigem apenas a numeração de face e o código no verso do cartão, o que pode resultar em transações suspeitas. Por isso, é importante adotar procedimentos de segurança para evitar prejuízos financeiros, como o Chargeback.
+ *
+ * Quando uma transação com cartão de crédito é realizada, ela passa por três etapas: autorização da operadora, análise de segurança e captura. Cada transação é analisada para identificar possíveis riscos. Se for aprovada, o valor é debitado na fatura do cliente. Caso contrário, o valor fica reservado até que a comunicação reversa seja concluída e o limite do cartão seja reestabelecido.
+ *
+ * ---
+ *
+ * ### Lista de Cartões aceitos pela Efí Pay
+ *
+ * - Visa
+ * - Master
+ * - AmericanExpress
+ * - Elo
+ * - Hipercard
+ *
+ * ---
+ *
+ * ### Atenção!
+ *
+ * Para fazer o pagamento com cartão de crédito,***é necessário obter o payment_token*** da transação. Portanto, é imprescindível seguir os procedimentos para [obter o payment_token](https://dev.efipay.com.br/docs/api-cobrancas/cartao#obten%C3%A7%C3%A3o-do-payment_token) conforme descrito no documento antes de criar a cobrança com cartão de crédito.
+ *
+ * Outra informação importante é você precisa cadastrar o ramo de atividade em sua conta. Confira mais detalhes [aqui](https://sejaefi.com.br/artigo/inserir-ramo-de-atividade/#versao-7).
+ *
+ * ---
+ *
+ * ### Tokenização de cartão
+ *
+ * Se você precisa reutilizar o payment_token para fins de recorrência, utilize o atributo `reuse` com o valor booleano `true`. Dessa forma, o payment_token pode ser usado em mais de uma transação de forma segura, sem a necessidade de salvar os dados do cartão
+ *
+ * ---
+ *
+ * ### Simulação em Ambiente de Homologação
+ *
+ * A simulação de cobranças de cartão em ambiente de Homologação funciona com base na análise imediata de acordo com o último dígito do número do cartão de crédito utilizado:
+ *
+ * - Cartão com final 1 retorna: `"reason":"Dados do cartão inválidos."`
+ * - Cartão com final 2 retorna: `"reason":"Transação não autorizada por motivos de segurança."`
+ * - Cartão com final 3 retorna: `"reason":"Transação não autorizada, tente novamente mais tarde."`
+ * - Demais finais têm transação aprovada.
+ *
+ */
+declare class Card<type extends EnvironmentTypes> extends ApiRequest<type, 'DEFAULT'> {
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): Card<type>;
+}
+
+interface CobrancasRequestProps<type extends EnvironmentTypes> {
+    type: type;
+    options: Optional<EfiConfig<type, 'DEFAULT'>, 'sandbox' | 'certificateType'>;
+}
+/**
+ *
+ * ---
+ *
+ * A API Cobranças Efí oferece recursos avançados que permitem emitir diferentes tipos de cobranças, tais como **Boleto**, **Cartão de crédito**, **Carnê**, **Links de pagamento**, **Assinaturas (Recorrência)** e **Marketplace (Split de pagamento)**.
+ *
+ * Para integrar a API Cobranças Efí ao seu sistema ou sua plataforma, **é necessário ter uma Conta Digital Efí**. Após obter o acesso à conta, você poderá adquirir as credenciais necessárias para estabelecer a comunicação com a API Cobranças Efí.
+ *
+ * ---
+ *
+ * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-cobrancas/credenciais)
+ *
+ * ---
+ *
+ */
+declare class CobrancaRequest<type extends EnvironmentTypes> extends ApiRequest<type, 'DEFAULT'> {
+    #private;
+    constructor({ type, options }: CobrancasRequestProps<type>);
+    /**
+     *
+     * ---
+     *
+     * As transações online via cartão de crédito exigem apenas a numeração de face e o código no verso do cartão, o que pode resultar em transações suspeitas. Por isso, é importante adotar procedimentos de segurança para evitar prejuízos financeiros, como o Chargeback.
+     *
+     * Quando uma transação com cartão de crédito é realizada, ela passa por três etapas: autorização da operadora, análise de segurança e captura. Cada transação é analisada para identificar possíveis riscos. Se for aprovada, o valor é debitado na fatura do cliente. Caso contrário, o valor fica reservado até que a comunicação reversa seja concluída e o limite do cartão seja reestabelecido.
+     *
+     * ---
+     *
+     * ### Lista de Cartões aceitos pela Efí Pay
+     *
+     * - Visa
+     * - Master
+     * - AmericanExpress
+     * - Elo
+     * - Hipercard
+     *
+     * ---
+     *
+     * ### Atenção!
+     *
+     * Para fazer o pagamento com cartão de crédito,***é necessário obter o payment_token*** da transação. Portanto, é imprescindível seguir os procedimentos para [obter o payment_token](https://dev.efipay.com.br/docs/api-cobrancas/cartao#obten%C3%A7%C3%A3o-do-payment_token) conforme descrito no documento antes de criar a cobrança com cartão de crédito.
+     *
+     * Outra informação importante é você precisa cadastrar o ramo de atividade em sua conta. Confira mais detalhes [aqui](https://sejaefi.com.br/artigo/inserir-ramo-de-atividade/#versao-7).
+     *
+     * ---
+     *
+     * ### Tokenização de cartão
+     *
+     * Se você precisa reutilizar o payment_token para fins de recorrência, utilize o atributo `reuse` com o valor booleano `true`. Dessa forma, o payment_token pode ser usado em mais de uma transação de forma segura, sem a necessidade de salvar os dados do cartão
+     *
+     * ---
+     *
+     * ### Simulação em Ambiente de Homologação
+     *
+     * A simulação de cobranças de cartão em ambiente de Homologação funciona com base na análise imediata de acordo com o último dígito do número do cartão de crédito utilizado:
+     *
+     * - Cartão com final 1 retorna: `"reason":"Dados do cartão inválidos."`
+     * - Cartão com final 2 retorna: `"reason":"Transação não autorizada por motivos de segurança."`
+     * - Cartão com final 3 retorna: `"reason":"Transação não autorizada, tente novamente mais tarde."`
+     * - Demais finais têm transação aprovada.
+     *
+     */
+    get card(): Card<type>;
+    useCredentials({ clientId, clientSecret, }: {
+        clientId: string;
+        clientSecret: string;
+    }): CobrancaRequest<type>;
+}
+
 declare abstract class ApiResponse {
+    /**
+     *
+     * ---
+     *
+     * Transforma a classe em um objeto Literal que pode ser serializado
+     *
+     * ---
+     *
+     */
     abstract toObject(...props: unknown[]): unknown;
+    /**
+     *
+     * ---
+     *
+     * Transforma a Classe um formato Json
+     *
+     * ---
+     *
+     * @param replacer Um array de strings e números que atua como uma lista aprovada para selecionar as propriedades do objeto que serão convertidas em string.
+     * @param space Adiciona indentação, espaços em branco e caracteres de quebra de linha ao texto JSON retornado para torná-lo mais fácil de ler.
+     * @returns `string`
+     */
     toJson(replacer?: Parameters<typeof JSON.stringify>[1], space?: Parameters<typeof JSON.stringify>[2]): string;
 }
 
@@ -4516,6 +4676,15 @@ declare class Address {
     get complement(): string;
     get city(): string;
     get state(): State;
+    /**
+     *
+     * ---
+     *
+     * Transforma a classe em um objeto Literal que pode ser serializado
+     *
+     * ---
+     *
+     */
     toObject(): AddressRaw;
     get plainText(): string;
     compareData(address: Address): boolean;
@@ -4613,16 +4782,86 @@ declare class UserAccount {
 type FormatLocales = 'af-ZA' | 'ar-SA' | 'ar-EG' | 'bg-BG' | 'ca-ES' | 'zh-CN' | 'zh-TW' | 'hr-HR' | 'cs-CZ' | 'da-DK' | 'nl-NL' | 'en-US' | 'en-GB' | 'et-EE' | 'fi-FI' | 'fr-FR' | 'de-DE' | 'el-GR' | 'he-IL' | 'hi-IN' | 'hu-HU' | 'id-ID' | 'it-IT' | 'ja-JP' | 'ko-KR' | 'lv-LV' | 'lt-LT' | 'ms-MY' | 'nb-NO' | 'pl-PL' | 'pt-BR' | 'pt-PT' | 'ro-RO' | 'ru-RU' | 'sr-RS' | 'sk-SK' | 'sl-SI' | 'es-ES' | 'sv-SE' | 'th-TH' | 'tr-TR' | 'uk-UA' | 'vi-VN';
 type FormatCurrencies = 'AED' | 'AFN' | 'ALL' | 'AMD' | 'ANG' | 'AOA' | 'ARS' | 'AUD' | 'AWG' | 'AZN' | 'BAM' | 'BBD' | 'BDT' | 'BGN' | 'BHD' | 'BIF' | 'BMD' | 'BND' | 'BOB' | 'BRL' | 'BSD' | 'BTN' | 'BWP' | 'BYN' | 'BYR' | 'BZD' | 'CAD' | 'CDF' | 'CHF' | 'CLF' | 'CLP' | 'CNY' | 'COP' | 'CRC' | 'CUC' | 'CUP' | 'CVE' | 'CZK' | 'DJF' | 'DKK' | 'DOP' | 'DZD' | 'EGP' | 'ERN' | 'ETB' | 'EUR' | 'FJD' | 'FKP' | 'FOK' | 'GBP' | 'GEL' | 'GGP' | 'GHS' | 'GIP' | 'GMD' | 'GNF' | 'GTQ' | 'GYD' | 'HKD' | 'HNL' | 'HRK' | 'HTG' | 'HUF' | 'IDR' | 'ILS' | 'IMP' | 'INR' | 'IQD' | 'IRR' | 'ISK' | 'JEP' | 'JMD' | 'JOD' | 'JPY' | 'KES' | 'KGS' | 'KHR' | 'KID' | 'KMF' | 'KRW' | 'KWD' | 'KYD' | 'KZT' | 'LAK' | 'LBP' | 'LKR' | 'LRD' | 'LSL' | 'LYD' | 'MAD' | 'MDL' | 'MGA' | 'MKD' | 'MMK' | 'MNT' | 'MOP' | 'MRU' | 'MUR' | 'MVR' | 'MWK' | 'MXN' | 'MYR' | 'MZN' | 'NAD' | 'NGN' | 'NIO' | 'NOK' | 'NPR' | 'NZD' | 'OMR' | 'PAB' | 'PEN' | 'PGK' | 'PHP' | 'PKR' | 'PLN' | 'PYG' | 'QAR' | 'RON' | 'RSD' | 'RUB' | 'RWF' | 'SAR' | 'SBD' | 'SCR' | 'SDG' | 'SEK' | 'SGD' | 'SHP' | 'SLE' | 'SLL' | 'SOS' | 'SRD' | 'SSP' | 'STD' | 'STN' | 'SVC' | 'SYP' | 'SZL' | 'THB' | 'TJS' | 'TMT' | 'TND' | 'TOP' | 'TRY' | 'TTD' | 'TVD' | 'TWD' | 'TZS' | 'UAH' | 'UGX' | 'USD' | 'UYU' | 'UZS' | 'VES' | 'VND' | 'VUV' | 'WST' | 'XAF' | 'XCD' | 'XDR' | 'XOF' | 'XPF' | 'YER' | 'ZAR' | 'ZMW' | 'ZWL';
 interface MonetaryValueFormatProps {
+    /**
+     * Determina para qual localização o valor será traduzido
+     */
     locale: FormatLocales;
+    /**
+     * Determina a Moeda a qual o valor será formatado
+     */
     currency: FormatCurrencies;
 }
 interface MonetaryValueToObjectProps {
     formatProps?: Partial<MonetaryValueFormatProps>;
 }
+/**
+ *
+ * ---
+ *
+ * Converte Números em valores monetários.
+ *
+ * ---
+ *
+ * Exemplo:
+ *
+ * ```ts
+ * import { MonetaryValue } from "@bruno-valero/gerencianet-sdk-typescript"
+ *
+ * // exemplo 1
+ * const exemplo1 = new MonetaryValue('R$ 289,90')
+ *
+ * // exemplo 2
+ * const exemplo2 = new MonetaryValue('289,90')
+ *
+ * // exemplo 3
+ * const exemplo3 = new MonetaryValue('289.90')
+ *
+ * // exemplo 4
+ * const exemplo4 = new MonetaryValue(289.90)
+ * ```
+ *
+ * ---
+ *
+ * ### Formatar para diferentes Moedas
+ *
+ * ```ts
+ * const value = new MonetaryValue(289.90)
+ *
+ * value.format({ currency: 'USD', locale: 'pt-BR' })
+ * ```
+ *
+ * ---
+ *
+ *
+ */
 declare class MonetaryValue {
     #private;
     constructor(value: number | string);
+    /**
+     *
+     * ---
+     *
+     * Retorna o valor monetário em centavos.
+     *
+     * Exemplo: `2.00 --> 200`
+     *
+     * ---
+     *
+     *
+     */
     get cents(): number;
+    /**
+     *
+     * ---
+     *
+     * Retorna o valor monetário em unidades com duas casas decimais.
+     *
+     * Exemplo: `2.4184315841 --> 2.42`
+     *
+     * ---
+     *
+     *
+     */
     get units(): number;
     /**
      * Valor original da cobrança com os centavos separados por ".", exemplo: "10.00"
@@ -4632,7 +4871,33 @@ declare class MonetaryValue {
         locale: FormatLocales;
         currency: FormatCurrencies;
     };
+    /**
+     *
+     * ---
+     *
+     * Formata o valor monetário para a moeda e localização escolhida.
+     *
+     * ---
+     *
+     * ### Atenção!
+     *
+     * **Não realiza conversão de moedas**, apenas formata o valor.
+     *
+     * ---
+     *
+     * @param MonetaryValueFormatProps
+     * @returns `string`
+     */
     format(props?: Partial<MonetaryValueFormatProps>): string;
+    /**
+     *
+     * ---
+     *
+     * Transforma a classe em um objeto Literal que pode ser serializado
+     *
+     * ---
+     *
+     */
     toObject(props?: MonetaryValueToObjectProps): {
         cents: number;
         units: number;
@@ -7342,7 +7607,7 @@ interface PixRequestProps<type extends EnvironmentTypes> {
  *
  * Para integrar a API Pix Efí ao seu sistema ou sua plataforma, é necessário ter uma Conta Digital Efí. Uma vez com acesso, você poderá obter as credenciais e o certificado necessários para a comunicação com a API Pix Efí.
  *
- * [Condira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
+ * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
  */
 declare class PixRequest<type extends EnvironmentTypes> extends ApiRequest<type, 'PIX'> {
     #private;
@@ -7487,6 +7752,7 @@ type GenerateDotEnvProps = {
         CLIENT_SECRET_PRODUCAO?: string;
         PIX_KEY?: string;
         WEBHOOK_PIX?: string;
+        ACCOUNT_IDENTIFIER?: string;
     };
     mode?: 'append' | 'overwrite';
 };
@@ -7549,6 +7815,22 @@ declare class EfiPay<type extends EnvironmentTypes> {
      * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-pix/credenciais)
      */
     get pix(): PixRequest<type>;
+    /**
+     *
+     * ---
+     *
+     * A API Cobranças Efí oferece recursos avançados que permitem emitir diferentes tipos de cobranças, tais como **Boleto**, **Cartão de crédito**, **Carnê**, **Links de pagamento**, **Assinaturas (Recorrência)** e **Marketplace (Split de pagamento)**.
+     *
+     * Para integrar a API Cobranças Efí ao seu sistema ou sua plataforma, **é necessário ter uma Conta Digital Efí**. Após obter o acesso à conta, você poderá adquirir as credenciais necessárias para estabelecer a comunicação com a API Cobranças Efí.
+     *
+     * ---
+     *
+     * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-cobrancas/credenciais)
+     *
+     * ---
+     *
+     */
+    get cobranca(): CobrancaRequest<type>;
     /**
      *
      * ---

@@ -13,7 +13,8 @@
     "minor": "npm version minor && git push origin --tags && git push origin dev && npm publish",
     "major": "npm version major && git push origin --tags && git push origin dev && npm publish",
     "git-add": "git add .",
-    "add": "run-s types lint build git-add",
+    "check": "run-s types lint",
+    "add": "run-s check build git-add",
     "test": "vitest ./tests"
   },
   "publishConfig": {

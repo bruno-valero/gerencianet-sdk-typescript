@@ -1,5 +1,7 @@
 // import axios from 'axios'
 
+import { MonetaryValue } from './exports.classes'
+
 // import EfiPay from '.'
 // import { env } from './env'
 
@@ -56,3 +58,7 @@
 // //   certificate: 'certificado em "base64"',
 // //   certificateType: 'base64',
 // // })
+
+const value = new MonetaryValue('R$ 50,00')
+
+console.log('value:', value.toObject())

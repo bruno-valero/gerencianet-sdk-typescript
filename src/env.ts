@@ -44,6 +44,10 @@ const envSchema = z.object({
     .string()
     // .min(1, 'environment variable "WEBHOOK_PIX" is missing')
     .optional(),
+  ACCOUNT_IDENTIFIER: z
+    .string()
+    // .min(1, 'environment variable "ACCOUNT_IDENTIFIER" is missing')
+    .optional(),
 })
 
 const _env = envSchema.safeParse(process.env)

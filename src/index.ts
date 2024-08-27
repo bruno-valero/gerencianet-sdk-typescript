@@ -9,6 +9,7 @@ import {
   OperationTypes,
 } from './domain-driven-design/core/apis/constants-callbacks'
 import { Optional } from './domain-driven-design/core/types/optional'
+import { CobrancaRequest } from './domain-driven-design/domains/apis/enterprise/entities/cobranca/cobranca'
 import { PixRequest } from './domain-driven-design/domains/apis/enterprise/entities/pix/pix'
 import { env } from './env'
 
@@ -49,6 +50,7 @@ type GenerateDotEnvProps = {
     CLIENT_SECRET_PRODUCAO?: string
     PIX_KEY?: string
     WEBHOOK_PIX?: string
+    ACCOUNT_IDENTIFIER?: string
   }
   mode?: 'append' | 'overwrite'
 }
@@ -156,6 +158,7 @@ function makeOptions<
 
 class EfiPay<type extends EnvironmentTypes> {
   #pix: PixRequest<type>
+  #cobranca: CobrancaRequest<type>
 
   constructor(type: type, options?: OptionsCredentials) {
     const certificate = options?.certificate
@@ -165,6 +168,20 @@ class EfiPay<type extends EnvironmentTypes> {
     const validateMtls = options?.validateMtls
 
     this.#pix = new PixRequest({
+      type,
+      options: makeOptions({
+        type,
+        data: {
+          certificate,
+          client_id: clientId,
+          client_secret: clientSecret,
+          certificateType,
+          validateMtls,
+        },
+      }),
+    })
+
+    this.#cobranca = new CobrancaRequest({
       type,
       options: makeOptions({
         type,
@@ -188,6 +205,25 @@ class EfiPay<type extends EnvironmentTypes> {
    */
   get pix() {
     return this.#pix
+  }
+
+  /**
+   *
+   * ---
+   *
+   * A API Cobranças Efí oferece recursos avançados que permitem emitir diferentes tipos de cobranças, tais como **Boleto**, **Cartão de crédito**, **Carnê**, **Links de pagamento**, **Assinaturas (Recorrência)** e **Marketplace (Split de pagamento)**.
+   *
+   * Para integrar a API Cobranças Efí ao seu sistema ou sua plataforma, **é necessário ter uma Conta Digital Efí**. Após obter o acesso à conta, você poderá adquirir as credenciais necessárias para estabelecer a comunicação com a API Cobranças Efí.
+   *
+   * ---
+   *
+   * [Confira a Documentação oficial para mais detalhes](https://dev.efipay.com.br/docs/api-cobrancas/credenciais)
+   *
+   * ---
+   *
+   */
+  get cobranca() {
+    return this.#cobranca
   }
 
   /**
@@ -229,33 +265,35 @@ class EfiPay<type extends EnvironmentTypes> {
   static generateDotEnv(props?: GenerateDotEnvProps) {
     const dotEnvData = `
     # CERTIFICATES ********************************************
-    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH ?? './path/to/homologacao-certificate.(p12|pem)'}"
-    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH ?? './path/to/producao-certificate.(p12|pem)'}"
+    CERTIFICADO_HOMOLOGACAO_PATH="${props?.variables?.CERTIFICADO_HOMOLOGACAO_PATH || './path/to/homologacao-certificate.(p12|pem)'}"
+    CERTIFICADO_PRODUCAO_PATH="${props?.variables?.CERTIFICADO_PRODUCAO_PATH || './path/to/producao-certificate.(p12|pem)'}"
 
-    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 ?? 'base64_string_of_homologacao'}"
-    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 ?? 'base64_string_of_producao'}"
+    CERTIFICADO_HOMOLOGACAO_BASE64="${props?.variables?.CERTIFICADO_HOMOLOGACAO_BASE64 || 'base64_string_of_homologacao'}"
+    CERTIFICADO_PRODUCAO_BASE64="${props?.variables?.CERTIFICADO_PRODUCAO_BASE64 || 'base64_string_of_producao'}"
 
     # CREDENTIALS ********************************************
     # HOMOLOGACAO
-    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO ?? 'Your_Client_Id_for_Homologacao'}"
-    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO ?? 'Your_Client_Secret_for_Homologacao'}"
+    CLIENT_ID_HOMOLOGACAO="${props?.variables?.CLIENT_ID_HOMOLOGACAO || 'Your_Client_Id_for_Homologacao'}"
+    CLIENT_SECRET_HOMOLOGACAO="${props?.variables?.CLIENT_SECRET_HOMOLOGACAO || 'Your_Client_Secret_for_Homologacao'}"
     # PRODUCAO
-    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO ?? 'Your_Client_Id_for_Producao'}"
-    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO ?? 'Your_Client_Secret_for_Producao'}"
+    CLIENT_ID_PRODUCAO="${props?.variables?.CLIENT_ID_PRODUCAO || 'Your_Client_Id_for_Producao'}"
+    CLIENT_SECRET_PRODUCAO="${props?.variables?.CLIENT_SECRET_PRODUCAO || 'Your_Client_Secret_for_Producao'}"
     
     
     # SUPPORT VARIABLES ********************************************
 
     # PIX
-    PIX_KEY="${props?.variables?.PIX_KEY ?? 'you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank'}"
+    PIX_KEY="${props?.variables?.PIX_KEY || 'you-pix-key--might-be-cpf-watsappNumber-or-randomkey-generated-by-efi-bank'}"
 
     # WEBHOOKS
-    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX ?? 'https://your-url/webhook/pix?ignorar=&hmac=your-custom-key'}"
+    WEBHOOK_PIX="${props?.variables?.WEBHOOK_PIX || 'https://your-url/webhook/pix?ignorar=&hmac=your-custom-key'}"
+    # ACCOUNT IDENTIFIER
+    ACCOUNT_IDENTIFIER="${props?.variables?.ACCOUNT_IDENTIFIER || 'your_account_identifier'}"
     `
       .trim()
       .replaceAll(/  +/gi, '')
 
-    const mode: GenerateDotEnvProps['mode'] = props?.mode ?? 'append'
+    const mode: GenerateDotEnvProps['mode'] = props?.mode || 'append'
 
     const fileName = '.env'
     const rootPath = './'

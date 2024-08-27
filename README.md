@@ -1,14 +1,3 @@
-
-<style>
-
-  hr {
-    border: 0;
-    height: 1px;
-    background-color: black;
-  }
-
-</style>
-
 # Gerencianet TypeScript SDK - Integração de Typescript com as APIs Efí Pay
 
 Este pacote oferece uma SDK moderna para integrar a API da Gerencianet com TypeScript. Diferente da SDK oficial, esta versão foi desenvolvida com foco total no TypeScript, proporcionando segurança de tipos e melhor reportagem de erros durante o desenvolvimento.
